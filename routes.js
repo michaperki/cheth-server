@@ -86,7 +86,7 @@ router.post('/addUser', validateRequestBody, async (req, res, next) => {
     }
 });
 
-router.post('/checkUser', validateRequestBody, async (req, res, next) => {
+router.post('/checkUser', async (req, res, next) => {
     try {
         const walletAddress = req.body.walletAddress;
         const userExists = await db.getUserByWalletAddress(walletAddress);
