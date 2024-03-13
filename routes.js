@@ -79,6 +79,11 @@ router.post('/checkEligibility', validateRequestBody, async (req, res, next) => 
 router.post('/addUser', validateRequestBody, async (req, res, next) => {
     try {
         const { lichessHandle, walletAddress, darkMode } = req.body;
+
+        // get the rating from lichess
+        const userInfo = await fetchLichessUserInfo(lichessHandle);
+        const rating = userInfo.perfs.blitz.rating;
+
         const user = await db.addUser(lichessHandle, walletAddress, darkMode);
         res.json(user);
     } catch (error) {
@@ -100,7 +105,11 @@ router.post('/getUserInfo', async (req, res, next) => {
     try {
         const walletAddress = req.body.walletAddress;
         const user = await db.getUserByWalletAddress(walletAddress);
-        res.json(user);
+        if(!user) {
+            return res.status(404).json({ error: 'User not found' });
+        } else {
+            res.json(user);
+        }
     } catch (error) {
         next(error); // Pass error to error handling middleware
     }
