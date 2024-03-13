@@ -59,6 +59,7 @@ const getUserByWalletAddress = async (walletAddress) => {
 }
 
 const createGame = async (whiteUserId) => {
+    console.log('createGame in db for whiteUserID: ', whiteUserId)
     try {
         const { rows } = await client.query('INSERT INTO games (player1_id, state) VALUES ($1, 0) RETURNING *', [whiteUserId]);
         return rows;
