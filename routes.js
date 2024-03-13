@@ -14,7 +14,10 @@ router.post('/checkEligibility', async (req, res) => {
 });
 
 async function fetchLichessUserInfo(lichessHandle) {
-    const response = await fetch(`https://lichess.org/api/user/${lichessHandle}`);
+    const headers = {
+        Authorization: 'Bearer ' + process.env.LICHESS_TOKEN,
+      };
+    const response = await fetch(`https://lichess.org/api/user/${lichessHandle}`, { headers });
     const userInformation = await response.json();
     return userInformation;
 }
