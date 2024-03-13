@@ -60,6 +60,7 @@ const getUserByWalletAddress = async (walletAddress) => {
 
 const createGame = async (whiteUserId) => {
     console.log('createGame in db for whiteUserID: ', whiteUserId)
+    console.log('typeof whiteUserId', typeof whiteUserId)
     try {
         checkIfUserHasActiveGame = await client.query('SELECT * FROM games WHERE player1_id = $1::integer AND state = 0', [whiteUserId]);
         console.log('checkIfUserHasActiveGame.rows', checkIfUserHasActiveGame.rows)
