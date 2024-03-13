@@ -60,22 +60,26 @@ const getUserByWalletAddress = async (walletAddress) => {
 }
 
 const createGame = async (whiteUserId) => {
-    console.log('createGame in db for whiteUserID: ', whiteUserId)
+    console.log('createGame in db for whiteUserID: ', whiteUserId);
     try {
-        checkIfUserHasActiveGame = await client.query('SELECT * FROM games WHERE player1_id = $1 AND state = 0', [parseInt(whiteUserId)]);
-        console.log('checkIfUserHasActiveGame.rows', checkIfUserHasActiveGame.rows)
+        // Check if the user already has an active game
+        const checkIfUserHasActiveGame = await client.query('SELECT * FROM games WHERE player1_id = $1 AND state = $2', [whiteUserId, '0']);
+        
         if (checkIfUserHasActiveGame.rows.length > 0) {
             console.log('User already has an active game');
             return checkIfUserHasActiveGame.rows;
-        }         
-        console.log('User does not have an active game, creating a new game');
-        const { rows } = await client.query('INSERT INTO games (player1_id, state) VALUES ($1, 0) RETURNING *', [parseInt(whiteUserId)]);
-        return rows;
+        } else {
+            console.log('User does not have an active game, creating a new game');
+            // Insert a new game into the database
+            const { rows } = await client.query('INSERT INTO games (player1_id, state) VALUES ($1, $2) RETURNING *', [whiteUserId, '0']);
+            return rows;
+        }
     } catch (error) {
         console.error('Error executing query', error.stack);
         throw error;
     }
 }
+
 
 const playGame = async (userId) => {
     try {
