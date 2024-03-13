@@ -126,12 +126,12 @@ router.post('/getUserInfo', async (req, res, next) => {
     }
 });
 
-router.post('/createGame', async (req, res, next) => {
-    console.log('/createGame route')
+router.post('/newGame', async (req, res, next) => {
+    console.log('/newGame route')
     console.log('req.body', req.body)
     try {
-        const whiteUserId = req.body.whiteUserId;
-        const game = await db.createGame(whiteUserId);
+        const userId = req.body.userId;
+        const game = await db.playGame(userId);
         res.json(game);
     } catch (error) {
         next(error); // Pass error to error handling middleware

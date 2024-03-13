@@ -61,6 +61,11 @@ const getUserByWalletAddress = async (walletAddress) => {
 const createGame = async (whiteUserId) => {
     console.log('createGame in db for whiteUserID: ', whiteUserId)
     try {
+        checkIfUserHasActiveGame = await client.query('SELECT * FROM games WHERE player1_id = $1 AND state = 0', [whiteUserId]);
+        if (checkIfUserHasActiveGame.rows.length > 0) {
+            console.log('User already has an active game');
+            return checkIfUserHasActiveGame.rows;
+        }         
         const { rows } = await client.query('INSERT INTO games (player1_id, state) VALUES ($1, 0) RETURNING *', [whiteUserId]);
         return rows;
     } catch (error) {
@@ -69,6 +74,25 @@ const createGame = async (whiteUserId) => {
     }
 }
 
+const playGame = async (userId) => {
+    try {
+        gamesToJoin = await client.query('SELECT * FROM games WHERE player1_id != $1 AND player2_id IS NULL', [userId]);
+        if (gamesToJoin.rows.length > 0) {
+            console.log('Game found to join');
+            return gamesToJoin.rows;
+        }
+        else {
+            console.log('No game found to join, creating a new game');
+            createGame(userId);
+        }
+    }
+    catch (error) {
+        console.error('Error executing query', error.stack);
+        throw error;
+    }
+}
+
+
 
 module.exports = {
     connectToDatabase,
@@ -76,5 +100,6 @@ module.exports = {
     addUser,
     getUserByLichessHandle,
     getUserByWalletAddress,
-    createGame
+    createGame, 
+    playGame
 };
