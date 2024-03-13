@@ -1,3 +1,4 @@
+const { parse } = require('dotenv');
 const { Client } = require('pg');
 
 const client = new Client({
@@ -60,16 +61,15 @@ const getUserByWalletAddress = async (walletAddress) => {
 
 const createGame = async (whiteUserId) => {
     console.log('createGame in db for whiteUserID: ', whiteUserId)
-    console.log('typeof whiteUserId', typeof whiteUserId)
     try {
-        checkIfUserHasActiveGame = await client.query('SELECT * FROM games WHERE player1_id = $1::integer AND state = 0', [whiteUserId]);
+        checkIfUserHasActiveGame = await client.query('SELECT * FROM games WHERE player1_id = $1 AND state = 0', [parseInt(whiteUserId)]);
         console.log('checkIfUserHasActiveGame.rows', checkIfUserHasActiveGame.rows)
         if (checkIfUserHasActiveGame.rows.length > 0) {
             console.log('User already has an active game');
             return checkIfUserHasActiveGame.rows;
         }         
         console.log('User does not have an active game, creating a new game');
-        const { rows } = await client.query('INSERT INTO games (player1_id, state) VALUES ($1::integer, 0) RETURNING *', [whiteUserId]);
+        const { rows } = await client.query('INSERT INTO games (player1_id, state) VALUES ($1, 0) RETURNING *', [parseInt(whiteUserId)]);
         return rows;
     } catch (error) {
         console.error('Error executing query', error.stack);
