@@ -96,4 +96,14 @@ router.post('/checkUser', async (req, res, next) => {
     }
 });
 
+router.post('/getUserInfo', async (req, res, next) => {
+    try {
+        const walletAddress = req.body.walletAddress;
+        const user = await db.getUserByWalletAddress(walletAddress);
+        res.json(user);
+    } catch (error) {
+        next(error); // Pass error to error handling middleware
+    }
+});
+
 module.exports = router;

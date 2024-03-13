@@ -27,9 +27,9 @@ const getConfig = async () => {
     }
 };
 
-const addUser = async (username, walletAddress, darkMode) => {
+const addUser = async (username, rating, walletAddress, darkMode) => {
     try {
-        const { rows } = await client.query('INSERT INTO users (username, wallet_address, dark_mode) VALUES ($1, $2, $3) RETURNING *', [username, walletAddress, darkMode]);
+        const { rows } = await client.query('INSERT INTO users (username, rating, wallet_address, dark_mode) VALUES ($1, $2, $3, $4) RETURNING *', [username, rating, walletAddress, darkMode]);
         return rows;
     } catch (error) {
         console.error('Error executing query', error.stack);

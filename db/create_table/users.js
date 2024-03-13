@@ -16,6 +16,7 @@ const sqlQuery = `
 CREATE TABLE users (
     user_id SERIAL PRIMARY KEY,
     username VARCHAR(255) NOT NULL,
+    rating INTEGER NOT NULL,
     wallet_address VARCHAR(255) NOT NULL,
     dark_mode BOOLEAN DEFAULT FALSE
 );
