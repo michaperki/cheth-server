@@ -3,7 +3,7 @@
 require('dotenv').config();
 const { Pool } = require('pg');
 
-const DATABASE_URL = "postgres://mrvvycpfnbmhlg:0a15ec34316816aef590db493385b5f88a8b6ab2421f3151ff359424862a85e6@ec2-107-21-67-46.compute-1.amazonaws.com:5432/d35mdin9n3b2mo";
+const DATABASE_URL = process.env.DATABASE_URL;
 
 // Configure the connection to your Heroku Postgres database
 const pool = new Pool({
