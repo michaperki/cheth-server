@@ -29,6 +29,7 @@ async function fetchLichessUserInfo(lichessHandle) {
 }
 
 router.post('/checkEligibility', validateRequestBody, async (req, res, next) => {
+    console.log('/checkEligibility route')
     try {
         const lichessHandle = req.body.lichessHandle;
 
@@ -77,6 +78,7 @@ router.post('/checkEligibility', validateRequestBody, async (req, res, next) => 
 });
 
 router.post('/addUser', validateRequestBody, async (req, res, next) => {
+    console.log('/addUser route')
     try {
         const { lichessHandle, walletAddress, darkMode } = req.body;
 
@@ -92,6 +94,7 @@ router.post('/addUser', validateRequestBody, async (req, res, next) => {
 });
 
 router.post('/checkUser', async (req, res, next) => {
+    console.log('/checkUser route')
     try {
         const walletAddress = req.body.walletAddress;
         const userExists = await db.getUserByWalletAddress(walletAddress);
@@ -108,7 +111,9 @@ router.post('/checkUser', async (req, res, next) => {
 });
 
 router.post('/getUserInfo', async (req, res, next) => {
+    console.log('/getUserInfo route')
     try {
+        console.log('req.body', req.body);
         const walletAddress = req.body.walletAddress;
         const user = await db.getUserByWalletAddress(walletAddress);
         if(!user) {
