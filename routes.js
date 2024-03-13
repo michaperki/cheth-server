@@ -128,6 +128,7 @@ router.post('/getUserInfo', async (req, res, next) => {
 
 router.post('/createGame', async (req, res, next) => {
     console.log('/createGame route')
+    console.log('req.body', req.body)
     try {
         const whiteUserId = req.body.whiteUserId;
         const game = await db.createGame(whiteUserId);
