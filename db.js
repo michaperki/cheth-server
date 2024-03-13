@@ -64,7 +64,7 @@ const createGame = async (whiteUserId) => {
     try {
         // Check if the user already has an active game
         const checkIfUserHasActiveGame = await client.query('SELECT * FROM games WHERE player1_id = $1 AND state = $2', [whiteUserId, '0']);
-        
+
         if (checkIfUserHasActiveGame.rows.length > 0) {
             console.log('User already has an active game');
             return checkIfUserHasActiveGame.rows;
@@ -83,14 +83,15 @@ const createGame = async (whiteUserId) => {
 
 const playGame = async (userId) => {
     try {
-        gamesToJoin = await client.query('SELECT * FROM games WHERE player1_id != $1 AND player2_id IS NULL', [userId]);
+        const gamesToJoin = await client.query('SELECT * FROM games WHERE player1_id != $1 AND player2_id IS NULL', [userId]);
         if (gamesToJoin.rows.length > 0) {
             console.log('Game found to join');
-            return gamesToJoin.rows;
+            const gameId = gamesToJoin.rows[0].game_id;
+            await joinGame(gameId, userId); // Await the joinGame function
         }
         else {
             console.log('No game found to join, creating a new game for user', userId);
-            createGame(userId);
+            return createGame(userId); // Return the result of createGame
         }
     }
     catch (error) {
@@ -98,6 +99,17 @@ const playGame = async (userId) => {
         throw error;
     }
 }
+
+const joinGame = async (gameId, userId) => {
+    try {
+        const { rows } = await client.query('UPDATE games SET player2_id = $1 WHERE game_id = $2 RETURNING *', [userId, gameId]);
+        return rows;
+    } catch (error) {
+        console.error('Error joining game', error.stack);
+        throw error;
+    }
+}
+
 
 
 
@@ -107,6 +119,6 @@ module.exports = {
     addUser,
     getUserByLichessHandle,
     getUserByWalletAddress,
-    createGame, 
+    createGame,
     playGame
 };
