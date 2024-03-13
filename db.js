@@ -28,7 +28,6 @@ const getConfig = async () => {
 };
 
 module.exports = {
-    client,
     connectToDatabase,
     getConfig
 };
