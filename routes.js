@@ -37,22 +37,26 @@ router.post('/checkEligibility', validateRequestBody, async (req, res, next) => 
         // Check eligibility based on user info and configuration
         // Implementation of eligibility checks
 
+        // Checking if the user's account is created before the specified date
         const createdBefore = new Date(config.find(item => item.name === 'created_before').value);
         const userCreatedAt = new Date(userInfo.createdAt);
         if (userCreatedAt > createdBefore) {
             return res.json({ isEligible: false, reason: 'Account created after specified date' });
         }
 
+        // Checking if the time control matches the configured time control
         const timeControl = config.find(item => item.name === 'time_control').value;
         if (userInfo.perfs[timeControl].games === 0) {
             return res.json({ isEligible: false, reason: 'No games in specified time control' });
         }
 
+        // Checking if the user has played enough games
         const minGames = parseInt(config.find(item => item.name === 'min_games').value);
         if (userInfo.perfs[timeControl].games < minGames) {
             return res.json({ isEligible: false, reason: 'Not enough games played' });
         }
 
+        // Checking if the user's rating is below the threshold
         const ratingThreshold = parseInt(config.find(item => item.name === 'rating_threshold').value);
         if (userInfo.perfs[timeControl].rating >= ratingThreshold) {
             return res.json({ isEligible: false, reason: 'User rating exceeds threshold' });

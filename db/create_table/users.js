@@ -1,7 +1,7 @@
 require('dotenv').config();
 const { Pool } = require('pg');
 
-const DATABASE_URL = process.env.DATABASE_URL;
+const DATABASE_URL = 'postgres://xftwwclpyvzzqm:ea793afacee56a9d17a19610aa366b8e00494799164ad502f287493fadd571fb@ec2-3-221-175-22.compute-1.amazonaws.com:5432/d661ne4qhp5q0p';
 
 // Configure the connection to your Heroku Postgres database
 const pool = new Pool({
@@ -13,11 +13,12 @@ const pool = new Pool({
 
 // Define your SQL query
 const sqlQuery = `
-    CREATE TABLE config (
-        id SERIAL PRIMARY KEY,
-        name VARCHAR(100),
-        value VARCHAR(100)
-    );
+CREATE TABLE users (
+    user_id SERIAL PRIMARY KEY,
+    username VARCHAR(255) NOT NULL,
+    wallet_address VARCHAR(255) NOT NULL,
+    dark_mode BOOLEAN DEFAULT FALSE
+);
 `;
 
 // Execute the SQL query
