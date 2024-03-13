@@ -69,4 +69,15 @@ router.post('/checkEligibility', validateRequestBody, async (req, res, next) => 
     }
 });
 
+router.post('/addUser', validateRequestBody, async (req, res, next) => {
+    try {
+        console.log(req.body);
+        const { username, walletAddress, darkMode } = req.body;
+        const user = await db.addUser(username, walletAddress, darkMode);
+        res.json(user);
+    } catch (error) {
+        next(error); // Pass error to error handling middleware
+    }
+});
+
 module.exports = router;

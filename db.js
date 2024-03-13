@@ -27,7 +27,18 @@ const getConfig = async () => {
     }
 };
 
+const addUser = async (username, walletAddress, darkMode) => {
+    try {
+        const { rows } = await client.query('INSERT INTO users (username, wallet_address, dark_mode) VALUES ($1, $2, $3) RETURNING *', [username, walletAddress, darkMode]);
+        return rows;
+    } catch (error) {
+        console.error('Error executing query', error.stack);
+        throw error;
+    }
+}
+
 module.exports = {
     connectToDatabase,
-    getConfig
+    getConfig,
+    addUser
 };
