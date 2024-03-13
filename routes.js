@@ -31,6 +31,13 @@ async function fetchLichessUserInfo(lichessHandle) {
 router.post('/checkEligibility', validateRequestBody, async (req, res, next) => {
     try {
         const lichessHandle = req.body.lichessHandle;
+
+        // Check if the user already exists in the database
+        const existingUser = await db.getUserByLichessHandle(lichessHandle);
+        if (existingUser) {
+            return res.json({ isEligible: false, reason: 'User already has an account' });
+        }
+        
         const userInfo = await fetchLichessUserInfo(lichessHandle);
         const config = await db.getConfig();
 
@@ -71,7 +78,6 @@ router.post('/checkEligibility', validateRequestBody, async (req, res, next) => 
 
 router.post('/addUser', validateRequestBody, async (req, res, next) => {
     try {
-        console.log(req.body);
         const { lichessHandle, walletAddress, darkMode } = req.body;
         const user = await db.addUser(lichessHandle, walletAddress, darkMode);
         res.json(user);

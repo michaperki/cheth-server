@@ -37,8 +37,19 @@ const addUser = async (username, walletAddress, darkMode) => {
     }
 }
 
+const getUserByLichessHandle = async (lichessHandle) => {
+    try {
+        const { rows } = await client.query('SELECT * FROM users WHERE username = $1', [lichessHandle]);
+        return rows;
+    } catch (error) {
+        console.error('Error executing query', error.stack);
+        throw error;
+    }
+}
+
 module.exports = {
     connectToDatabase,
     getConfig,
-    addUser
+    addUser,
+    getUserByLichessHandle
 };
