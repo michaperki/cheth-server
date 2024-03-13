@@ -96,8 +96,12 @@ router.post('/checkUser', async (req, res, next) => {
         const walletAddress = req.body.walletAddress;
         const userExists = await db.getUserByWalletAddress(walletAddress);
 
-        // if userExists is an empty array, userExists is false
-        res.json({ userExists: !!userExists, username: userExists[0]?.username });
+        if (userExists) {
+            res.json({ userExists: true, username: userExists.username });
+        }
+        else {
+            res.json({ userExists: false });
+        }
     } catch (error) {
         next(error); // Pass error to error handling middleware
     }
