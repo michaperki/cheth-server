@@ -22,15 +22,42 @@ async function fetchLichessUserInfo(lichessHandle) {
     return userInformation;
 }
 
-async function checkEligibility(userInformation) {
-    // Retrieve config values from the database
-    const config = await db.getConfig();
-    console.log(config);
-    console.log(userInformation);
+router.post('/checkEligibility', async (req, res) => {
+    try {
+        const lichessHandle = req.body.lichessHandle;
+        const userInfo = await fetchLichessUserInfo(lichessHandle);
+        const config = await db.getConfig();
 
-    // Perform eligibility check based on userInformation and config values
-    // Return true or false based on the check
-    return true;
-}
+        // Check if the user's account is created before the specified date
+        const createdBefore = new Date(config.find(item => item.name === 'created_before').value);
+        const userCreatedAt = new Date(userInfo.createdAt);
+        if (userCreatedAt > createdBefore) {
+            return res.json({ isEligible: false, reason: 'Account created after specified date' });
+        }
+
+        // Check if the time control matches the configured time control
+        const timeControl = config.find(item => item.name === 'time_control').value;
+        if (userInfo.perfs[timeControl].games === 0) {
+            return res.json({ isEligible: false, reason: 'No games in specified time control' });
+        }
+
+        // Check if the user has played enough games
+        const minGames = parseInt(config.find(item => item.name === 'min_games').value);
+        if (userInfo.perfs[timeControl].games < minGames) {
+            return res.json({ isEligible: false, reason: 'Not enough games played' });
+        }
+
+        // Check if the user's rating is below the threshold
+        const ratingThreshold = parseInt(config.find(item => item.name === 'rating_threshold').value);
+        if (userInfo.perfs[timeControl].rating >= ratingThreshold) {
+            return res.json({ isEligible: false, reason: 'User rating exceeds threshold' });
+        }
+
+        // If all checks passed, the user is eligible
+        res.json({ isEligible: true });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
 
 module.exports = router;
