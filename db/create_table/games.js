@@ -1,9 +1,11 @@
 const { Pool } = require('pg');
 require('dotenv').config();
 
+const DATABASE_URL = process.env.DATABASE_URL;
+
 // Configure the connection to your Heroku Postgres database
 const pool = new Pool({
-    connectionString: "postgres://ehtfbficwwwsrj:4693d4154db943e425737280a9c25e7f1706734520a1057fe66a0b3b51c7c80f@ec2-44-195-248-14.compute-1.amazonaws.com:5432/d4647u1u8g64ch",
+    connectionString: DATABASE_URL,
     ssl: {
         rejectUnauthorized: false
     }
