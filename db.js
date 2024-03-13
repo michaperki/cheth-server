@@ -52,7 +52,7 @@ const getUserByWalletAddress = async (walletAddress) => {
     try {
         const { rows } = await client.query('SELECT * FROM users WHERE wallet_address = $1', [walletAddress]);
         console.log('rows', rows)
-        return rows;
+        return rows.length > 0 ? rows[0] : null; // Return the first row if found, otherwise return null
     } catch (error) {
         console.error('Error executing query', error.stack);
         throw error;
