@@ -47,9 +47,20 @@ const getUserByLichessHandle = async (lichessHandle) => {
     }
 }
 
+const getUserByWalletAddress = async (walletAddress) => {
+    try {
+        const { rows } = await client.query('SELECT * FROM users WHERE wallet_address = $1', [walletAddress]);
+        return rows;
+    } catch (error) {
+        console.error('Error executing query', error.stack);
+        throw error;
+    }
+}
+
 module.exports = {
     connectToDatabase,
     getConfig,
     addUser,
-    getUserByLichessHandle
+    getUserByLichessHandle,
+    getUserByWalletAddress
 };

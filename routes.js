@@ -37,7 +37,7 @@ router.post('/checkEligibility', validateRequestBody, async (req, res, next) => 
         if (existingUser) {
             return res.json({ isEligible: false, reason: 'User already has an account' });
         }
-        
+
         const userInfo = await fetchLichessUserInfo(lichessHandle);
         const config = await db.getConfig();
 
@@ -81,6 +81,16 @@ router.post('/addUser', validateRequestBody, async (req, res, next) => {
         const { lichessHandle, walletAddress, darkMode } = req.body;
         const user = await db.addUser(lichessHandle, walletAddress, darkMode);
         res.json(user);
+    } catch (error) {
+        next(error); // Pass error to error handling middleware
+    }
+});
+
+router.post('/checkUser', validateRequestBody, async (req, res, next) => {
+    try {
+        const walletAddress = req.body.walletAddress;
+        const userExists = await db.getUserByWalletAddress(walletAddress);
+        res.json({ userExists: !!userExists });
     } catch (error) {
         next(error); // Pass error to error handling middleware
     }
