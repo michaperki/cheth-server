@@ -84,7 +84,7 @@ router.post('/addUser', validateRequestBody, async (req, res, next) => {
         const userInfo = await fetchLichessUserInfo(lichessHandle);
         const rating = userInfo.perfs.blitz.rating;
 
-        const user = await db.addUser(lichessHandle, walletAddress, darkMode);
+        const user = await db.addUser(lichessHandle, rating, walletAddress, darkMode);
         res.json(user);
     } catch (error) {
         next(error); // Pass error to error handling middleware
