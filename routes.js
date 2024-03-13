@@ -6,6 +6,7 @@ router.post('/checkEligibility', async (req, res) => {
     try {
         const lichessHandle = req.body.lichessHandle;
         const userInformation = await fetchLichessUserInfo(lichessHandle);
+        console.log(userInformation);
         const isEligible = await checkEligibility(userInformation);
         res.json({ isEligible });
     } catch (error) {
