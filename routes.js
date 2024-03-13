@@ -95,9 +95,7 @@ router.post('/checkUser', async (req, res, next) => {
     try {
         const walletAddress = req.body.walletAddress;
         const userExists = await db.getUserByWalletAddress(walletAddress);
-        console.log("userExists", userExists);
-        console.log("userExists[0]", userExists[0]);
-        console.log("!!userExists", !!userExists);
+
         // if userExists is an empty array, userExists is false
         res.json({ userExists: !!userExists, username: userExists[0]?.username });
     } catch (error) {

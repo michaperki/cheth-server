@@ -40,7 +40,7 @@ const addUser = async (username, rating, walletAddress, darkMode) => {
 const getUserByLichessHandle = async (lichessHandle) => {
     try {
         const { rows } = await client.query('SELECT * FROM users WHERE username = $1', [lichessHandle]);
-        return rows;
+        return rows.length > 0 ? rows[0] : null; // Return the first row if found, otherwise return null
     } catch (error) {
         console.error('Error executing query', error.stack);
         throw error;
@@ -51,7 +51,6 @@ const getUserByWalletAddress = async (walletAddress) => {
     console.log('walletAddress', walletAddress)
     try {
         const { rows } = await client.query('SELECT * FROM users WHERE wallet_address = $1', [walletAddress]);
-        console.log('rows', rows)
         return rows.length > 0 ? rows[0] : null; // Return the first row if found, otherwise return null
     } catch (error) {
         console.error('Error executing query', error.stack);
