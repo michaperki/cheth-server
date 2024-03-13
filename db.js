@@ -68,7 +68,7 @@ const createGame = async (whiteUserId) => {
             return checkIfUserHasActiveGame.rows;
         }         
         console.log('User does not have an active game, creating a new game');
-        const { rows } = await client.query('INSERT INTO games (player1_id, state) VALUES ($1, 0) RETURNING *', [whiteUserId]);
+        const { rows } = await client.query('INSERT INTO games (player1_id, state) VALUES ($1::integer, 0) RETURNING *', [whiteUserId]);
         return rows;
     } catch (error) {
         console.error('Error executing query', error.stack);
@@ -84,7 +84,7 @@ const playGame = async (userId) => {
             return gamesToJoin.rows;
         }
         else {
-            console.log('No game found to join, creating a new game');
+            console.log('No game found to join, creating a new game for user', userId);
             createGame(userId);
         }
     }
