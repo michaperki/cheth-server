@@ -58,10 +58,22 @@ const getUserByWalletAddress = async (walletAddress) => {
     }
 }
 
+const createGame = async (whiteUserId) => {
+    try {
+        const { rows } = await client.query('INSERT INTO games (player1_id, state) VALUES ($1, 0) RETURNING *', [whiteUserId]);
+        return rows;
+    } catch (error) {
+        console.error('Error executing query', error.stack);
+        throw error;
+    }
+}
+
+
 module.exports = {
     connectToDatabase,
     getConfig,
     addUser,
     getUserByLichessHandle,
-    getUserByWalletAddress
+    getUserByWalletAddress,
+    createGame
 };

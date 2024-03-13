@@ -126,4 +126,15 @@ router.post('/getUserInfo', async (req, res, next) => {
     }
 });
 
+router.post('/createGame', async (req, res, next) => {
+    console.log('/createGame route')
+    try {
+        const whiteUserId = req.body.whiteUserId;
+        const game = await db.createGame(whiteUserId);
+        res.json(game);
+    } catch (error) {
+        next(error); // Pass error to error handling middleware
+    }
+});
+
 module.exports = router;
