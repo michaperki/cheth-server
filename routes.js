@@ -2,17 +2,6 @@ const express = require('express');
 const router = express.Router();
 const db = require('./db');
 
-router.post('/checkEligibility', async (req, res) => {
-    try {
-        const lichessHandle = req.body.lichessHandle;
-        const userInformation = await fetchLichessUserInfo(lichessHandle);
-        const isEligible = await checkEligibility(userInformation);
-        res.json({ isEligible });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
 async function fetchLichessUserInfo(lichessHandle) {
     const headers = {
         Authorization: 'Bearer ' + process.env.LICHESS_TOKEN,
