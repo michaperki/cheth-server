@@ -6,7 +6,6 @@ router.post('/checkEligibility', async (req, res) => {
     try {
         const lichessHandle = req.body.lichessHandle;
         const userInformation = await fetchLichessUserInfo(lichessHandle);
-        console.log(userInformation);
         const isEligible = await checkEligibility(userInformation);
         res.json({ isEligible });
     } catch (error) {
@@ -26,6 +25,8 @@ async function fetchLichessUserInfo(lichessHandle) {
 async function checkEligibility(userInformation) {
     // Retrieve config values from the database
     const config = await db.getConfig();
+    console.log(config);
+    console.log(userInformation);
 
     // Perform eligibility check based on userInformation and config values
     // Return true or false based on the check
