@@ -145,13 +145,19 @@ router.post('/newGame', async (req, res, next) => {
                 }
             });
             
-            await contract.startGame();
+            const tx = await contract.startGame();
             console.log('game after starting', game);
+            console.log('tx in newGame', tx);
             // Update the game state in the database
             const updatedGame = await db.updateGameState(game[0].game_id, 2);
             console.log('game state updated to 2');
             console.log('updatedGame', updatedGame);
 
+            req.wss.clients.forEach(client => {
+                if (client.readyState === WebSocket.OPEN) {
+                    client.send(JSON.stringify({ type: "GAME_STARTED", gameId: game[0].game_id }));
+                }
+            });
             // Return the game state
             res.json({ state: updatedGame[0].state });
         } else {

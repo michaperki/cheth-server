@@ -16,7 +16,8 @@ const startGame = async () => {
         const tx = await contract.startGame({ value: ethers.parseEther('.00001'), gasLimit: 3000000 });
         await tx.wait();
         console.log('New game started.');
-        console.log('Game ID:', tx.hash);
+        console.log('tx:', tx);
+        return tx;
     } catch (error) {
         console.error('Error starting game:', error);
     }
