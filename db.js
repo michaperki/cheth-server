@@ -88,6 +88,10 @@ const playGame = async (userId) => {
             console.log('Game found to join');
             const gameId = gamesToJoin.rows[0].game_id;
             await joinGame(gameId, userId); // Await the joinGame function
+
+            // Return the game that was joined
+            const { rows } = await client.query('SELECT * FROM games WHERE game_id = $1', [gameId]);
+            return rows;
         }
         else {
             console.log('No game found to join, creating a new game for user', userId);
