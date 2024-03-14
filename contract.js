@@ -29,15 +29,17 @@ const joinGame = async () => {
     }
 };
 
-contract.on('GameStarted', (player1, player2, gameId) => {
-    console.log('Game started:', player1, player2, gameId);
-}
-);
+contract.on('GameStarted', (gameId, playerOne, entryFee) => {
+    console.log('Game started:', gameId, playerOne, entryFee);
+});
 
-contract.on('GameJoined', (player1, player2, gameId) => {
-    console.log('Game joined:', player1, player2, gameId);
-}
-);
+contract.on('JoinedGame', (gameId, playerTwo) => {
+    console.log('Game joined:', gameId, playerTwo);
+});
+
+contract.on('GameFinished', (gameId, winner, reward) => {
+    console.log('Game finished:', gameId, winner, reward);
+});
 
 module.exports = {
     startGame,
