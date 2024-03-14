@@ -10,7 +10,7 @@ const contract = new ethers.Contract(contractAddress, abi.abi, signer);
 const startGame = async () => {
     try {
         // Replace parameters as needed
-        const tx = await contract.startGame({ value: ethers.utils.parseEther('1.0') });
+        const tx = await contract.startGame({ value: ethers.parseEther('.00001') });
         await tx.wait();
         console.log('New game started.');
     } catch (error) {
@@ -21,7 +21,7 @@ const startGame = async () => {
 const joinGame = async () => {
     try {
         // Replace parameters as needed
-        const tx = await contract.joinGame({ value: ethers.utils.parseEther('1.0') });
+        const tx = await contract.joinGame({ value: ethers.parseEther('.00001') });
         await tx.wait();
         console.log('Joined game.');
     } catch (error) {
