@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('./db');
 const contract = require('./contract');
+const WebSocket = require('ws'); // Import WebSocket class
 
 // Middleware for error handling
 router.use((err, req, res, next) => {
