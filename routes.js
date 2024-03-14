@@ -169,18 +169,18 @@ router.post('/newGame', async (req, res, next) => {
     }
 });
 
-// get game info for a game id
-router.post('/getGameInfo', async (req, res, next) => {
-    console.log('/getGameInfo route');
-    try {
-        const gameId = req.body.gameId;
-        const game = await db.getGameById(gameId);
-        if (!game) {
-            return res.status(404).json({ error: 'Game not found' });
-        } else {
-            res.json(game);
-        }
-    } catch (error) {
-        next(error); // Pass error to error handling middleware
-    }
-});
+// // get game info for a game id
+// router.post('/getGameInfo', async (req, res, next) => {
+//     console.log('/getGameInfo route');
+//     try {
+//         const gameId = req.body.gameId;
+//         const game = await db.getGameById(gameId);
+//         if (!game) {
+//             return res.status(404).json({ error: 'Game not found' });
+//         } else {
+//             res.json(game);
+//         }
+//     } catch (error) {
+//         next(error); // Pass error to error handling middleware
+//     }
+// });
