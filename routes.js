@@ -169,10 +169,11 @@ router.post('/newGame', async (req, res, next) => {
     }
 });
 
-router.get('/getGameInfo/:gameId', async (req, res, next) => {
+// get game info for a game id
+router.post('/getGameInfo', async (req, res, next) => {
     console.log('/getGameInfo route');
     try {
-        const gameId = req.params.gameId;
+        const gameId = req.body.gameId;
         const game = await db.getGameById(gameId);
         if (!game) {
             return res.status(404).json({ error: 'Game not found' });
