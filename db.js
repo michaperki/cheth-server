@@ -110,7 +110,7 @@ const joinGame = async (gameId, userId) => {
     console.log('joinGame in db for gameId: ', gameId, 'userId: ', userId);
     try {
         // Update the game's player2_id and state to 1
-        const { rows } = await client.query('UPDATE games SET player2_id = $1, state = 1 WHERE game_id = $2 RETURNING *', [userId, gameId]);
+        const { rows } = await client.query('UPDATE games SET player2_id = $1, state = CAST($2 AS INTEGER) WHERE game_id = $3 RETURNING *', [userId, 1, gameId]);
         return rows;
     } catch (error) {
         console.error('Error joining game', error.stack);
