@@ -25,6 +25,10 @@ wss.on('connection', (ws) => {
 
 server.listen(PORT, () => {
     console.log(`Server listening on port ${PORT}`);
+    
+    // Print WebSocket URL
+    const hostname = server.address().address;
+    console.log(`WebSocket URL: ws://${hostname}:${PORT}`);
 });
 
 // Connect to the database
