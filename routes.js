@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('./db');
 const contract = require('./contract');
+const ws = require('ws');
 
 // Middleware for error handling
 router.use((err, req, res, next) => {
@@ -134,6 +135,7 @@ router.post('/newGame', async (req, res, next) => {
         const userId = req.body.userId;
         const game = await db.playGame(userId);
         console.log('game', game);
+        ws.send('Game started');
         res.json(game);
     } catch (error) {
         next(error); // Pass error to error handling middleware
