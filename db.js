@@ -115,8 +115,15 @@ const joinGame = async (gameId, userId) => {
     }
 }
 
-
-
+const updateGameState = async (gameId, state) => {
+    try {
+        const { rows } = await client.query('UPDATE games SET state = $1 WHERE game_id = $2 RETURNING *', [state, gameId]);
+        return rows;
+    } catch (error) {
+        console.error('Error updating game state', error.stack);
+        throw error;
+    }
+}
 
 module.exports = {
     connectToDatabase,
@@ -125,5 +132,6 @@ module.exports = {
     getUserByLichessHandle,
     getUserByWalletAddress,
     createGame,
-    playGame
+    playGame,
+    updateGameState
 };
