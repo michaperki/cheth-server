@@ -135,10 +135,14 @@ router.post('/newGame', async (req, res, next) => {
         const game = await db.playGame(userId);
         console.log('game', game);
         if(game.state === '1') {
+            console.log('two players in the game, starting the game');
             await contract.startGame();
+            console.log('game after starting', game);
 
             // Update the game state in the database
             await db.updateGameState(game.id, '2');
+            console.log('game state updated to 2');
+            console.log('game after updating', game);
 
             // Return the game state
             res.json({ state: '2' });
