@@ -134,7 +134,7 @@ router.post('/newGame', async (req, res, next) => {
         const userId = req.body.userId;
         const game = await db.playGame(userId);
         console.log('game', game);
-        if(game.state === '1') {
+        if(parseInt(game.state) === 1) {
             console.log('two players in the game, starting the game');
             await contract.startGame();
             console.log('game after starting', game);
