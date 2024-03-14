@@ -8,71 +8,39 @@ const wallet = new ethers.Wallet(privateKey);
 const signer = wallet.connect(new ethers.providers.JsonRpcProvider(process.env.RPC_URL));
 const contract = new ethers.Contract(contractAddress, abi.abi, signer);
 
-const createGameContract = async (gameId, buyInAmount) => {
-    console.log('Creating a new game contract for game ID:', gameId);
+const startGame = async () => {
     try {
-        const tx = await contract.createGame(gameId, buyInAmount);
-        const receipt = await tx.wait();
-        return receipt;
+        // Replace parameters as needed
+        const tx = await contract.startGame({ value: ethers.utils.parseEther('1.0') });
+        await tx.wait();
+        console.log('New game started.');
     } catch (error) {
-        console.error('Error creating game contract:', error);
-        throw error;
+        console.error('Error starting game:', error);
     }
-}
+};
 
-const joinGameContract = async (gameId) => {
-    console.log('Joining game contract for game ID:', gameId);
+const joinGame = async () => {
     try {
-        const tx = await contract.joinGame(gameId, { value: ethers.utils.parseEther('0.01') });
-        const receipt = await tx.wait();
-        return receipt;
+        // Replace parameters as needed
+        const tx = await contract.joinGame({ value: ethers.utils.parseEther('1.0') });
+        await tx.wait();
+        console.log('Joined game.');
     } catch (error) {
-        console.error('Error joining game contract:', error);
-        throw error;
+        console.error('Error joining game:', error);
     }
-}
+};
 
-const endGameContract = async (gameId, winner) => {
-    console.log('Ending game contract for game ID:', gameId);
-    try {
-        const tx = await contract.endGame(gameId, winner);
-        const receipt = await tx.wait();
-        return receipt;
-    } catch (error) {
-        console.error('Error ending game contract:', error);
-        throw error;
-    }
+contract.on('GameStarted', (player1, player2, gameId) => {
+    console.log('Game started:', player1, player2, gameId);
 }
+);
 
-const abortGameContract = async (gameId) => {
-    console.log('Aborting game contract for game ID:', gameId);
-    try {
-        const tx = await contract.abortGame(gameId);
-        const receipt = await tx.wait();
-        return receipt;
-    } catch (error) {
-        console.error('Error aborting game contract:', error);
-        throw error;
-    }
+contract.on('GameJoined', (player1, player2, gameId) => {
+    console.log('Game joined:', player1, player2, gameId);
 }
-
-const withdrawWinningsContract = async (gameId) => {
-    console.log('Withdrawing winnings from game contract for game ID:', gameId);
-    try {
-        const tx = await contract.withdrawWinnings(gameId);
-        const receipt = await tx.wait();
-        return receipt;
-    } catch (error) {
-        console.error('Error withdrawing winnings from game contract:', error);
-        throw error;
-    }
-}
-
+);
 
 module.exports = {
-    createGameContract,
-    joinGameContract,
-    endGameContract,
-    abortGameContract,
-    withdrawWinningsContract
+    startGame,
+    joinGame
 };
