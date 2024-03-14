@@ -20,6 +20,18 @@ const websocket = require('./websocket')(server);
 
 server.listen(PORT, () => {
     console.log(`Server listening on port ${PORT}`);
+
+    // Send a message to all connected clients
+    websocket.clients.forEach(client => {
+        if (client.readyState === WebSocket.OPEN) {
+            client.send('Hello from the server!');
+        }
+    });
+
+    // Listen for incoming WebSocket connections
+    websocket.on('connection', ws => {
+        console.log('Client connected');
+    });
 });
 
 // Connect to the database
