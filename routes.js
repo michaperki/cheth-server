@@ -145,21 +145,15 @@ router.post('/newGame', async (req, res, next) => {
                 }
             });
             
-            const tx = await contract.startGame();
+            await contract.startGame();
             console.log('game after starting', game);
-            console.log('tx in newGame', tx);
             // Update the game state in the database
             const updatedGame = await db.updateGameState(game[0].game_id, 2);
             console.log('game state updated to 2');
             console.log('updatedGame', updatedGame);
 
-            // req.wss.clients.forEach(client => {
-            //     if (client.readyState === WebSocket.OPEN) {
-            //         client.send(JSON.stringify({ type: "GAME_STARTED", gameId: game[0].game_id }));
-            //     }
-            // });
             // Return the game state
-            res.json({ state: updatedGame[0].state });
+            res.json({ state: game[0].state });
         } else {
             console.log('game state is not 1, returning the game state');
             res.json({ state: game[0].state });
@@ -169,18 +163,17 @@ router.post('/newGame', async (req, res, next) => {
     }
 });
 
-// get game info for a game id
-router.post('/getGameInfo', async (req, res, next) => {
+router.post('/getGameInfo/:gameId', async (req, res, next) => {
     console.log('/getGameInfo route');
+    console.log('req.body', req.body);
     try {
-        const gameId = req.body.gameId;
+        const gameId = req.params.gameId;
         const game = await db.getGameById(gameId);
-        if (!game) {
-            return res.status(404).json({ error: 'Game not found' });
-        } else {
-            res.json(game);
-        }
+        console.log('game', game);
+        res.json(game);
     } catch (error) {
         next(error); // Pass error to error handling middleware
     }
 });
+
+module.exports = router;

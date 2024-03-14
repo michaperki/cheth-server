@@ -9,17 +9,17 @@ const contract = new ethers.Contract(contractAddress, abi.abi, signer);
 
 const startGame = async () => {
     try {
+        // Replace parameters as needed
         console.log('Starting new game...');
         console.log('Contract address:', contract.target);
         console.log('Wallet address:', wallet.address);
         const tx = await contract.startGame({ value: ethers.parseEther('.00001'), gasLimit: 3000000 });
-        const receipt = await tx.wait();
-        const contractAddress = receipt.contractAddress; // Get the address of the newly created contract
-        console.log('New game started. Contract address:', contractAddress);
-        return contractAddress; // Return the contract address
+        await tx.wait();
+        console.log('New game started.');
+        console.log('tx:', tx);
+        return tx;
     } catch (error) {
         console.error('Error starting game:', error);
-        throw error; // Rethrow the error to be handled by the caller
     }
 };
 
