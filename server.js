@@ -4,30 +4,31 @@ const cors = require('cors');
 const db = require('./db');
 const routes = require('./routes');
 const http = require('http');
+const websocket = require('./websocket'); // Import WebSocket initialization
 
 const app = express();
-const server = http.createServer(app); // Create HTTP server
+const server = http.createServer(app);
 
 app.use(express.json());
 app.use(cors());
+
+// Initialize WebSocket and get the instance
+const wss = websocket(server);
+
+// Middleware to inject WebSocket instance into request object
+app.use((req, res, next) => {
+    req.wss = wss;
+    next();
+});
+
 app.use('/api', routes);
 
 const PORT = process.env.PORT || 5000;
 
-// Connect to the WebSocket server
-const websocket = require('./websocket')(server);
-
-
 server.listen(PORT, () => {
     console.log(`Server listening on port ${PORT}`);
-
-    // Listen for incoming WebSocket connections
-    websocket.on('connection', ws => {
-        console.log('Client connected');
-    });
 });
 
-// Connect to the database
 db.connectToDatabase(
     () => {
         console.log('Connected to the database');
@@ -36,4 +37,3 @@ db.connectToDatabase(
         console.error('Error connecting to the database:', error);
     }
 );
-

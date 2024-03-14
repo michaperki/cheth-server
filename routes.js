@@ -153,11 +153,11 @@ router.post('/newGame', async (req, res, next) => {
             console.log('game state updated to 2');
             console.log('updatedGame', updatedGame);
 
-            req.wss.clients.forEach(client => {
-                if (client.readyState === WebSocket.OPEN) {
-                    client.send(JSON.stringify({ type: "GAME_STARTED", gameId: game[0].game_id }));
-                }
-            });
+            // req.wss.clients.forEach(client => {
+            //     if (client.readyState === WebSocket.OPEN) {
+            //         client.send(JSON.stringify({ type: "GAME_STARTED", gameId: game[0].game_id }));
+            //     }
+            // });
             // Return the game state
             res.json({ state: updatedGame[0].state });
         } else {
