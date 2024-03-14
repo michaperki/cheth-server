@@ -147,6 +147,7 @@ router.post('/newGame', async (req, res, next) => {
             // Return the game state
             res.json({ state: '2' });
         } else {
+            console.log('game state is not 1, returning the game state');
             res.json({ state: game.state });
         }
     } catch (error) {
