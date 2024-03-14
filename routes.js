@@ -128,27 +128,30 @@ router.post('/getUserInfo', async (req, res, next) => {
 });
 
 router.post('/newGame', async (req, res, next) => {
-    console.log('/newGame route')
-    console.log('req.body', req.body)
+    console.log('/newGame route');
+    console.log('req.body', req.body);
     try {
         const userId = req.body.userId;
         const game = await db.playGame(userId); // game is an array of game objects
 
-        if(parseInt(game[0].state) === 1) { // get the state of the first game object in the array
+        if (parseInt(game[0].state) === 1) { // get the state of the first game object in the array
             console.log('two players in the game, starting the game');
+            // emit event to start the game
+            req.wss.emit('start_game', { gameId: game[0].game_id });
+
             await contract.startGame();
             console.log('game after starting', game);
 
             // Update the game state in the database
-            await db.updateGameState(game.game_id, 2); 
+            await db.updateGameState(game[0].game_id, 2);
             console.log('game state updated to 2');
             console.log('game after updating', game);
 
             // Return the game state
-            res.json({ state: game.state });
+            res.json({ state: game[0].state });
         } else {
             console.log('game state is not 1, returning the game state');
-            res.json({ state: game.state });
+            res.json({ state: game[0].state });
         }
     } catch (error) {
         next(error); // Pass error to error handling middleware

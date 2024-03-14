@@ -4,6 +4,7 @@ module.exports = function websocket(server) {
     const wss = new WebSocket.Server({ server });
 
     wss.on('connection', async ws => {
+        console.log('Client connected');
 
         ws.on('message', async message => {
             const data = JSON.parse(message);
@@ -16,8 +17,13 @@ module.exports = function websocket(server) {
                     break;
                 case "JOIN_GAME":
                     console.log("Join game request received");
+                    // Broadcast a message to all connected clients when a game is joined
+                    wss.clients.forEach(client => {
+                        if (client.readyState === WebSocket.OPEN) {
+                            client.send(JSON.stringify({ type: "GAME_JOINED", gameData: data.gameData }));
+                        }
+                    });
                     break;
-                
                 default:
                     console.log("Unknown message type received");
             }
@@ -25,6 +31,4 @@ module.exports = function websocket(server) {
     });
 
     return wss;
-}
-
-
+};
