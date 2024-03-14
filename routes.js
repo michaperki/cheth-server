@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const db = require('./db');
 const contract = require('./contract');
-const ws = require('ws');
 
 // Middleware for error handling
 router.use((err, req, res, next) => {
@@ -135,8 +134,17 @@ router.post('/newGame', async (req, res, next) => {
         const userId = req.body.userId;
         const game = await db.playGame(userId);
         console.log('game', game);
-        ws.send('Game started');
-        res.json(game);
+        if(game.state === '1') {
+            await contract.startGame();
+
+            // Update the game state in the database
+            await db.updateGameState(game.id, '2');
+
+            // Return the game state
+            res.json({ state: '2' });
+        } else {
+            res.json({ state: game.state });
+        }
     } catch (error) {
         next(error); // Pass error to error handling middleware
     }

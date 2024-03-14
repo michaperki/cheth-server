@@ -3,7 +3,7 @@ const { Pool } = require('pg');
 
 // Configure the connection to your Heroku Postgres database
 const pool = new Pool({
-    connectionString: DATABASE_URL,
+    connectionString: 'DATABASE_URL',
     ssl: {
         rejectUnauthorized: false
     }
