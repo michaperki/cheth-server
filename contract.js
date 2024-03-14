@@ -10,6 +10,9 @@ const contract = new ethers.Contract(contractAddress, abi.abi, signer);
 const startGame = async () => {
     try {
         // Replace parameters as needed
+        console.log('Starting new game...');
+        console.log('Contract address:', contract.address);
+        console.log('Wallet address:', wallet.address);
         const tx = await contract.startGame({ value: ethers.parseEther('.00001') });
         await tx.wait();
         console.log('New game started.');
