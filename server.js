@@ -15,12 +15,11 @@ app.use('/api', routes);
 const PORT = process.env.PORT || 5000;
 
 // Connect to the WebSocket server
-require('./websocket').connectToWebSocketServer(server);
+const websocket = require('./websocket')(server);
 
 
 server.listen(PORT, () => {
     console.log(`Server listening on port ${PORT}`);
-
 });
 
 // Connect to the database
