@@ -163,11 +163,10 @@ router.post('/newGame', async (req, res, next) => {
     }
 });
 
-router.post('/getGameInfo/:gameId', async (req, res, next) => {
+router.get('/getGameInfo', async (req, res, next) => {
     console.log('/getGameInfo route');
-    console.log('req.body', req.body);
     try {
-        const gameId = req.params.gameId;
+        const gameId = req.query.gameId; // Parse gameId from query parameters
         const game = await db.getGameById(gameId);
         console.log('game', game);
         res.json(game);
