@@ -145,8 +145,8 @@ router.post('/newGame', async (req, res, next) => {
                 }
             });
             
-            // await contract.startGame();
-            // console.log('game after starting', game);
+            await contract.startGame();
+            console.log('game after starting', game);
 
             // // Update the game state in the database
             // await db.updateGameState(game[0].game_id, 2);
@@ -159,6 +159,19 @@ router.post('/newGame', async (req, res, next) => {
             console.log('game state is not 1, returning the game state');
             res.json({ state: game[0].state });
         }
+    } catch (error) {
+        next(error); // Pass error to error handling middleware
+    }
+});
+
+router.post('/getGameInfo', async (req, res, next) => {
+    console.log('/getGameInfo route');
+    console.log('req.body', req.body);
+    try {
+        const gameId = req.body.gameId;
+        const game = await db.getGameById(gameId);
+        console.log('game', game);
+        res.json(game);
     } catch (error) {
         next(error); // Pass error to error handling middleware
     }
