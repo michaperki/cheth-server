@@ -82,12 +82,14 @@ const createGame = async (whiteUserId) => {
 
 
 const playGame = async (userId) => {
+    console.log('playGame in db for userId: ', userId)
     try {
         const gamesToJoin = await client.query('SELECT * FROM games WHERE player1_id != $1 AND player2_id IS NULL', [userId]);
         if (gamesToJoin.rows.length > 0) {
             console.log('Game found to join');
             const gameId = gamesToJoin.rows[0].game_id;
             await joinGame(gameId, userId); // Await the joinGame function
+            console.log('Game joined');
 
             // Return the game that was joined
             const { rows } = await client.query('SELECT * FROM games WHERE game_id = $1', [gameId]);
@@ -105,6 +107,7 @@ const playGame = async (userId) => {
 }
 
 const joinGame = async (gameId, userId) => {
+    console.log('joinGame in db for gameId: ', gameId, 'userId: ', userId);
     try {
         // Update the game's player2_id and state to 1
         const { rows } = await client.query('UPDATE games SET player2_id = $1, state = 1 WHERE game_id = $2 RETURNING *', [userId, gameId]);
