@@ -12,6 +12,7 @@ const startGame = async () => {
         // Replace parameters as needed
         console.log('Starting new game...');
         console.log('CHAIN_ID:', process.env.CHAIN_ID);
+        console.log('contract:', contract);
         console.log('Contract address:', contract.address);
         console.log('Wallet address:', wallet.address);
         const tx = await contract.startGame({ value: ethers.parseEther('.00001') });
