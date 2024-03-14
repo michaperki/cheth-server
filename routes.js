@@ -132,18 +132,15 @@ router.post('/newGame', async (req, res, next) => {
     console.log('req.body', req.body)
     try {
         const userId = req.body.userId;
-        const game = await db.playGame(userId);
-        console.log('game', game);
-        console.log('game state', game[0].state);
-        console.log('game state type', typeof game.state);
-        console.log('game state to int', parseInt(game.state));
-        if(parseInt(game[0].state) === 1) {
+        const game = await db.playGame(userId); // game is an array of game objects
+
+        if(parseInt(game[0].state) === 1) { // get the state of the first game object in the array
             console.log('two players in the game, starting the game');
             await contract.startGame();
             console.log('game after starting', game);
 
             // Update the game state in the database
-            await db.updateGameState(game.id, 2); 
+            await db.updateGameState(game.game_id, 2); 
             console.log('game state updated to 2');
             console.log('game after updating', game);
 
