@@ -2,10 +2,11 @@ const ethers = require('ethers');
 const abi = require("./abis/ChessGame.json");
 
 const contractAddress = abi.networks[process.env.CHAIN_ID].address;
+console.log('contractAddress:', contractAddress);
 const privateKey = process.env.SEPOLIA_PRIVATE_KEY;
 const wallet = new ethers.Wallet(privateKey);
 const signer = wallet.connect(new ethers.JsonRpcProvider(process.env.RPC_URL));
-const contract = new ethers.Contract(contractAddress, abi, signer);
+const contract = new ethers.Contract(contractAddress, abi.abi, signer);
 
 const startGame = async () => {
     try {
