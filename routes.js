@@ -148,12 +148,12 @@ router.post('/newGame', async (req, res, next) => {
             await contract.startGame();
             console.log('game after starting', game);
             // Update the game state in the database
-            await db.updateGameState(game[0].game_id, 2);
+            const updatedGame = await db.updateGameState(game[0].game_id, 2);
             console.log('game state updated to 2');
-            console.log('game after updating', game);
+            console.log('updatedGame', updatedGame);
 
             // Return the game state
-            res.json({ state: game[0].state });
+            res.json({ state: updatedGame[0].state });
         } else {
             console.log('game state is not 1, returning the game state');
             res.json({ state: game[0].state });
