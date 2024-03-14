@@ -145,13 +145,13 @@ router.post('/newGame', async (req, res, next) => {
                 }
             });
             
-            await contract.startGame();
-            console.log('game after starting', game);
+            // await contract.startGame();
+            // console.log('game after starting', game);
 
-            // Update the game state in the database
-            await db.updateGameState(game[0].game_id, 2);
-            console.log('game state updated to 2');
-            console.log('game after updating', game);
+            // // Update the game state in the database
+            // await db.updateGameState(game[0].game_id, 2);
+            // console.log('game state updated to 2');
+            // console.log('game after updating', game);
 
             // Return the game state
             res.json({ state: game[0].state });
