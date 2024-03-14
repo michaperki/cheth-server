@@ -14,7 +14,8 @@ const startGame = async () => {
         console.log('Wallet address:', wallet.address);
         const tx = await contract.startGame({ value: ethers.parseEther('.00001'), gasLimit: 3000000 });
         const receipt = await tx.wait();
-        const contractAddress = receipt.contractAddress; // Get the address of the newly created contract
+        console.log('Game started:', receipt);
+        const contractAddress = receipt.contractAddress; //Get  the address of the newly created contract
         console.log('New game started. Contract address:', contractAddress);
         return contractAddress; // Return the contract address
     } catch (error) {
