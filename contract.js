@@ -27,10 +27,15 @@ const startGame = async () => {
 const fundGame = async (gameId) => {
     try {
         console.log('Funding game...');
+        // error: {code: -32603, message: 'nonce too low: next nonce 631, tx nonce 630'
+        const nonce = await wallet.getTransactionCount();
         console.log('Contract address:', contract.target);
         console.log('Wallet address:', wallet.address);
         console.log('Game ID:', gameId);
-        const tx = await contract.fundGame(gameId, { value: ethers.parseEther('.00001'), gasLimit: 3000000 });
+        const entryFee = ethers.utils.parseEther('.00001');
+        console.log('Entry fee:', entryFee);
+        const tx = await contract.fundGame(gameId, { value: entryFee, nonce });
+
         const receipt = await tx.wait();
         console.log('Game funded:', receipt);
         return receipt;
