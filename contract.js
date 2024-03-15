@@ -16,9 +16,7 @@ const startGame = async (gameId) => {
         const tx = await contract.startGame(gameId, { value: ethers.parseEther('.00001'), gasLimit: 3000000 });
         const receipt = await tx.wait();
         console.log('Game started:', receipt);
-        const contractAddress = receipt.contractAddress; //Get  the address of the newly created contract
-        console.log('New game started. Contract address:', contractAddress);
-        return contractAddress; // Return the contract address
+        return receipt;
     } catch (error) {
         console.error('Error starting game:', error);
         throw error; // Rethrow the error to be handled by the caller
