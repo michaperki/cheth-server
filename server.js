@@ -4,7 +4,7 @@ const cors = require('cors');
 const db = require('./db');
 const routes = require('./routes');
 const http = require('http');
-const websocket = require('./websocket'); // Import WebSocket initialization
+const websocket = require('./websocket');
 
 const app = express();
 const server = http.createServer(app);

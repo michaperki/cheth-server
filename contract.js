@@ -1,6 +1,7 @@
 const ethers = require('ethers');
 const abi = require("./abis/ChessGame.json");
 const db = require('./db'); // Import your database module
+import { sendToClients } from './websocket';
 
 const contractAddress = abi.networks[process.env.CHAIN_ID].address;
 const privateKey = process.env.SEPOLIA_PRIVATE_KEY;
@@ -45,7 +46,10 @@ contract.on('GameStarted', async (gameId, playerOne, entryFee) => {
     
     // Fetch the game details from your database and send them to the players
     const game = await db.getGameById(gameId);
+    
     // Send game details to the players
+    sendToClients({ type: 'GAME_STARTED', game });
+
     
 });
 

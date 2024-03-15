@@ -1,6 +1,14 @@
 const WebSocket = require('ws');
 
-module.exports = function websocket(server) {
+function sendToClients(wss, message) {
+    wss.clients.forEach(client => {
+        if (client.readyState === WebSocket.OPEN) {
+            client.send(JSON.stringify(message));
+        }
+    });
+}
+
+function websocket(server) {
     const wss = new WebSocket.Server({ server });
 
     wss.on('connection', async ws => {
@@ -31,4 +39,9 @@ module.exports = function websocket(server) {
     });
 
     return wss;
+}
+
+module.exports = {
+    websocket,
+    sendToClients
 };
