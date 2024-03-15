@@ -121,6 +121,11 @@ const joinGame = async (gameId, userId) => {
 const updateGameState = async (gameId, state) => {
     try {
         console.log('updateGameState in db for gameId: ', gameId, 'state: ', state);
+        if (typeof state === 'string') {
+            console.log('state is a string, converting to integer');
+            state = parseInt(state);
+            console.log('state is now', state);
+        }
         const { rows } = await client.query('UPDATE games SET state = $1 WHERE game_id = $2 RETURNING *', [state, gameId]);
         return rows;
     } catch (error) {
