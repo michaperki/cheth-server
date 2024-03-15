@@ -61,5 +61,5 @@ contract.on('GameFinished', (gameId, winner, reward) => {
 
 module.exports = {
     startGame,
-    joinGame
+    fundGame
 };
