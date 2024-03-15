@@ -15,6 +15,7 @@ const pool = new Pool({
 const sqlQuery = `
     CREATE TABLE games (
         game_id SERIAL PRIMARY KEY,
+        contract_game_id VARCHAR(255) NULL,
         player1_id INTEGER NOT NULL,
         player2_id INTEGER DEFAULT NULL,
         state VARCHAR(255) NOT NULL,
@@ -22,7 +23,6 @@ const sqlQuery = `
         last_move VARCHAR(255) DEFAULT NULL,
         winner INTEGER DEFAULT NULL,
         reward_pool bigint DEFAULT 0,
-        transaction_hash VARCHAR(255) DEFAULT NULL,
         FOREIGN KEY (player1_id) REFERENCES users(user_id),
         FOREIGN KEY (player2_id) REFERENCES users(user_id),
         FOREIGN KEY (winner) REFERENCES users(user_id)
