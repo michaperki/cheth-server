@@ -34,8 +34,7 @@ const fundGame = async (gameId) => {
         console.log('Game ID:', gameId);
         const entryFee = ethers.utils.parseEther('.00001');
         console.log('Entry fee:', entryFee);
-        const tx = await contract.fundGame(gameId, { value: entryFee, nonce });
-
+        const tx = await contract.fundGame(gameId, { value: entryFee, nonce, gasLimit: 3000000 });
         const receipt = await tx.wait();
         console.log('Game funded:', receipt);
         return receipt;
