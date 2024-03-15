@@ -152,7 +152,15 @@ router.post('/newGame', async (req, res, next) => {
             const updatedGame = await db.updateGameState(game[0].game_id, 2);
             console.log('game state updated to 2');
             console.log('updatedGame', updatedGame);
-            
+
+            if (parseInt(updatedGame[0].state) === 2) {
+                console.log('game state is 2, sending game started event');
+                req.wss.clients.forEach(client => {
+                    if (client.readyState === WebSocket.OPEN) {
+                        client.send(JSON.stringify({ type: "GAME_STARTED", gameId: game[0].game_id }));
+                    }
+                });
+            }            
             // Return the game state
             res.json({ state: updatedGame[0].state });
         } else {
