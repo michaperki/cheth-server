@@ -121,11 +121,22 @@ const joinGame = async (gameId, userId) => {
 const updateGameState = async (gameId, state) => {
     try {
         console.log('updateGameState in db for gameId: ', gameId, 'state: ', state);
-        if (typeof state === 'string') {
-            console.log('state is a string, converting to integer');
-            state = parseInt(state);
-            console.log('state is now', state);
+        console.log('type of state: ', typeof state);
+        // log the type of gameId   
+        console.log('type of gameId: ', typeof gameId);
+        if (typeof gameId === 'string') {
+            console.log('gameId is a string, converting to integer');
+            gameId = parseInt(gameId);
+            console.log('gameId is now', gameId);
         }
+
+        // if gameId is a bigint, convert to integer
+        if (typeof gameId === 'bigint') {
+            console.log('gameId is a bigint, converting to integer');
+            gameId = parseInt(gameId);
+            console.log('gameId is now', gameId);
+        }
+
         const { rows } = await client.query('UPDATE games SET state = $1 WHERE game_id = $2 RETURNING *', [state, gameId]);
         return rows;
     } catch (error) {
@@ -137,6 +148,14 @@ const updateGameState = async (gameId, state) => {
 const updateRewardPool = async (gameId, rewardPool) => {
     try {
         console.log('updateRewardPool in db for gameId: ', gameId, 'rewardPool: ', rewardPool);
+        // log the type of rewardPool
+        console.log('type of rewardPool: ', typeof rewardPool);
+        // if gameId is a bigint, convert to integer
+        if (typeof gameId === 'bigint') {
+            console.log('gameId is a bigint, converting to integer');
+            gameId = parseInt(gameId);
+            console.log('gameId is now', gameId);
+        }
         const { rows } = await client.query('UPDATE games SET reward_pool = $1 WHERE game_id = $2 RETURNING *', [rewardPool, gameId]);
         return rows;
     } catch (error) {
