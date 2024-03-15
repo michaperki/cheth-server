@@ -27,8 +27,8 @@ const startGame = async () => {
 const fundGame = async (gameId) => {
     try {
         console.log('Funding game...');
-        // error: {code: -32603, message: 'nonce too low: next nonce 631, tx nonce 630'
-        const nonce = await wallet.getTransactionCount();
+        const nonce = await wallet.getTransactionCount('pending'); // Specify 'pending' to get the correct nonce for pending transactions
+        console.log('Nonce:', nonce);
         console.log('Contract address:', contract.target);
         console.log('Wallet address:', wallet.address);
         console.log('Game ID:', gameId);
