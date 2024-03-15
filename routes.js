@@ -145,13 +145,13 @@ router.post('/newGame', async (req, res, next) => {
                 }
             });
             
-            const tx = await contract.startGame(game[0].game_id);
-            console.log('tx', tx);
-            console.log('game after starting', game);
-            // Update the game state in the database
-            const updatedGame = await db.updateGameState(game[0].game_id, 2);
-            console.log('game state updated to 2');
-            console.log('updatedGame', updatedGame);
+            // const tx = await contract.startGame(game[0].game_id);
+            // console.log('tx', tx);
+            // console.log('game after starting', game);
+            // // Update the game state in the database
+            // const updatedGame = await db.updateGameState(game[0].game_id, 2);
+            // console.log('game state updated to 2');
+            // console.log('updatedGame', updatedGame);
 
             if (parseInt(updatedGame[0].state) === 2) {
                 console.log('game state is 2, sending game started event');
