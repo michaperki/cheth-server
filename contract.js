@@ -1,5 +1,6 @@
 const ethers = require('ethers');
 const abi = require("./abis/ChessGame.json");
+const db = require('./db'); // Import your database module
 
 const contractAddress = abi.networks[process.env.CHAIN_ID].address;
 const privateKey = process.env.SEPOLIA_PRIVATE_KEY;
@@ -34,8 +35,11 @@ const joinGame = async () => {
     }
 };
 
-contract.on('GameStarted', (gameId, playerOne, entryFee) => {
+contract.on('GameStarted', async (gameId, playerOne, entryFee) => {
     console.log('Game started:', gameId, playerOne, entryFee);
+
+    await db.updateGameState(gameId, 3); // Assuming 2 is the state for "game started" in your database
+
 });
 
 contract.on('JoinedGame', (gameId, playerTwo) => {
