@@ -149,11 +149,16 @@ router.post('/newGame', async (req, res, next) => {
 
         if (parseInt(game[0].state) === 1) { // get the state of the first game object in the array
             console.log('two players in the game, starting the game');
+            // start the game by calling the contract
+            const gameContract = await contract.startGame();
+
+            console.log('game in /newGame route', gameContract);
+
             // emit event to start the game
             // Emit event to start the game to all connected clients
             req.wss.clients.forEach(client => {
                 if (client.readyState === WebSocket.OPEN) {
-                    client.send(JSON.stringify({ type: "START_GAME", gameId: game[0].game_id }));
+                    client.send(JSON.stringify({ type: "START_GAME", gameId: game[0].game_id, gameContract }));
                 }
             });
 

@@ -8,13 +8,14 @@ const wallet = new ethers.Wallet(privateKey);
 const signer = wallet.connect(new ethers.JsonRpcProvider(process.env.RPC_URL));
 const contract = new ethers.Contract(contractAddress, abi.abi, signer);
 
-const startGame = async (gameId) => {
+const startGame = async () => {
     try {
         console.log('Starting new game...');
         console.log('Contract address:', contract.target);
         console.log('Wallet address:', wallet.address);
         console.log('Game ID:', gameId);
-        const tx = await contract.startGame(gameId, { value: ethers.parseEther('.00001'), gasLimit: 3000000 });
+        //const tx = await contract.startGame({ value: ethers.parseEther('.00001'), gasLimit: 3000000 });
+        const tx = await contract.startGame();
         const receipt = await tx.wait();
         console.log('Game started:', receipt);
         return receipt;
@@ -24,14 +25,19 @@ const startGame = async (gameId) => {
     }
 };
 
-const joinGame = async () => {
+const fundGame = async (gameId) => {
     try {
-        // Replace parameters as needed
-        const tx = await contract.joinGame({ value: ethers.parseEther('.00001') });
-        await tx.wait();
-        console.log('Joined game.');
+        console.log('Funding game...');
+        console.log('Contract address:', contract.target);
+        console.log('Wallet address:', wallet.address);
+        console.log('Game ID:', gameId);
+        const tx = await contract.fundGame(gameId, { value: ethers.parseEther('.00001'), gasLimit: 3000000 });
+        const receipt = await tx.wait();
+        console.log('Game funded:', receipt);
+        return receipt;
     } catch (error) {
-        console.error('Error joining game:', error);
+        console.error('Error funding game:', error);
+        throw error; // Rethrow the error to be handled by the caller
     }
 };
 
