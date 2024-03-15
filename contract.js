@@ -51,8 +51,11 @@ contract.on('GameStarted', async (gameId, playerOne, entryFee) => {
     
 });
 
-contract.on('JoinedGame', (gameId, playerTwo) => {
-    console.log('Game joined:', gameId, playerTwo);
+contract.on('GameFunded', async (gameId, player, amount) => {
+    console.log('Game funded:', gameId, player, amount);
+
+    // Update the reward pool in your database
+    await db.updateRewardPool(gameId, amount.toString()); // Convert BigInt to string
 });
 
 contract.on('GameFinished', (gameId, winner, reward) => {
