@@ -145,7 +145,8 @@ router.post('/newGame', async (req, res, next) => {
                 }
             });
             
-            await contract.startGame();
+            const tx = await contract.startGame(game[0].game_id);
+            console.log('tx', tx);
             console.log('game after starting', game);
             // Update the game state in the database
             const updatedGame = await db.updateGameState(game[0].game_id, 2);

@@ -132,7 +132,7 @@ const updateGameState = async (gameId, state) => {
 const getGameById = async (gameId) => {
     try {
         const { rows } = await client.query('SELECT * FROM games WHERE game_id = $1', [gameId]);
-        return rows;
+        return rows[0];
     } catch (error) {
         console.error('Error executing query', error.stack);
         throw error;
