@@ -5,7 +5,7 @@ const DATABASE_URL = process.env.DATABASE_URL;
 
 // Configure the connection to your Heroku Postgres database
 const pool = new Pool({
-    connectionString: 'DATABASE_URL',
+    connectionString: 'postgres://xftwwclpyvzzqm:ea793afacee56a9d17a19610aa366b8e00494799164ad502f287493fadd571fb@ec2-3-221-175-22.compute-1.amazonaws.com:5432/d661ne4qhp5q0p',
     ssl: {
         rejectUnauthorized: false
     }
@@ -21,7 +21,7 @@ const sqlQuery = `
         fen VARCHAR(255) DEFAULT NULL,
         last_move VARCHAR(255) DEFAULT NULL,
         winner INTEGER DEFAULT NULL,
-        reward_pool INTEGER NOT NULL DEFAULT 0,
+        reward_pool bigint DEFAULT 0,
         transaction_hash VARCHAR(255) DEFAULT NULL,
         FOREIGN KEY (player1_id) REFERENCES users(user_id),
         FOREIGN KEY (player2_id) REFERENCES users(user_id),

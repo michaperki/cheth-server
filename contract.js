@@ -41,7 +41,23 @@ contract.on('GameStarted', async (gameId, playerOne, entryFee) => {
     await db.updateGameState(gameId, 2); // Assuming 2 is the state for "game started" in your database
     await db.updateRewardPool(gameId, entryFee);
 
+    // Fetch the game details from your database
+    const game = await db.getGameById(gameId);
+    // Send game details to the players
+    notifyPlayers(gameId, game);
 });
+
+// Define a function to send game details to the players
+const notifyPlayers = (gameId, game) => {
+    const message = JSON.stringify({ type: 'game_update', gameId: gameId, game: game });
+    // Iterate through WebSocket clients and send the message to each player
+    // Adjust this logic according to your WebSocket implementation
+    req.wss.clients.forEach(client => {
+        if (client.readyState === WebSocket.OPEN) {
+            client.send(message);
+        }
+    });
+};
 
 contract.on('JoinedGame', (gameId, playerTwo) => {
     console.log('Game joined:', gameId, playerTwo);

@@ -1,4 +1,5 @@
 const WebSocket = require('ws');
+const db = require('./db'); // Import your database module
 
 module.exports = function websocket(server) {
     const wss = new WebSocket.Server({ server });
@@ -30,5 +31,19 @@ module.exports = function websocket(server) {
         });
     });
 
-    return wss;
+    // Function to send game update message to all connected clients
+    const sendGameUpdate = async (gameId) => {
+        try {
+            const game = await db.getGameById(gameId);
+            wss.clients.forEach(client => {
+                if (client.readyState === WebSocket.OPEN) {
+                    client.send(JSON.stringify({ type: "GAME_UPDATE", game: game }));
+                }
+            });
+        } catch (error) {
+            console.error('Error sending game update:', error);
+        }
+    };
+
+    return { wss, sendGameUpdate };
 };

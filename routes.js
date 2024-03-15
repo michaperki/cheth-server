@@ -3,6 +3,8 @@ const router = express.Router();
 const db = require('./db');
 const contract = require('./contract');
 const WebSocket = require('ws'); // Import WebSocket class
+const websocket = require('./websocket');
+const { sendGameUpdate } = websocket();
 
 // Middleware for error handling
 router.use((err, req, res, next) => {
@@ -144,6 +146,7 @@ router.post('/newGame', async (req, res, next) => {
                     client.send(JSON.stringify({ type: "START_GAME", gameId: game[0].game_id }));
                 }
             });
+        }
 
         if (parseInt(game[0].state) === 2) {
             console.log('game state is 2, sending game started event');
@@ -152,17 +155,17 @@ router.post('/newGame', async (req, res, next) => {
                     client.send(JSON.stringify({ type: "GAME_STARTED", gameId: game[0].game_id }));
                 }
             });
+            // Send game update to clients when the game state is updated
+            await sendGameUpdate(game[0].game_id);
         }            
+
         // Return the game state
-            res.json({ state: game[0].state });
-        } else {
-            console.log('game state is not 1 or 2, returning the game state');
-            res.json({ state: game[0].state });
-        }
+        res.json({ state: game[0].state });
     } catch (error) {
         next(error); // Pass error to error handling middleware
     }
 });
+
 
 router.get('/getGameInfo', async (req, res, next) => {
     console.log('@@@@@@@@ /getGameInfo route');
