@@ -13,7 +13,6 @@ const startGame = async () => {
         console.log('Starting new game...');
         console.log('Contract address:', contract.target);
         console.log('Wallet address:', wallet.address);
-        console.log('Game ID:', gameId);
         //const tx = await contract.startGame({ value: ethers.parseEther('.00001'), gasLimit: 3000000 });
         const tx = await contract.startGame();
         const receipt = await tx.wait();
