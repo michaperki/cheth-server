@@ -1,7 +1,7 @@
 const ethers = require('ethers');
 const abi = require("./abis/ChessGame.json");
 const db = require('./db'); // Import your database module
-const sendToClients = require('./websocket'); // Import your WebSocket module
+const { sendToClients } = require('./websocket'); // Import your WebSocket function
 
 const contractAddress = abi.networks[process.env.CHAIN_ID].address;
 const privateKey = process.env.SEPOLIA_PRIVATE_KEY;
