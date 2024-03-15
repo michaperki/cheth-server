@@ -19,15 +19,27 @@ function validateRequestBody(req, res, next) {
 }
 
 async function fetchLichessUserInfo(lichessHandle) {
-    const headers = {
-        Authorization: 'Bearer ' + process.env.LICHESS_TOKEN,
-    };
-    const response = await fetch(`https://lichess.org/api/user/${lichessHandle}`, { headers });
-    if (!response.ok) {
-        throw new Error('Failed to fetch Lichess user information');
+    try {
+        const headers = {
+            Authorization: 'Bearer ' + process.env.LICHESS_TOKEN,
+        };
+        console.log('fetching lichess user info');
+        console.log('lichessHandle', lichessHandle);
+        console.log('process.env.LICHESS_TOKEN', process.env.LICHESS_TOKEN);
+        // log the full url
+        console.log(`https://lichess.org/api/user/${lichessHandle}`);
+        const response = await fetch(`https://lichess.org/api/user/${lichessHandle}`, { headers });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch Lichess user information: ' + response.statusText);
+        }
+
+        const userInformation = await response.json();
+        return userInformation;
+    } catch (error) {
+        console.error('Error fetching Lichess user information:', error);
+        throw error;
     }
-    const userInformation = await response.json();
-    return userInformation;
 }
 
 router.post('/checkEligibility', validateRequestBody, async (req, res, next) => {
