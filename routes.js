@@ -80,7 +80,7 @@ router.post('/checkEligibility', validateRequestBody, async (req, res, next) => 
 });
 
 router.post('/addUser', validateRequestBody, async (req, res, next) => {
-    console.log('/addUser route')
+    console.log('@@@@@@@@ /addUser route')
     try {
         const { lichessHandle, walletAddress, darkMode } = req.body;
 
@@ -96,7 +96,7 @@ router.post('/addUser', validateRequestBody, async (req, res, next) => {
 });
 
 router.post('/checkUser', async (req, res, next) => {
-    console.log('/checkUser route')
+    console.log('@@@@@@@@ /checkUser route')
     try {
         const walletAddress = req.body.walletAddress;
         const userExists = await db.getUserByWalletAddress(walletAddress);
@@ -113,7 +113,7 @@ router.post('/checkUser', async (req, res, next) => {
 });
 
 router.post('/getUserInfo', async (req, res, next) => {
-    console.log('/getUserInfo route')
+    console.log('@@@@@@@@ /getUserInfo route')
     try {
         console.log('req.body', req.body);
         const walletAddress = req.body.walletAddress;
@@ -129,7 +129,7 @@ router.post('/getUserInfo', async (req, res, next) => {
 });
 
 router.post('/newGame', async (req, res, next) => {
-    console.log('/newGame route');
+    console.log('@@@@@@@@ /newGame route');
     console.log('req.body', req.body);
     try {
         const userId = req.body.userId;
@@ -165,11 +165,11 @@ router.post('/newGame', async (req, res, next) => {
 });
 
 router.get('/getGameInfo', async (req, res, next) => {
-    console.log('/getGameInfo route');
+    console.log('@@@@@@@@ /getGameInfo route');
     try {
         const gameId = req.query.gameId; // Parse gameId from query parameters
         const game = await db.getGameById(gameId);
-        console.log('game', game);
+        console.log('game in get game info', game);
         res.json(game);
     } catch (error) {
         next(error); // Pass error to error handling middleware
