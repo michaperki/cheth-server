@@ -7,12 +7,13 @@ const wallet = new ethers.Wallet(privateKey);
 const signer = wallet.connect(new ethers.JsonRpcProvider(process.env.RPC_URL));
 const contract = new ethers.Contract(contractAddress, abi.abi, signer);
 
-const startGame = async () => {
+const startGame = async (gameId) => {
     try {
         console.log('Starting new game...');
         console.log('Contract address:', contract.target);
         console.log('Wallet address:', wallet.address);
-        const tx = await contract.startGame({ value: ethers.parseEther('.00001'), gasLimit: 3000000 });
+        console.log('Game ID:', gameId);
+        const tx = await contract.startGame(gameId, { value: ethers.parseEther('.00001'), gasLimit: 3000000 });
         const receipt = await tx.wait();
         console.log('Game started:', receipt);
         const contractAddress = receipt.contractAddress; //Get  the address of the newly created contract
