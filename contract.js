@@ -38,9 +38,9 @@ const joinGame = async () => {
 contract.on('GameStarted', async (gameId, playerOne, entryFee) => {
     console.log('Game started:', gameId, playerOne, entryFee);
 
-    await db.updateGameState(gameId, 3); // Assuming 2 is the state for "game started" in your database
+    await db.updateGameState(gameId, 2); // Assuming 2 is the state for "game started" in your database
     await db.updateRewardPool(gameId, entryFee);
-    
+
 });
 
 contract.on('JoinedGame', (gameId, playerTwo) => {
