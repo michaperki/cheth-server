@@ -129,6 +129,17 @@ const updateGameState = async (gameId, state) => {
     }
 }
 
+const updateRewardPool = async (gameId, rewardPool) => {
+    try {
+        console.log('updateRewardPool in db for gameId: ', gameId, 'rewardPool: ', rewardPool);
+        const { rows } = await client.query('UPDATE games SET reward_pool = $1 WHERE game_id = $2 RETURNING *', [rewardPool, gameId]);
+        return rows;
+    } catch (error) {
+        console.error('Error updating reward pool', error.stack);
+        throw error;
+    }
+}
+
 const getGameById = async (gameId) => {
     try {
         const { rows } = await client.query('SELECT * FROM games WHERE game_id = $1', [gameId]);
@@ -139,6 +150,7 @@ const getGameById = async (gameId) => {
     }
 }
 
+
 module.exports = {
     connectToDatabase,
     getConfig,
@@ -148,5 +160,6 @@ module.exports = {
     createGame,
     playGame,
     updateGameState,
+    updateRewardPool,
     getGameById
 };
