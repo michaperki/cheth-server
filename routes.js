@@ -144,27 +144,19 @@ router.post('/newGame', async (req, res, next) => {
                     client.send(JSON.stringify({ type: "START_GAME", gameId: game[0].game_id }));
                 }
             });
-            
-            // const tx = await contract.startGame(game[0].game_id);
-            // console.log('tx', tx);
-            // console.log('game after starting', game);
-            // // Update the game state in the database
-            // const updatedGame = await db.updateGameState(game[0].game_id, 2);
-            // console.log('game state updated to 2');
-            // console.log('updatedGame', updatedGame);
 
-            if (parseInt(updatedGame[0].state) === 2) {
-                console.log('game state is 2, sending game started event');
-                req.wss.clients.forEach(client => {
-                    if (client.readyState === WebSocket.OPEN) {
-                        client.send(JSON.stringify({ type: "GAME_STARTED", gameId: game[0].game_id }));
-                    }
-                });
-            }            
-            // Return the game state
-            res.json({ state: updatedGame[0].state });
+        if (parseInt(game[0].state) === 2) {
+            console.log('game state is 2, sending game started event');
+            req.wss.clients.forEach(client => {
+                if (client.readyState === WebSocket.OPEN) {
+                    client.send(JSON.stringify({ type: "GAME_STARTED", gameId: game[0].game_id }));
+                }
+            });
+        }            
+        // Return the game state
+            res.json({ state: game[0].state });
         } else {
-            console.log('game state is not 1, returning the game state');
+            console.log('game state is not 1 or 2, returning the game state');
             res.json({ state: game[0].state });
         }
     } catch (error) {
