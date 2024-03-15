@@ -30,16 +30,5 @@ module.exports = function websocket(server) {
         });
     });
 
-    // Define the function to send game updates to clients
-    function sendGameUpdate(gameId) {
-        const message = JSON.stringify({ type: 'game_update', gameId: gameId });
-        // Iterate through WebSocket clients and send the message to each player
-        wss.clients.forEach(client => {
-            if (client.readyState === WebSocket.OPEN) {
-                client.send(message);
-            }
-        });
-    }
-
-    return { wss, sendGameUpdate };
+    return wss;
 };
