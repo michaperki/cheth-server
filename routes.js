@@ -92,7 +92,7 @@ router.post('/checkEligibility', validateRequestBody, async (req, res, next) => 
 });
 
 router.post('/addUser', validateRequestBody, async (req, res, next) => {
-    console.log('@@@@@@@@ /addUser route')
+    console.log('/addUser route')
     try {
         const { lichessHandle, walletAddress, darkMode } = req.body;
 
@@ -108,7 +108,7 @@ router.post('/addUser', validateRequestBody, async (req, res, next) => {
 });
 
 router.post('/checkUser', async (req, res, next) => {
-    console.log('@@@@@@@@ /checkUser route')
+    console.log('/checkUser route')
     try {
         const walletAddress = req.body.walletAddress;
         const userExists = await db.getUserByWalletAddress(walletAddress);
@@ -125,7 +125,7 @@ router.post('/checkUser', async (req, res, next) => {
 });
 
 router.post('/getUserInfo', async (req, res, next) => {
-    console.log('@@@@@@@@ /getUserInfo route')
+    console.log('/getUserInfo route')
     try {
         console.log('req.body', req.body);
         const walletAddress = req.body.walletAddress;
@@ -140,53 +140,10 @@ router.post('/getUserInfo', async (req, res, next) => {
     }
 });
 
-router.post('/newGame', async (req, res, next) => {
-    console.log('@@@@@@@@ /newGame route');
-    console.log('req.body', req.body);
+router.post('/joinGame', async (req, res, next) => {
+    console.log('/joinGame route')
     try {
-        const userId = req.body.userId;
-        const game = await db.playGame(userId); // game is an array of game objects
-
-        if (parseInt(game[0].state) === 1) { // get the state of the first game object in the array
-            console.log('two players in the game, starting the game');
-            // start the game by calling the contract
-            const gameContract = await contract.startGame();
-
-            console.log('game in /newGame route', gameContract);
-
-            // emit event to start the game
-            // Emit event to start the game to all connected clients
-            req.wss.clients.forEach(client => {
-                if (client.readyState === WebSocket.OPEN) {
-                    client.send(JSON.stringify({ type: "START_GAME", gameId: game[0].game_id, gameContract }));
-                }
-            });
-
-        if (parseInt(game[0].state) === 2) {
-            console.log('game state is 2, sending game started event');
-            req.wss.clients.forEach(client => {
-                if (client.readyState === WebSocket.OPEN) {
-                    client.send(JSON.stringify({ type: "GAME_STARTED", gameId: game[0].game_id }));
-                }
-            });
-        }            
-        // Return the game state
-            res.json({ state: game[0].state });
-        } else {
-            console.log('game state is not 1 or 2, returning the game state');
-            res.json({ state: game[0].state });
-        }
-    } catch (error) {
-        next(error); // Pass error to error handling middleware
-    }
-});
-
-router.get('/getGameInfo', async (req, res, next) => {
-    console.log('@@@@@@@@ /getGameInfo route');
-    try {
-        const gameId = req.query.gameId; // Parse gameId from query parameters
-        const game = await db.getGameById(gameId);
-        console.log('game in get game info', game);
+        const game = await contract.joinGame();
         res.json(game);
     } catch (error) {
         next(error); // Pass error to error handling middleware
