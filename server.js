@@ -11,6 +11,8 @@ const server = http.createServer(app);
 
 app.use(express.json());
 
+console.log('process.env.CORS_ORIGIN', process.env.CORS_ORIGIN);
+
 const corsOptions = {
     origin: process.env.CORS_ORIGIN,
     optionsSuccessStatus: 200,
