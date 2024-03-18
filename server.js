@@ -16,7 +16,7 @@ const corsOptions = {
     optionsSuccessStatus: 200,
 };
 
-app.use(cors());
+app.use(cors(corsOptions));
 
 // Initialize WebSocket and get the instance
 const wss = websocket(server);
