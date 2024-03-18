@@ -10,6 +10,12 @@ const app = express();
 const server = http.createServer(app);
 
 app.use(express.json());
+
+const corsOptions = {
+    origin: process.env.CORS_ORIGIN,
+    optionsSuccessStatus: 200,
+};
+
 app.use(cors());
 
 // Initialize WebSocket and get the instance
