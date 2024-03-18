@@ -9,7 +9,11 @@ const signer = wallet.connect(new ethers.JsonRpcProvider(process.env.RPC_URL));
 const contract = new ethers.Contract(contractAddress, abi.abi, signer);
 
 const cancelGame = async () => {
-    await contract.cancel();
+    await contract.cancelGame();
+}
+
+const finishGame = async () => {
+    await contract.finishGame();
 }
 
 module.exports = {
