@@ -8,16 +8,10 @@ const wallet = new ethers.Wallet(privateKey);
 const signer = wallet.connect(new ethers.JsonRpcProvider(process.env.RPC_URL));
 const contract = new ethers.Contract(contractAddress, abi.abi, signer);
 
-const joinGame = async () => {
-    try {
-        const game = await contract.joinGame();
-        console.log('Game joined:', game);
-        return game;
-    } catch (error) {
-        console.error('Error:', error);
-    }
+const cancelGame = async () => {
+    await contract.cancelGame();
 }
 
 module.exports = {
-    joinGame,
+    cancelGame,
 };

@@ -140,14 +140,12 @@ router.post('/getUserInfo', async (req, res, next) => {
     }
 });
 
-router.post('/joinGame', async (req, res, next) => {
-    console.log('/joinGame route')
+router.post('/cancelGame', async (req, res, next) => {
+    console.log('/cancelGame route')
     try {
-        const game = await contract.joinGame();
-        res.json(game);
+        contract.cancelGame();
     } catch (error) {
         next(error); // Pass error to error handling middleware
     }
 });
-
 module.exports = router;
