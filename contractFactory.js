@@ -15,14 +15,6 @@ const createGame = async (gameId) => {
         const entryFeeInEther = ethers.parseEther("0.01");
         const commission = 5;
 
-        // Subscribe to the GameCreated event
-        contract.on("GameCreated", (game, creator) => {
-            console.log("New game created. Game address:", game, "Creator:", creator);
-            // Update the game contract address in the database
-            db.updateGameContractAddress(gameId, game);
-            db.updateGameState(gameId, 2);
-        });
-
         // Send the transaction to create the game
         const tx = await contract.createGame(entryFeeInEther, commission);
         console.log("Transaction hash:", tx.hash);

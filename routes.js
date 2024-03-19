@@ -156,6 +156,21 @@ router.post('/playGame', async (req, res, next) => {
             // create a new game in the contract
             console.log('creating a new game contract using factory contract');
             console.log('game[0].game_id', game[0].game_id);
+
+            factoryContract.on('GameCreated', (game, creator) => {
+                console.log('GameCreated event received');
+                console.log('game', game);
+                console.log('creator', creator);
+                db.updateGameContractAddress(game[0].game_id, game);
+                db.updateGameState(game[0].game_id, 2);
+                // Broadcasting the message to all connected WebSocket clients
+                req.wss.clients.forEach(client => {
+                    if (client.readyState === WebSocket.OPEN) {
+                        client.send(JSON.stringify({ type: 'CONTRACT_READY', gameId: game[0].game_id }));
+                    }
+                });
+            });
+
             factoryContract.createGame(game[0].game_id);
 
             const message = JSON.stringify({ type: 'START_GAME', gameId: game[0].game_id });
