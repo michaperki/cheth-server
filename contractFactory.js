@@ -20,6 +20,7 @@ const createGame = async (gameId) => {
             console.log("New game created. Game address:", game, "Creator:", creator);
             // Update the game contract address in the database
             db.updateGameContractAddress(gameId, game);
+            db.updateGameState(gameId, 2);
         });
 
         // Send the transaction to create the game
