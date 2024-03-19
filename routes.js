@@ -220,7 +220,14 @@ router.get('/game/:gameId', async (req, res, next) => {
 router.post('/cancelGame', async (req, res, next) => {
     console.log('/cancelGame route')
     try {
-        chessContract.cancelGame();
+        const gameId = req.body.gameId;
+        const game = await db.getGameById(gameId);
+        if (!game) {
+            return res.status(404).json({ error: 'Game not found' });
+        }
+        const contractAddress = game.contract_address;
+        await chessContract.cancelGame(contractAddress);
+        res.json({ message: 'Game cancelled successfully' });
     } catch (error) {
         next(error); // Pass error to error handling middleware
     }
