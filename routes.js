@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const db = require('./db');
-const contract = require('./contract');
+const chessContract = require('./contractChess');
+const factoryContract = require('./contractFactory');
 const WebSocket = require('ws'); // Import WebSocket class
 const wss = require('./websocket'); // Assuming you export the WebSocket server instance from websocket.js
 
@@ -151,6 +152,13 @@ router.post('/playGame', async (req, res, next) => {
         if (game[0].state === '1') {
             // Send a message to the client to start the game
             console.log('game started');
+
+            // create a new game in the contract
+            console.log('creating a new game in the contract using factory contract');
+            const gameId = factoryContract.createGame();
+            console.log('gameId', gameId);
+
+            
             const message = JSON.stringify({ type: 'START_GAME' });
             console.log('req.wss', req.wss); // Ensure req.wss is accessible
 
@@ -170,7 +178,7 @@ router.post('/playGame', async (req, res, next) => {
 router.post('/cancelGame', async (req, res, next) => {
     console.log('/cancelGame route')
     try {
-        contract.cancelGame();
+        chessContract.cancelGame();
     } catch (error) {
         next(error); // Pass error to error handling middleware
     }
