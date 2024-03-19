@@ -152,13 +152,14 @@ router.post('/playGame', async (req, res, next) => {
             // Send a message to the client to start the game
             console.log('game started');
             const message = JSON.stringify({ type: 'START_GAME' });
-            console.log('wss', wss)
-            console.log('wss.clients', wss.clients)
-            try {
-                wss.clients.forEach(client => client.send(message));
-            } catch (error) {
-                console.error('Error sending message to WebSocket clients:', error);
-            }
+            console.log('req.wss', req.wss); // Ensure req.wss is accessible
+
+            // Broadcasting the message to all connected WebSocket clients
+            req.wss.clients.forEach(client => {
+                if (client.readyState === WebSocket.OPEN) {
+                    client.send(message);
+                }
+            });
         }
         res.json(game);
     } catch (error) {
