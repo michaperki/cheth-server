@@ -140,6 +140,17 @@ router.post('/getUserInfo', async (req, res, next) => {
     }
 });
 
+router.post('/playGame', async (req, res, next) => {
+    console.log('/playGame route')
+    try {
+        const userId = req.body.userId;
+        const game = await db.playGame(userId);
+        res.json(game);
+    } catch (error) {
+        next(error); // Pass error to error handling middleware
+    }
+});
+
 router.post('/cancelGame', async (req, res, next) => {
     console.log('/cancelGame route')
     try {
