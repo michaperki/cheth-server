@@ -188,6 +188,13 @@ router.post('/playGame', async (req, res, next) => {
                     console.log('entryFee', entryFee);
                     console.log('dbGame.game_id', dbGame.game_id);
                     db.updateGameState(dbGame.game_id, 3);
+
+                    // Broadcasting the message to all connected WebSocket clients
+                    req.wss.clients.forEach(client => {
+                        if (client.readyState === WebSocket.OPEN) {
+                            client.send(JSON.stringify({ type: 'GAME_PRIMED', gameId: dbGame.game_id }));
+                        }
+                    });
                 });
 
                 // Broadcasting the message to all connected WebSocket clients
