@@ -18,13 +18,23 @@ const createGame = async () => {
     const receipt = await tx.wait();
     const receiptHash = receipt.hash;
     console.log('receiptHash', receiptHash);
-    // get the logs from the receipt hash
-    // provider.getTransactionReceipt(receiptHash)
-    const logs = await provider.getLogs({ transactionHash: receiptHash });
-    console.log('logs', logs);
-    const receiptFromProvider = await provider.getTransactionReceipt(receiptHash);
-    console.log('receiptFromProvider', receiptFromProvider);
 
+    // Retrieve the transaction receipt
+    const receiptFromProvider = await provider.getTransactionReceipt(receiptHash);
+
+    // Filter logs by contract address and event signature
+    const contractInterface = new ethers.Interface(abi.abi); // Use the ABI of your contract
+    const eventFilter = contractInterface.getEvent("GameCreated");
+    console.log('eventFilter', eventFilter);
+
+    const filteredLogs = receiptFromProvider.logs.filter(log => {
+        return log.address.toLowerCase() === contractAddress.toLowerCase() && log.topics[0] === eventFilter.topic;
+    });
+    console.log('filteredLogs', filteredLogs);
+
+    // Extract the address of the newly created contract from the logs
+    const newContractAddress = ethers.getAddress("0x" + filteredLogs[0].data.slice(26)); // Assuming address is at index 0
+    console.log('New contract address:', newContractAddress);
 
     return "Game created successfully!";
 }
