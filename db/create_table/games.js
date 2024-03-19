@@ -16,6 +16,7 @@ const sqlQuery = `
     CREATE TABLE games (
         game_id SERIAL PRIMARY KEY,
         contract_address VARCHAR(255) NULL,
+        transaction_hash VARCHAR(255) NULL,
         player1_id INTEGER NOT NULL,
         player2_id INTEGER DEFAULT NULL,
         state VARCHAR(255) NOT NULL,

@@ -164,6 +164,24 @@ const updateGameContractAddress = async (gameId, contractAddress) => {
     }
 }
 
+const updateTransactionHash = async (gameId, transactionHash) => {
+    try {
+        console.log('Updating transaction hash in database for gameId:', gameId, 'Transaction hash:', transactionHash);
+        // Convert gameId to integer if it's a string or a BigInt
+        if (typeof gameId === 'string') {
+            gameId = parseInt(gameId);
+        } else if (typeof gameId === 'bigint') {
+            gameId = parseInt(gameId.toString());
+        }
+
+        const { rows } = await client.query('UPDATE games SET transaction_hash = $1 WHERE game_id = $2 RETURNING *', [transactionHash, gameId]);
+        return rows;
+    } catch (error) {
+        console.error('Error updating transaction hash in database:', error.stack);
+        throw error;
+    }
+}
+
 const updateRewardPool = async (gameId, rewardPool) => {
     try {
         console.log('updateRewardPool in db for gameId: ', gameId, 'rewardPool: ', rewardPool);
@@ -204,6 +222,7 @@ module.exports = {
     playGame,
     updateGameState,
     updateGameContractAddress,
+    updateTransactionHash,
     updateRewardPool,
     getGameById
 };

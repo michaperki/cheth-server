@@ -10,30 +10,35 @@ const signer = wallet.connect(provider);
 const contract = new ethers.Contract(contractAddress, abi.abi, signer);
 
 const createGame = async (gameId) => {
-    // Convert entry fee and commission to wei
-    const entryFeeInEther = ethers.parseEther("0.01");
-    const commission = 5;
+    try {
+        // Convert entry fee and commission to wei
+        const entryFeeInEther = ethers.parseEther("0.01");
+        const commission = 5;
 
-    // Subscribe to the GameCreated event
-    contract.on("GameCreated", (game, creator) => {
-        console.log("New game created. Game address:", game, "Creator:", creator);
-        // Update the game contract address in the database
-        db.updateGameContractAddress(gameId, game);
-    });
-
-    await contract.createGame(entryFeeInEther, commission)
-        .then(async (tx) => {
-            console.log("Transaction hash:", tx.hash);
-            console.log("Waiting for the transaction to be mined...");
-            await tx.wait();
-            console.log("Transaction was mined!");
-        })
-        .catch((error) => {
-            console.error("Error creating game:", error);
-            throw error;
+        // Subscribe to the GameCreated event
+        contract.on("GameCreated", (game, creator) => {
+            console.log("New game created. Game address:", game, "Creator:", creator);
+            // Update the game contract address in the database
+            db.updateGameContractAddress(gameId, game);
         });
 
-    return "Game created successfully!";
+        // Send the transaction to create the game
+        const tx = await contract.createGame(entryFeeInEther, commission);
+        console.log("Transaction hash:", tx.hash);
+        
+        // Save the transaction hash to the database
+        await db.updateTransactionHash(gameId, tx.hash);
+
+        // Wait for the transaction to be mined
+        console.log("Waiting for the transaction to be mined...");
+        const receipt = await tx.wait();
+        console.log("Transaction was mined!");
+        
+        return "Game created successfully!";
+    } catch (error) {
+        console.error("Error creating game:", error);
+        throw error;
+    }
 }
 
 module.exports = {
