@@ -172,6 +172,20 @@ router.post('/playGame', async (req, res, next) => {
     }
 });
 
+router.get('/game/:gameId', async (req, res, next) => {
+    try {
+        const gameId = req.params.gameId;
+        const gameInfo = await db.getGameById(gameId);
+        if (!gameInfo) {
+            return res.status(404).json({ error: 'Game not found' });
+        } else {
+            res.json(gameInfo);
+        }
+    } catch (error) {
+        next(error); // Pass error to error handling middleware
+    }
+});
+
 router.post('/cancelGame', async (req, res, next) => {
     console.log('/cancelGame route')
     try {
