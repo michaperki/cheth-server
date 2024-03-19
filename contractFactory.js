@@ -17,8 +17,14 @@ const createGame = async () => {
     const tx = await contract.createGame(entryFeeInEther, commission);
     const receipt = await tx.wait();
     console.log('Transaction receipt:', receipt);
-    const gameAddress = receipt.events[0].args.gameAddress;
+    const gameAddress = receipt.events[0].args.game;
     console.log('New game contract address:', gameAddress);
+
+    // Subscribe to the GameCreated event
+    contract.on("GameCreated", (game, creator) => {
+        console.log("New game created. Game address:", game, "Creator:", creator);
+        // Additional logic here if needed
+    });
 
     return "Game created successfully!";
 }
