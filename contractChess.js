@@ -1,5 +1,7 @@
 const ethers = require('ethers');
 const abi = require("./abis/Chess.json");
+const privateKey = process.env.SEPOLIA_PRIVATE_KEY;
+const wallet = new ethers.Wallet(privateKey);
 const provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
 const signer = wallet.connect(provider);
 
