@@ -130,7 +130,7 @@ router.post('/getUserInfo', async (req, res, next) => {
         console.log('req.body', req.body);
         const walletAddress = req.body.walletAddress;
         const user = await db.getUserByWalletAddress(walletAddress);
-        if(!user) {
+        if (!user) {
             return res.status(404).json({ error: 'User not found' });
         } else {
             res.json(user);
@@ -146,6 +146,18 @@ router.post('/playGame', async (req, res, next) => {
         const userId = req.body.userId;
         const game = await db.playGame(userId);
         console.log('game', game);
+        // if the game state is 1, then the game is started
+        if (game[0].state === '1') {
+            // Send a message to the client to start the game
+            console.log('game started');
+            const message = JSON.stringify({ type: 'START_GAME' });
+            // Broadcast the message to all connected WebSocket clients
+            wss.clients.forEach(client => {
+                if (client.readyState === WebSocket.OPEN) {
+                    client.send(message);
+                }
+            });
+        }
         res.json(game);
     } catch (error) {
         next(error); // Pass error to error handling middleware
