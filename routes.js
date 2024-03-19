@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('./db');
 const chessContract = require('./contractChess');
+const chessContractAbi = require('./abis/Chess.json');
 const factoryContractFunctions = require('./contractFactory');
 const factoryContractAbi = require('./abis/ChessFactory.json');
 const WebSocket = require('ws'); // Import WebSocket class
@@ -166,7 +167,7 @@ router.post('/playGame', async (req, res, next) => {
 
             // create a new game in the contract
             console.log('creating a new game contract using factory contract');
-            console.log('game[0].game_id', dbGame.game_id);
+            console.log('db game_id', dbGame.game_id);
 
             // Define the event handler outside of the route handler to avoid adding multiple event handlers
             const handleGameCreated = (game, creator) => {
@@ -177,7 +178,9 @@ router.post('/playGame', async (req, res, next) => {
                 db.updateGameState(dbGame.game_id, 2);
 
                 // Subscribe to GamePrimed event
-                const gameContract = new ethers.Contract(game, chessContract.abi, signer);
+                console.log('subscribing to GamePrimed event');
+                const gameContract = new ethers.Contract(game, chessContractAbi.abi, signer);
+                console.log('gameContract created');
                 gameContract.on('GamePrimed', (white, black, entryFee) => {
                     console.log('GamePrimed event received');
                     console.log('white', white);
