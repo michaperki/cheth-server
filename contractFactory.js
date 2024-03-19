@@ -12,9 +12,9 @@ const contract = new ethers.Contract(contractAddress, abi.abi, signer);
 const createGame = async () => {
     // Convert entry fee and commission to wei
     const entryFeeInEther = ethers.parseEther("0.01");
-    const commissionInEther = ethers.parseEther("0.05"); // 5% commission
+    const commission = 5;
 
-    const tx = await contract.createGame(entryFeeInEther, commissionInEther);
+    const tx = await contract.createGame(entryFeeInEther, commission);
     const receipt = await tx.wait();
     console.log('receipt', receipt);
     const gameId = receipt.events[0].args.gameId;
