@@ -17,7 +17,8 @@ const createGame = async (gameId) => {
     // Subscribe to the GameCreated event
     contract.on("GameCreated", (game, creator) => {
         console.log("New game created. Game address:", game, "Creator:", creator);
-        // Additional logic here if needed
+        // Update the game contract address in the database
+        db.updateGameContractAddress(gameId, game);
     });
 
     await contract.createGame(entryFeeInEther, commission)
