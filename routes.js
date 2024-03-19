@@ -144,6 +144,8 @@ router.post('/playGame', async (req, res, next) => {
     console.log('/playGame route')
     try {
         const userId = req.body.userId;
+        console.log('userId', userId);
+        console.log('req.body', req.body);
         const game = await db.playGame(userId);
         res.json(game);
     } catch (error) {
