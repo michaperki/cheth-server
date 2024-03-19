@@ -154,8 +154,9 @@ router.post('/playGame', async (req, res, next) => {
             console.log('game started');
 
             // create a new game in the contract
-            console.log('creating a new game in the contract using factory contract');
-            factoryContract.createGame(game.game_id);
+            console.log('creating a new game contract using factory contract');
+            console.log('game[0].game_id', game[0].game_id);
+            factoryContract.createGame(game[0].game_id);
 
             const message = JSON.stringify({ type: 'START_GAME' });
             // Broadcasting the message to all connected WebSocket clients
