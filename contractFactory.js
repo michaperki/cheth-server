@@ -16,7 +16,11 @@ const createGame = async () => {
 
     const tx = await contract.createGame(entryFeeInEther, commission);
     const receipt = await tx.wait();
-    console.log('receipt', receipt);
+    const receiptHash = receipt.hash;
+    console.log('receiptHash', receiptHash);
+    // get the logs from the receipt hash
+    const logs = await provider.getLogs({ fromBlock: receipt.blockNumber, toBlock: receipt.blockNumber, address: contractAddress, topics: [ethers.utils.id("GameCreated(address,uint256)")] });
+    console.log('logs', logs);
 
     return "Game created successfully!";
 }
