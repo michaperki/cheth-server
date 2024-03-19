@@ -175,6 +175,18 @@ router.post('/playGame', async (req, res, next) => {
                 console.log('creator', creator);
                 db.updateGameContractAddress(dbGame.game_id, game);
                 db.updateGameState(dbGame.game_id, 2);
+
+                // Subscribe to GamePrimed event
+                const gameContract = new ethers.Contract(game, chessContract.abi, signer);
+                gameContract.on('GamePrimed', (white, black, entryFee) => {
+                    console.log('GamePrimed event received');
+                    console.log('white', white);
+                    console.log('black', black);
+                    console.log('entryFee', entryFee);
+                    console.log('dbGame.game_id', dbGame.game_id);
+                    db.updateGameState(dbGame.game_id, 3);
+                });
+
                 // Broadcasting the message to all connected WebSocket clients
                 req.wss.clients.forEach(client => {
                     if (client.readyState === WebSocket.OPEN) {
