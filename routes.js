@@ -2,9 +2,19 @@ const express = require('express');
 const router = express.Router();
 const db = require('./db');
 const chessContract = require('./contractChess');
-const factoryContract = require('./contractFactory');
+const factoryContractFunctions = require('./contractFactory');
+const factoryContractAbi = require('./abis/ChessFactory.json');
 const WebSocket = require('ws'); // Import WebSocket class
 const wss = require('./websocket'); // Assuming you export the WebSocket server instance from websocket.js
+const ethers = require('ethers');
+
+
+const contractAddress = abi.networks[process.env.CHAIN_ID].address;
+const privateKey = process.env.SEPOLIA_PRIVATE_KEY;
+const wallet = new ethers.Wallet(privateKey);
+const provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
+const signer = wallet.connect(provider);
+const factoryContract = new ethers.Contract(contractAddress, factoryContractAbi.abi, signer);
 
 // Middleware for error handling
 router.use((err, req, res, next) => {
@@ -171,7 +181,7 @@ router.post('/playGame', async (req, res, next) => {
                 });
             });
 
-            factoryContract.createGame(game[0].game_id);
+            factoryContractFunctions.createGame(game[0].game_id);
 
             const message = JSON.stringify({ type: 'START_GAME', gameId: game[0].game_id });
             // Broadcasting the message to all connected WebSocket clients
