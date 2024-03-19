@@ -14,23 +14,13 @@ const createGame = async (gameId) => {
     const entryFeeInEther = ethers.parseEther("0.01");
     const commission = 5;
 
-    await contract.createGame(entryFeeInEther, commission)
-        .then(async (tx) => {
-            console.log("Transaction hash:", tx.hash);
-            // Wait for the transaction to be mined
-            await tx.wait();
-        })
-        .catch((error) => {
-            console.error("Error creating game:", error);
-            throw error;
-        });
+    const tx = await contract.createGame(entryFeeInEther, commission);
+    const receipt = await tx.wait();
 
     // Subscribe to the GameCreated event
     contract.on("GameCreated", (game, creator) => {
         console.log("New game created. Game address:", game, "Creator:", creator);
-        // Additional logic here if needed
         db.updateGameContractAddress(gameId, game);
-
     });
 
     return "Game created successfully!";
