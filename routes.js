@@ -153,37 +153,43 @@ router.post('/getUserInfo', async (req, res, next) => {
 });
 
 router.post('/playGame', async (req, res, next) => {
-    console.log('/playGame route')
+    console.log('/playGame route');
     try {
         const userId = req.body.userId;
-        const game = await db.playGame(userId);
-        console.log('game', game);
+        const dbGames = await db.playGame(userId);
+        const dbGame = dbGames[0];
+        console.log('dbGame', dbGame);
         // if the game state is 1, then the game is started
-        if (game[0].state === '1') {
+        if (dbGame.state === '1') {
             // Send a message to the client to start the game
             console.log('game started');
 
             // create a new game in the contract
             console.log('creating a new game contract using factory contract');
-            console.log('game[0].game_id', game[0].game_id);
+            console.log('game[0].game_id', dbGame.game_id);
 
-            factoryContract.on('GameCreated', (game, creator) => {
+            // Define the event handler outside of the route handler to avoid adding multiple event handlers
+            const handleGameCreated = (game, creator) => {
                 console.log('GameCreated event received');
                 console.log('game', game);
                 console.log('creator', creator);
-                db.updateGameContractAddress(game[0].game_id, game);
-                db.updateGameState(game[0].game_id, 2);
+                db.updateGameContractAddress(dbGame.game_id, game);
+                db.updateGameState(dbGame.game_id, 2);
                 // Broadcasting the message to all connected WebSocket clients
                 req.wss.clients.forEach(client => {
                     if (client.readyState === WebSocket.OPEN) {
-                        client.send(JSON.stringify({ type: 'CONTRACT_READY', gameId: game[0].game_id }));
+                        client.send(JSON.stringify({ type: 'CONTRACT_READY', gameId: dbGame.game_id }));
                     }
                 });
-            });
+            };
 
-            factoryContractFunctions.createGame(game[0].game_id);
+            // Add the event handler
+            factoryContract.on('GameCreated', handleGameCreated);
 
-            const message = JSON.stringify({ type: 'START_GAME', gameId: game[0].game_id });
+            // Call the function to create a new game
+            factoryContractFunctions.createGame(dbGame.game_id);
+
+            const message = JSON.stringify({ type: 'START_GAME', gameId: dbGame.game_id });
             // Broadcasting the message to all connected WebSocket clients
             req.wss.clients.forEach(client => {
                 if (client.readyState === WebSocket.OPEN) {
@@ -191,7 +197,7 @@ router.post('/playGame', async (req, res, next) => {
                 }
             });
         }
-        res.json(game);
+        res.json(dbGame);
     } catch (error) {
         next(error); // Pass error to error handling middleware
     }
