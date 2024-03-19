@@ -145,6 +145,25 @@ const updateGameState = async (gameId, state) => {
     }
 }
 
+const updateGameContractAddress = async (gameId, contractAddress) => {
+    try {
+        console.log('updateGameContractAddress in db for gameId: ', gameId, 'contractAddress: ', contractAddress);
+        // log the type of contractAddress
+        console.log('type of contractAddress: ', typeof contractAddress);
+        // if gameId is a bigint, convert to integer
+        if (typeof gameId === 'bigint') {
+            console.log('gameId is a bigint, converting to integer');
+            gameId = parseInt(gameId);
+            console.log('gameId is now', gameId);
+        }
+        const { rows } = await client.query('UPDATE games SET contract_address = $1 WHERE game_id = $2 RETURNING *', [contractAddress, gameId]);
+        return rows;
+    } catch (error) {
+        console.error('Error updating game contract address', error.stack);
+        throw error;
+    }
+}
+
 const updateRewardPool = async (gameId, rewardPool) => {
     try {
         console.log('updateRewardPool in db for gameId: ', gameId, 'rewardPool: ', rewardPool);
@@ -184,6 +203,7 @@ module.exports = {
     createGame,
     playGame,
     updateGameState,
+    updateGameContractAddress,
     updateRewardPool,
     getGameById
 };
