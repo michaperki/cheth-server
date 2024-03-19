@@ -158,10 +158,7 @@ router.post('/playGame', async (req, res, next) => {
             const gameId = factoryContract.createGame();
             console.log('gameId', gameId);
 
-            
             const message = JSON.stringify({ type: 'START_GAME' });
-            console.log('req.wss', req.wss); // Ensure req.wss is accessible
-
             // Broadcasting the message to all connected WebSocket clients
             req.wss.clients.forEach(client => {
                 if (client.readyState === WebSocket.OPEN) {
