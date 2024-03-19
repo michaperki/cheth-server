@@ -17,8 +17,10 @@ const createGame = async () => {
     const tx = await contract.createGame(entryFeeInEther, commission);
     const receipt = await tx.wait();
     console.log('receipt', receipt);
-    const gameId = receipt.events[0].args.gameId;
-    return gameId;
+    // Retrieve the transaction receipt from the blockchain
+    const { events } = await provider.getTransactionReceipt(receipt.hash);
+    console.log('events', events);
+    return "Game created successfully!";
 }
 
 module.exports = {
