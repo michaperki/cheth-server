@@ -1,6 +1,7 @@
 const ethers = require('ethers');
 const abi = require("./abis/Chess.json");
-const db = require('./db'); // Import your database module
+const provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
+const signer = wallet.connect(provider);
 
 const cancelGame = async (contractAddress) => {
     const contract = new ethers.Contract(contractAddress, abi.abi, signer);
