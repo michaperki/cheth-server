@@ -3,6 +3,7 @@ const router = express.Router();
 const db = require('./db');
 const contract = require('./contract');
 const WebSocket = require('ws'); // Import WebSocket class
+const wss = require('./websocket'); // Assuming you export the WebSocket server instance from websocket.js
 
 // Middleware for error handling
 router.use((err, req, res, next) => {
