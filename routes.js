@@ -270,8 +270,10 @@ async function createChallenge(player1Username, player2Username) {
     console.log('player2Username', player2Username);
     try {
         const lichessApiUrl = 'https://lichess.org/api/challenge/open';
-        const lichessToken = process.env.LICHESS_TOKEN;
-        console.log('lichessToken', lichessToken);
+        const headers = {
+            Authorization: 'Bearer ' + process.env.LICHESS_TOKEN,
+            'Content-Type': 'application/x-www-form-urlencoded'
+        };
 
         // const requestBody = new URLSearchParams({
         //     rated: 'true',
@@ -286,7 +288,7 @@ async function createChallenge(player1Username, player2Username) {
 
         const response = await fetch(lichessApiUrl, {
             method: 'POST',
-            headers: { 'Authorization': `Bearer ${lichessToken}`, 'Content-Type': 'application/x-www-form-urlencoded' },
+            headers: headers,
             // body: requestBody
         });
 
