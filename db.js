@@ -1,6 +1,6 @@
-const { parse } = require('dotenv');
+// errorHandlingMiddleware.js
+const handleErrors = require('./middleware/errorHandlingMiddleware');
 const { Client } = require('pg');
-
 const client = new Client({
     connectionString: process.env.DATABASE_URL,
     ssl: {
@@ -9,273 +9,113 @@ const client = new Client({
 });
 
 const connectToDatabase = async () => {
-    try {
-        await client.connect();
-        console.log('Connected to the database');
-    } catch (error) {
-        console.error('Error connecting to the database:', error);
-        throw error;
-    }
+    await client.connect();
+    console.log('Connected to the database');
 };
 
 const getConfig = async () => {
-    try {
-        const { rows } = await client.query('SELECT * FROM config');
-        return rows;
-    } catch (error) {
-        console.error('Error executing query', error.stack);
-        throw error;
-    }
+    const { rows } = await client.query('SELECT * FROM config');
+    return rows;
 };
 
 const addUser = async (username, rating, walletAddress, darkMode) => {
-    try {
-        const { rows } = await client.query('INSERT INTO users (username, rating, wallet_address, dark_mode) VALUES ($1, $2, $3, $4) RETURNING *', [username, rating, walletAddress, darkMode]);
-        return rows;
-    } catch (error) {
-        console.error('Error executing query', error.stack);
-        throw error;
-    }
+    const { rows } = await client.query('INSERT INTO users (username, rating, wallet_address, dark_mode) VALUES ($1, $2, $3, $4) RETURNING *', [username, rating, walletAddress, darkMode]);
+    return rows;
 }
 
 const getUserById = async (userId) => {
-    try {
-        const { rows } = await client.query('SELECT * FROM users WHERE user_id = $1', [userId]);
-        return rows.length > 0 ? rows[0] : null; // Return the first row if found, otherwise return null
-    }
-    catch (error) {
-        console.error('Error executing query', error.stack);
-        throw error;
-    }
+    const { rows } = await client.query('SELECT * FROM users WHERE user_id = $1', [userId]);
+    return rows.length > 0 ? rows[0] : null;
 }
 
 const getUserByLichessHandle = async (lichessHandle) => {
-    try {
-        const { rows } = await client.query('SELECT * FROM users WHERE username = $1', [lichessHandle]);
-        return rows.length > 0 ? rows[0] : null; // Return the first row if found, otherwise return null
-    } catch (error) {
-        console.error('Error executing query', error.stack);
-        throw error;
-    }
+    const { rows } = await client.query('SELECT * FROM users WHERE username = $1', [lichessHandle]);
+    return rows.length > 0 ? rows[0] : null;
 }
 
 const getUserByWalletAddress = async (walletAddress) => {
-    console.log('walletAddress', walletAddress)
-    try {
-        const { rows } = await client.query('SELECT * FROM users WHERE wallet_address = $1', [walletAddress]);
-        return rows.length > 0 ? rows[0] : null; // Return the first row if found, otherwise return null
-    } catch (error) {
-        console.error('Error executing query', error.stack);
-        throw error;
-    }
+    const { rows } = await client.query('SELECT * FROM users WHERE wallet_address = $1', [walletAddress]);
+    return rows.length > 0 ? rows[0] : null;
 }
 
 const createGame = async (whiteUserId) => {
-    console.log('createGame in db for whiteUserID: ', whiteUserId);
-    try {
-        // Check if the user already has an active game
-        const checkIfUserHasActiveGame = await client.query('SELECT * FROM games WHERE player1_id = $1 AND state = $2', [whiteUserId, '0']);
+    const checkIfUserHasActiveGame = await client.query('SELECT * FROM games WHERE player1_id = $1 AND state = $2', [whiteUserId, '0']);
 
-        if (checkIfUserHasActiveGame.rows.length > 0) {
-            console.log('User already has an active game');
-            return checkIfUserHasActiveGame.rows;
-        } else {
-            console.log('User does not have an active game, creating a new game');
-            // Insert a new game into the database
-            const { rows } = await client.query('INSERT INTO games (player1_id, state) VALUES ($1, $2) RETURNING *', [whiteUserId, '0']);
-            return rows;
-        }
-    } catch (error) {
-        console.error('Error executing query', error.stack);
-        throw error;
+    if (checkIfUserHasActiveGame.rows.length > 0) {
+        return checkIfUserHasActiveGame.rows;
+    } else {
+        const { rows } = await client.query('INSERT INTO games (player1_id, state) VALUES ($1, $2) RETURNING *', [whiteUserId, '0']);
+        return rows;
     }
 }
 
-
 const playGame = async (userId) => {
-    console.log('playGame in db for userId: ', userId)
-    try {
-        const gamesToJoin = await client.query('SELECT * FROM games WHERE player1_id != $1 AND player2_id IS NULL', [userId]);
-        if (gamesToJoin.rows.length > 0) {
-            console.log('Game found to join');
-            const gameId = gamesToJoin.rows[0].game_id;
-            await joinGame(gameId, userId); // Await the joinGame function
-            console.log('Game joined');
-
-            // Return the game that was joined
-            const { rows } = await client.query('SELECT * FROM games WHERE game_id = $1', [gameId]);
-            return rows;
-        }
-        else {
-            console.log('No game found to join, creating a new game for user', userId);
-            return createGame(userId); // Return the result of createGame
-        }
-    }
-    catch (error) {
-        console.error('Error executing query', error.stack);
-        throw error;
+    const gamesToJoin = await client.query('SELECT * FROM games WHERE player1_id != $1 AND player2_id IS NULL', [userId]);
+    if (gamesToJoin.rows.length > 0) {
+        const gameId = gamesToJoin.rows[0].game_id;
+        await joinGame(gameId, userId);
+        const { rows } = await client.query('SELECT * FROM games WHERE game_id = $1', [gameId]);
+        return rows;
+    } else {
+        return createGame(userId);
     }
 }
 
 const joinGame = async (gameId, userId) => {
-    console.log('joinGame in db for gameId: ', gameId, 'userId: ', userId);
-    try {
-        // Update the game's player2_id and state to 1
-        const { rows } = await client.query('UPDATE games SET player2_id = $1, state = 1 WHERE game_id = $2 RETURNING *', [userId, gameId]);
-        return rows;
-    } catch (error) {
-        console.error('Error joining game', error.stack);
-        throw error;
-    }
+    const { rows } = await client.query('UPDATE games SET player2_id = $1, state = 1 WHERE game_id = $2 RETURNING *', [userId, gameId]);
+    return rows;
 }
 
 const updateGameState = async (gameId, state) => {
-    try {
-        console.log('updateGameState in db for gameId: ', gameId, 'state: ', state);
-        console.log('type of state: ', typeof state);
-        // log the type of gameId   
-        console.log('type of gameId: ', typeof gameId);
-        if (typeof gameId === 'string') {
-            console.log('gameId is a string, converting to integer');
-            gameId = parseInt(gameId);
-            console.log('gameId is now', gameId);
-        }
-
-        // if gameId is a bigint, convert to integer
-        if (typeof gameId === 'bigint') {
-            console.log('gameId is a bigint, converting to integer');
-            gameId = parseInt(gameId);
-            console.log('gameId is now', gameId);
-        }
-
-        const { rows } = await client.query('UPDATE games SET state = $1 WHERE game_id = $2 RETURNING *', [state, gameId]);
-        return rows;
-    } catch (error) {
-        console.error('Error updating game state', error.stack);
-        throw error;
-    }
+    const { rows } = await client.query('UPDATE games SET state = $1 WHERE game_id = $2 RETURNING *', [state, gameId]);
+    return rows;
 }
 
 const updateGameContractAddress = async (gameId, contractAddress) => {
-    try {
-        console.log('updateGameContractAddress in db for gameId: ', gameId, 'contractAddress: ', contractAddress);
-        // log the type of contractAddress
-        console.log('type of contractAddress: ', typeof contractAddress);
-        // if gameId is a bigint, convert to integer
-        if (typeof gameId === 'bigint') {
-            console.log('gameId is a bigint, converting to integer');
-            gameId = parseInt(gameId);
-            console.log('gameId is now', gameId);
-        }
-        const { rows } = await client.query('UPDATE games SET contract_address = $1 WHERE game_id = $2 RETURNING *', [contractAddress, gameId]);
-        return rows;
-    } catch (error) {
-        console.error('Error updating game contract address', error.stack);
-        throw error;
-    }
+    const { rows } = await client.query('UPDATE games SET contract_address = $1 WHERE game_id = $2 RETURNING *', [contractAddress, gameId]);
+    return rows;
 }
 
 const updateTransactionHash = async (gameId, transactionHash) => {
-    try {
-        console.log('Updating transaction hash in database for gameId:', gameId, 'Transaction hash:', transactionHash);
-        // Convert gameId to integer if it's a string or a BigInt
-        if (typeof gameId === 'string') {
-            gameId = parseInt(gameId);
-        } else if (typeof gameId === 'bigint') {
-            gameId = parseInt(gameId.toString());
-        }
-
-        const { rows } = await client.query('UPDATE games SET transaction_hash = $1 WHERE game_id = $2 RETURNING *', [transactionHash, gameId]);
-        return rows;
-    } catch (error) {
-        console.error('Error updating transaction hash in database:', error.stack);
-        throw error;
-    }
+    const { rows } = await client.query('UPDATE games SET transaction_hash = $1 WHERE game_id = $2 RETURNING *', [transactionHash, gameId]);
+    return rows;
 }
 
 const updateLichessId = async (gameId, lichessId) => {
-    try {
-        console.log('updateLichessId in db for gameId: ', gameId, 'lichessId: ', lichessId);
-        // log the type of lichessId
-        console.log('type of lichessId: ', typeof lichessId);
-        // if gameId is a bigint, convert to integer
-        if (typeof gameId === 'bigint') {
-            console.log('gameId is a bigint, converting to integer');
-            gameId = parseInt(gameId);
-            console.log('gameId is now', gameId);
-        }
-        const { rows } = await client.query('UPDATE games SET lichess_id = $1 WHERE game_id = $2 RETURNING *', [lichessId, gameId]);
-        return rows;
-    } catch (error) {
-        console.error('Error updating lichess id', error.stack);
-        throw error;
-    }
+    const { rows } = await client.query('UPDATE games SET lichess_id = $1 WHERE game_id = $2 RETURNING *', [lichessId, gameId]);
+    return rows;
 }
 
 const updateRewardPool = async (gameId, rewardPool) => {
-    try {
-        console.log('updateRewardPool in db for gameId: ', gameId, 'rewardPool: ', rewardPool);
-        // log the type of rewardPool
-        console.log('type of rewardPool: ', typeof rewardPool);
-        // if gameId is a bigint, convert to integer
-        if (typeof gameId === 'bigint') {
-            console.log('gameId is a bigint, converting to integer');
-            gameId = parseInt(gameId);
-            console.log('gameId is now', gameId);
-        }
-        const { rows } = await client.query('UPDATE games SET reward_pool = $1 WHERE game_id = $2 RETURNING *', [rewardPool, gameId]);
-        return rows;
-    } catch (error) {
-        console.error('Error updating reward pool', error.stack);
-        throw error;
-    }
+    const { rows } = await client.query('UPDATE games SET reward_pool = $1 WHERE game_id = $2 RETURNING *', [rewardPool, gameId]);
+    return rows;
 }
 
 const updateWinner = async (gameId, winnerId) => {
-    try {
-        console.log('updateWinner in db for gameId: ', gameId, 'winnerId: ', winnerId);
-        // log the type of winnerId
-        console.log('type of winnerId: ', typeof winnerId);
-        // if gameId is a bigint, convert to integer
-        if (typeof gameId === 'bigint') {
-            console.log('gameId is a bigint, converting to integer');
-            gameId = parseInt(gameId);
-            console.log('gameId is now', gameId);
-        }
-        const { rows } = await client.query('UPDATE games SET winner = $1 WHERE game_id = $2 RETURNING *', [winnerId, gameId]);
-        return rows;
-    } catch (error) {
-        console.error('Error updating winner', error.stack);
-        throw error;
-    }
+    const { rows } = await client.query('UPDATE games SET winner = $1 WHERE game_id = $2 RETURNING *', [winnerId, gameId]);
+    return rows;
 }
 
 const getGameById = async (gameId) => {
-    console.log('getGameById in db for gameId: ', gameId);
-    try {
-        const { rows } = await client.query('SELECT * FROM games WHERE game_id = $1', [gameId]);
-        return rows[0];
-    } catch (error) {
-        console.error('Error executing query', error.stack);
-        throw error;
-    }
+    const { rows } = await client.query('SELECT * FROM games WHERE game_id = $1', [gameId]);
+    return rows[0];
 }
 
-
 module.exports = {
-    connectToDatabase,
-    getConfig,
-    addUser,
-    getUserById,
-    getUserByLichessHandle,
-    getUserByWalletAddress,
-    createGame,
-    playGame,
-    updateGameState,
-    updateGameContractAddress,
-    updateTransactionHash,
-    updateLichessId,
-    updateRewardPool,
-    updateWinner,
-    getGameById
+    connectToDatabase: handleErrors(connectToDatabase),
+    getConfig: handleErrors(getConfig),
+    addUser: handleErrors(addUser),
+    getUserById: handleErrors(getUserById),
+    getUserByLichessHandle: handleErrors(getUserByLichessHandle),
+    getUserByWalletAddress: handleErrors(getUserByWalletAddress),
+    createGame: handleErrors(createGame),
+    playGame: handleErrors(playGame),
+    joinGame: handleErrors(joinGame),
+    updateGameState: handleErrors(updateGameState),
+    updateGameContractAddress: handleErrors(updateGameContractAddress),
+    updateTransactionHash: handleErrors(updateTransactionHash),
+    updateLichessId: handleErrors(updateLichessId),
+    updateRewardPool: handleErrors(updateRewardPool),
+    updateWinner: handleErrors(updateWinner),
+    getGameById: handleErrors(getGameById)
 };
