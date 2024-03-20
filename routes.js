@@ -340,7 +340,7 @@ router.post('/reportGameOver', async (req, res, next) => {
         const lichessId = game.lichess_id;
         const headers = { Authorization: 'Bearer ' + process.env.LICHESS_TOKEN };
         // get the game info from lichess
-        const response = await fetch(`https://lichess.org/api/game/${lichessId}`, { headers });
+        const response = await fetch(`https://lichess.org/game/export/${lichessId}`, { headers });
         if (!response.ok) {
             throw new Error('Failed to fetch game information from Lichess');
         }
