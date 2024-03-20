@@ -264,4 +264,38 @@ router.post('/getUser', async (req, res, next) => {
     }
 });
 
+// POST route to create an open challenge on Lichess
+router.post('/createChallenge', async (req, res, next) => {
+    try {
+        const { player1Username, player2Username } = req.body;
+
+        const lichessApiUrl = 'https://lichess.org/api/challenge/open';
+        const lichessToken = process.env.LICHESS_TOKEN;
+
+        const requestBody = new URLSearchParams({
+            rated: 'true',
+            users: `${player1Username},${player2Username}`,
+            expiresAt: Date.now() + 24 * 60 * 60 * 1000 // 24 hours from now
+        });
+
+        const response = await fetch(lichessApiUrl, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${lichessToken}`,
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: requestBody
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to create open challenge on Lichess');
+        }
+
+        const challengeData = await response.json();
+        res.json(challengeData);
+    } catch (error) {
+        next(error); // Pass error to error handling middleware
+    }
+});
+
 module.exports = router;
