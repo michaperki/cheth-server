@@ -275,24 +275,12 @@ async function createChallenge(player1Username, player2Username) {
             'Content-Type': 'application/x-www-form-urlencoded'
         };
 
-        // const requestBody = new URLSearchParams({
-        //     rated: 'true',
-        //     'clock.limit': '300', // 5 minutes per side
-        //     'clock.increment': '0',
-        //     color: 'random',
-        //     variant: 'standard',
-        //     name: 'Cheth Game',
-        //     rules: 'noRematch,noGiveTime,noEarlyDraw',
-        //     users: `${player1Username},${player2Username}`
-        // });
+        const response = await fetch(lichessApiUrl, { headers });
 
-        const response = await fetch(lichessApiUrl, {
-            method: 'POST',
-            headers: headers,
-            // body: requestBody
-        });
+        console.log('Response status code:', response.status);
 
         if (!response.ok) {
+            console.error('Error response:', await response.text());
             throw new Error('Failed to create open challenge on Lichess');
         }
 
@@ -304,6 +292,7 @@ async function createChallenge(player1Username, player2Username) {
         throw error;
     }
 }
+
 
 router.post('/createChallenge', async (req, res, next) => {
     console.log('/createChallenge route');
