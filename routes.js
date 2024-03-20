@@ -350,6 +350,8 @@ router.post('/reportGameOver', async (req, res, next) => {
         if (!response.ok) {
             throw new Error('Failed to fetch game information from Lichess');
         }
+
+        console.log('response', response);
         const gameInfo = await response.json();
         console.log('gameInfo', gameInfo);
     } catch (error) {
