@@ -46,23 +46,17 @@
     "linkReferences": {},
     "deployedLinkReferences": {},
     "networks": {
-        "43113": {
+        "5777": {
             "events": {},
             "links": {},
-            "address": "0x317B6CF4Bf47eb4bd163AD656EbAd86fA9A9D7F8",
-            "transactionHash": "0x362c74efbb5c3fbc7176e5f4b5ea90a0b9a6175e2fd7bbff88e29c7b05f8d833"
+            "address": "0xD4387424E8E218Cf7f9ff256d443bb24bC4555d6",
+            "transactionHash": "0x9283096ac7f86c14acd8b90c15633d869b29f7fc812bfe269388bf3a1a4d8740"
         },
         "0xaa36a7": {
             "events": {},
             "links": {},
             "address": "0x317B6CF4Bf47eb4bd163AD656EbAd86fA9A9D7F8",
             "transactionHash": "0x362c74efbb5c3fbc7176e5f4b5ea90a0b9a6175e2fd7bbff88e29c7b05f8d833"
-        },
-        "5777": {
-            "events": {},
-            "links": {},
-            "address": "0x572ee0FB88Fc3c5680990e91b1171C88487787D4",
-            "transactionHash": "0x7c10d7453b1a0f74bcbcee437b89c4757625fc7eb17ddc9f811607076911e5d1"
         }
     }
   }
