@@ -338,6 +338,8 @@ router.post('/reportGameOver', async (req, res, next) => {
         if (!game) {
             return res.status(404).json({ error: 'Game not found' });
         }
+        console.log('game', game);
+        
         const lichessId = game.lichess_id;
         const headers = { Authorization: 'Bearer ' + process.env.LICHESS_TOKEN };
         // get the game info from lichess

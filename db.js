@@ -232,6 +232,7 @@ const updateRewardPool = async (gameId, rewardPool) => {
 }
 
 const getGameById = async (gameId) => {
+    console.log('getGameById in db for gameId: ', gameId);
     try {
         const { rows } = await client.query('SELECT * FROM games WHERE game_id = $1', [gameId]);
         return rows[0];
