@@ -333,6 +333,7 @@ router.post('/reportGameOver', async (req, res, next) => {
     console.log('/reportGameOver route');
     try {
         const { gameId } = req.body;
+        console.log('gameId', gameId);
         const game = await db.getGameById(gameId);
         if (!game) {
             return res.status(404).json({ error: 'Game not found' });
