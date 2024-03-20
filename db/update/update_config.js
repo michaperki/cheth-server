@@ -15,26 +15,9 @@ const pool = new Pool({
 
 // Define your SQL query
 const sqlQuery = `
-    INSERT INTO config (name, value)
-    VALUES ('rating_threshold', '2599');
-
-    INSERT INTO config (name, value)
-    VALUES ('min_games', '10');
-
-    INSERT INTO config (name, value)
-    VALUES ('time_control', 'blitz');
-
-    INSERT INTO config (name, value)
-    VALUES ('is_active', 'true');
-
-    INSERT INTO config (name, value)
-    VALUES ('created_before', '2024-03-20 16:00:00+00');
-
-    INSERT INTO config (name, value)
-    VALUES ('admin_account', 'cheth_testing');
-
-    INSERT INTO config (name, value)
-    VALUES ('follows_admin', 'true');
+    UPDATE config
+    SET value = '2024-03-20 16:00:00+00'
+    WHERE name = 'created_before'
 `;
 
 // Execute the SQL query

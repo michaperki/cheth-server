@@ -277,7 +277,7 @@ async function createChallenge(player1Username, player2Username) {
 
         const body = new URLSearchParams({
             variant: 'standard',
-            rated: 'true',
+            rated: 'false',
             color: 'random',
             'clock.limit': '300',
             'clock.increment': '0',
