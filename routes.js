@@ -275,7 +275,10 @@ async function createChallenge(player1Username, player2Username) {
             'Content-Type': 'application/x-www-form-urlencoded'
         };
 
-        const response = await fetch(lichessApiUrl, { headers });
+        const response = await fetch(lichessApiUrl, {
+            method: 'POST',
+            headers: headers
+        });
 
         console.log('Response status code:', response.status);
 
