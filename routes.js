@@ -329,6 +329,12 @@ router.post('/createChallenge', async (req, res, next) => {
     }
 });
 
+function parseGameInfo(gameInfo) {
+    // for now, just return the gameInfo as is
+    console.log('parseGameInfo function');
+    return gameInfo;
+}
+
 router.post('/reportGameOver', async (req, res, next) => {
     console.log('/reportGameOver route');
     try {
@@ -350,10 +356,13 @@ router.post('/reportGameOver', async (req, res, next) => {
         if (!response.ok) {
             throw new Error('Failed to fetch game information from Lichess');
         }
-
-        console.log('response', response);
-        const gameInfo = await response.json();
-        console.log('gameInfo', gameInfo);
+        const responseText = await response.text();
+        console.log('Response Text:', responseText);
+        
+        // Process the response text and extract necessary information
+        // Example: Parse the response text to extract game information
+        const gameInfo = parseGameInfo(responseText);
+        console.log('Game Info:', gameInfo);
     } catch (error) {
         next(error); // Pass error to error handling middleware
     }
