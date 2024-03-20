@@ -9,6 +9,9 @@ const WebSocket = require('ws'); // Import WebSocket class
 const wss = require('./websocket'); // Assuming you export the WebSocket server instance from websocket.js
 const ethers = require('ethers');
 
+// Middleware for error handling
+const handleErrors = require('./middleware/errorHandlingMiddleware');
+router.use(handleErrors);
 
 const contractAddress = factoryContractAbi.networks[process.env.CHAIN_ID].address;
 const privateKey = process.env.SEPOLIA_PRIVATE_KEY;
@@ -16,12 +19,6 @@ const wallet = new ethers.Wallet(privateKey);
 const provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
 const signer = wallet.connect(provider);
 const factoryContract = new ethers.Contract(contractAddress, factoryContractAbi.abi, signer);
-
-// Middleware for error handling
-router.use((err, req, res, next) => {
-    console.error('Error:', err);
-    res.status(500).json({ error: err.message });
-});
 
 // Middleware for request validation
 function validateRequestBody(req, res, next) {
