@@ -308,7 +308,6 @@ async function createChallenge(player1Username, player2Username) {
     }
 }
 
-
 router.post('/createChallenge', async (req, res, next) => {
     console.log('/createChallenge route');
     try {
@@ -319,12 +318,34 @@ router.post('/createChallenge', async (req, res, next) => {
         if (game.lichess_id) {
             return res.json({ url: `https://lichess.org/${game.lichess_id}` });
         }
-        
+
         const challengeData = await createChallenge(player1Username, player2Username);
         console.log('Challenge created:', challengeData);
         // update the game with the challenge url
         await db.updateLichessId(gameId, challengeData.id);
         res.json(challengeData);
+    } catch (error) {
+        next(error); // Pass error to error handling middleware
+    }
+});
+
+router.post('/reportGameOver', async (req, res, next) => {
+    console.log('/reportGameOver route');
+    try {
+        const { gameId, result } = req.body;
+        const game = await db.getGameById(gameId);
+        if (!game) {
+            return res.status(404).json({ error: 'Game not found' });
+        }
+        const lichessId = game.lichess_id;
+        const headers = { Authorization: 'Bearer ' + process.env.LICHESS_TOKEN };
+        // get the game info from lichess
+        const response = await fetch(`https://lichess.org/api/game/${lichessId}`, { headers });
+        if (!response.ok) {
+            throw new Error('Failed to fetch game information from Lichess');
+        }
+        const gameInfo = await response.json();
+        console.log('gameInfo', gameInfo);
     } catch (error) {
         next(error); // Pass error to error handling middleware
     }
