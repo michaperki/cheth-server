@@ -254,4 +254,19 @@ router.post('/cancelGame', async (req, res, next) => {
     }
 });
 
+router.post('/getUser', async (req, res, next) => {
+    console.log('/getUser route');
+    try {
+        const userId = req.body.userId;
+        const user = await db.getUserById(userId);
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        } else {
+            res.json(user);
+        }
+    } catch (error) {
+        next(error); // Pass error to error handling middleware
+    }
+});
+
 module.exports = router;

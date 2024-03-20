@@ -38,6 +38,17 @@ const addUser = async (username, rating, walletAddress, darkMode) => {
     }
 }
 
+const getUserById = async (userId) => {
+    try {
+        const { rows } = await client.query('SELECT * FROM users WHERE user_id = $1', [userId]);
+        return rows.length > 0 ? rows[0] : null; // Return the first row if found, otherwise return null
+    }
+    catch (error) {
+        console.error('Error executing query', error.stack);
+        throw error;
+    }
+}
+
 const getUserByLichessHandle = async (lichessHandle) => {
     try {
         const { rows } = await client.query('SELECT * FROM users WHERE username = $1', [lichessHandle]);
@@ -224,5 +235,6 @@ module.exports = {
     updateGameContractAddress,
     updateTransactionHash,
     updateRewardPool,
-    getGameById
+    getGameById,
+    getUserById
 };
