@@ -384,8 +384,11 @@ router.post('/reportGameOver', async (req, res, next) => {
         const winner = gameInfo.Result === '1-0' ? 'White' : gameInfo.Result === '0-1' ? 'Black' : 'Draw';
         const winningPlayerHandle = winner === 'White' ? gameInfo.White : winner === 'Black' ? gameInfo.Black : null;
 
+        // get the user id of the winning player
+        const winningPlayer = await db.getUserByLichessHandle(winningPlayerHandle);
+
         // Update the game in the database with the winner's handle
-        await db.updateWinner(gameId, winningPlayerHandle);
+        await db.updateWinner(gameId, winningPlayer);
 
         // Send the winning player's handle as a websocket message
         req.wss.clients.forEach(client => {
