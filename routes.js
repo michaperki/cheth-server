@@ -137,22 +137,6 @@ router.post('/checkUser', async (req, res, next) => {
     }
 });
 
-router.post('/getUserInfo', async (req, res, next) => {
-    console.log('/getUserInfo route')
-    try {
-        console.log('req.body', req.body);
-        const walletAddress = req.body.walletAddress;
-        const user = await db.getUserByWalletAddress(walletAddress);
-        if (!user) {
-            return res.status(404).json({ error: 'User not found' });
-        } else {
-            res.json(user);
-        }
-    } catch (error) {
-        next(error); // Pass error to error handling middleware
-    }
-});
-
 router.post('/playGame', async (req, res, next) => {
     console.log('/playGame route');
     try {
@@ -257,8 +241,19 @@ router.post('/cancelGame', async (req, res, next) => {
 router.post('/getUser', async (req, res, next) => {
     console.log('/getUser route');
     try {
-        const userId = req.body.userId;
-        const user = await db.getUserById(userId);
+        let user;
+        if (req.body.userId) {
+            // If userId is provided, fetch user by ID
+            const userId = req.body.userId;
+            user = await db.getUserById(userId);
+        } else if (req.body.walletAddress) {
+            // If walletAddress is provided, fetch user by wallet address
+            const walletAddress = req.body.walletAddress;
+            user = await db.getUserByWalletAddress(walletAddress);
+        } else {
+            return res.status(400).json({ error: 'Missing userId or walletAddress in request body' });
+        }
+
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
         } else {
