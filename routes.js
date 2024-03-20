@@ -332,7 +332,7 @@ router.post('/createChallenge', async (req, res, next) => {
 router.post('/reportGameOver', async (req, res, next) => {
     console.log('/reportGameOver route');
     try {
-        const { gameId, result } = req.body;
+        const { gameId } = req.body;
         const game = await db.getGameById(gameId);
         if (!game) {
             return res.status(404).json({ error: 'Game not found' });
@@ -340,7 +340,10 @@ router.post('/reportGameOver', async (req, res, next) => {
         const lichessId = game.lichess_id;
         const headers = { Authorization: 'Bearer ' + process.env.LICHESS_TOKEN };
         // get the game info from lichess
-        const response = await fetch(`https://lichess.org/game/export/${lichessId}`, { headers });
+        const url = `https://lichess.org/game/export/${lichessId}`;
+        console.log('url', url);
+        const response = await fetch(url, { headers });
+
         if (!response.ok) {
             throw new Error('Failed to fetch game information from Lichess');
         }
