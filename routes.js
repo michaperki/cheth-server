@@ -271,22 +271,23 @@ async function createChallenge(player1Username, player2Username) {
     try {
         const lichessApiUrl = 'https://lichess.org/api/challenge/open';
         const lichessToken = process.env.LICHESS_TOKEN;
+        console.log('lichessToken', lichessToken);
 
-        const requestBody = new URLSearchParams({
-            rated: 'true',
-            'clock.limit': '300', // 5 minutes per side
-            'clock.increment': '0',
-            color: 'random',
-            variant: 'standard',
-            name: 'Cheth Game',
-            rules: 'noRematch,noGiveTime,noEarlyDraw,',
-            users: `${player1Username},${player2Username}`
-        });
+        // const requestBody = new URLSearchParams({
+        //     rated: 'true',
+        //     'clock.limit': '300', // 5 minutes per side
+        //     'clock.increment': '0',
+        //     color: 'random',
+        //     variant: 'standard',
+        //     name: 'Cheth Game',
+        //     rules: 'noRematch,noGiveTime,noEarlyDraw',
+        //     users: `${player1Username},${player2Username}`
+        // });
 
         const response = await fetch(lichessApiUrl, {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${lichessToken}`, 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: requestBody
+            // body: requestBody
         });
 
         if (!response.ok) {
