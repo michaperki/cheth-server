@@ -275,9 +275,21 @@ async function createChallenge(player1Username, player2Username) {
             'Content-Type': 'application/x-www-form-urlencoded'
         };
 
+        const body = new URLSearchParams({
+            variant: 'standard',
+            rated: 'true',
+            color: 'random',
+            'clock.limit': '300',
+            'clock.increment': '0',
+            users: `${player1Username},${player2Username}`,
+            rules: 'noRematch,noGiveTime,noEarlyDraw',
+            name: 'Cheth Game'
+        });
+
         const response = await fetch(lichessApiUrl, {
             method: 'POST',
-            headers: headers
+            headers: headers,
+            body: body
         });
 
         console.log('Response status code:', response.status);
