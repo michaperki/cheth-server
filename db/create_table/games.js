@@ -20,10 +20,12 @@ const sqlQuery = `
         player1_id INTEGER NOT NULL,
         player2_id INTEGER DEFAULT NULL,
         state VARCHAR(255) NOT NULL,
-        fen VARCHAR(255) DEFAULT NULL,
-        last_move VARCHAR(255) DEFAULT NULL,
         winner INTEGER DEFAULT NULL,
         reward_pool bigint DEFAULT 0,
+        lichess_id VARCHAR(255) NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
         FOREIGN KEY (player1_id) REFERENCES users(user_id),
         FOREIGN KEY (player2_id) REFERENCES users(user_id),
         FOREIGN KEY (winner) REFERENCES users(user_id)

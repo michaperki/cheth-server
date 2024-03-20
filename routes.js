@@ -312,8 +312,18 @@ async function createChallenge(player1Username, player2Username) {
 router.post('/createChallenge', async (req, res, next) => {
     console.log('/createChallenge route');
     try {
-        const { player1Username, player2Username } = req.body;
+        const { player1Username, player2Username, gameId } = req.body;
+
+        // check if the challenge already exists
+        const game = await db.getGameById(gameId);
+        if (game.lichess_id) {
+            return res.json({ url: `https://lichess.org/${game.lichess_id}` });
+        }
+        
         const challengeData = await createChallenge(player1Username, player2Username);
+        console.log('Challenge created:', challengeData);
+        // update the game with the challenge url
+        await db.updateLichessId(gameId, challengeData.id);
         res.json(challengeData);
     } catch (error) {
         next(error); // Pass error to error handling middleware

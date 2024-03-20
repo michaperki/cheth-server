@@ -193,6 +193,25 @@ const updateTransactionHash = async (gameId, transactionHash) => {
     }
 }
 
+const updateLichessId = async (gameId, lichessId) => {
+    try {
+        console.log('updateLichessId in db for gameId: ', gameId, 'lichessId: ', lichessId);
+        // log the type of lichessId
+        console.log('type of lichessId: ', typeof lichessId);
+        // if gameId is a bigint, convert to integer
+        if (typeof gameId === 'bigint') {
+            console.log('gameId is a bigint, converting to integer');
+            gameId = parseInt(gameId);
+            console.log('gameId is now', gameId);
+        }
+        const { rows } = await client.query('UPDATE games SET lichess_id = $1 WHERE game_id = $2 RETURNING *', [lichessId, gameId]);
+        return rows;
+    } catch (error) {
+        console.error('Error updating lichess id', error.stack);
+        throw error;
+    }
+}
+
 const updateRewardPool = async (gameId, rewardPool) => {
     try {
         console.log('updateRewardPool in db for gameId: ', gameId, 'rewardPool: ', rewardPool);
@@ -234,6 +253,7 @@ module.exports = {
     updateGameState,
     updateGameContractAddress,
     updateTransactionHash,
+    updateLichessId,
     updateRewardPool,
     getGameById,
     getUserById
