@@ -322,7 +322,7 @@ router.post('/createChallenge', async (req, res, next) => {
         const challengeData = await createChallenge(player1Username, player2Username);
         console.log('Challenge created:', challengeData);
         // update the game with the challenge url
-        await db.updateLichessId(gameId, challengeData.id);
+        await db.updateLichessId(gameId, challengeData.challenge.id);
         res.json(challengeData);
     } catch (error) {
         next(error); // Pass error to error handling middleware
@@ -339,7 +339,7 @@ router.post('/reportGameOver', async (req, res, next) => {
             return res.status(404).json({ error: 'Game not found' });
         }
         console.log('game', game);
-        
+
         const lichessId = game.lichess_id;
         const headers = { Authorization: 'Bearer ' + process.env.LICHESS_TOKEN };
         // get the game info from lichess
