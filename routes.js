@@ -265,18 +265,22 @@ router.post('/getUser', async (req, res, next) => {
 });
 
 async function createChallenge(player1Username, player2Username) {
+    console.log('createChallenge function');
+    console.log('player1Username', player1Username);
+    console.log('player2Username', player2Username);
     try {
-        const headers = {
-            Authorization: 'Bearer ' + process.env.LICHESS_TOKEN,
-        };
         const lichessApiUrl = 'https://lichess.org/api/challenge/open';
         const lichessToken = process.env.LICHESS_TOKEN;
 
         const requestBody = new URLSearchParams({
             rated: 'true',
-            users: `${player1Username},${player2Username}`,
             'clock.limit': '300', // 5 minutes per side
-            expiresAt: Date.now() + 60 * 1000 // Challenge expires in 1 minute
+            'clock.increment': '0',
+            color: 'random',
+            variant: 'standard',
+            name: 'Cheth Game',
+            rules: 'noRematch,noGiveTime,noEarlyDraw,',
+            users: `${player1Username},${player2Username}`
         });
 
         const response = await fetch(lichessApiUrl, {
