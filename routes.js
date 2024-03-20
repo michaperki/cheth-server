@@ -384,11 +384,34 @@ router.post('/reportGameOver', async (req, res, next) => {
         const winner = gameInfo.Result === '1-0' ? 'White' : gameInfo.Result === '0-1' ? 'Black' : 'Draw';
         const winningPlayerHandle = winner === 'White' ? gameInfo.White : winner === 'Black' ? gameInfo.Black : null;
 
-        // get the user id of the winning player
+        // Get the user id of the winning player
         const winningPlayer = await db.getUserByLichessHandle(winningPlayerHandle);
 
-        // Update the game in the database with the winner's handle
-        await db.updateWinner(gameId, winningPlayer.user_id);
+        // Calculate the amount to distribute
+        const contractAddress = game.contract_address;
+
+        // instantiate the contract
+        const gameContract = new ethers.Contract(contractAddress, chessContractAbi.abi, signer);
+
+        // subscribe to the GameFinished event
+        //            emit GameFinished(_winner, winnings);
+        gameContract.once('GameFinished', async (winner, winnings) => {
+            console.log('GameFinished event received');
+            console.log('winner', winner);
+            console.log('winnings', winnings);
+            console.log('contractAddress', contractAddress);
+            console.log('winningPlayer.wallet_address', winningPlayer.wallet_address);
+            console.log('winningPlayerHandle', winningPlayerHandle);
+            console.log('gameId', gameId);
+            console.log('game', game);
+            
+            // Update the game state in the database
+            await db.updateGameState(gameId, 4);
+        });
+
+
+        // Finish the game in the contract and distribute funds
+        await chessContract.finishGame(contractAddress, winningPlayer.wallet_address);
 
         // Send the winning player's handle as a websocket message
         req.wss.clients.forEach(client => {

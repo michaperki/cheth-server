@@ -10,9 +10,9 @@ const cancelGame = async (contractAddress) => {
     await contract.cancelGame();
 }
 
-const finishGame = async (contractAddress) => {
+const finishGame = async (contractAddress, winnerAddress) => {
     const contract = new ethers.Contract(contractAddress, abi.abi, signer);
-    await contract.finishGame();
+    await contract.finishGame(winnerAddress);
 }
 
 module.exports = {
