@@ -330,9 +330,26 @@ router.post('/createChallenge', async (req, res, next) => {
 });
 
 function parseGameInfo(gameInfo) {
-    // for now, just return the gameInfo as is
     console.log('parseGameInfo function');
-    return gameInfo;
+    
+    // Split the response text by line breaks
+    const lines = gameInfo.split('\n');
+    
+    // Initialize an object to store the extracted information
+    const parsedInfo = {};
+    
+    // Iterate over each line and parse the key-value pairs
+    lines.forEach(line => {
+        // Extract key-value pairs using regex
+        const match = line.match(/^\[(.*?)\s"(.*?)"\]$/);
+        if (match) {
+            const key = match[1];
+            const value = match[2];
+            parsedInfo[key] = value;
+        }
+    });
+    
+    return parsedInfo;
 }
 
 router.post('/reportGameOver', async (req, res, next) => {
@@ -360,9 +377,25 @@ router.post('/reportGameOver', async (req, res, next) => {
         console.log('Response Text:', responseText);
         
         // Process the response text and extract necessary information
-        // Example: Parse the response text to extract game information
         const gameInfo = parseGameInfo(responseText);
         console.log('Game Info:', gameInfo);
+        
+        // Determine the winner and get their handle
+        const winner = gameInfo.Result === '1-0' ? 'White' : gameInfo.Result === '0-1' ? 'Black' : 'Draw';
+        const winningPlayerHandle = winner === 'White' ? gameInfo.White : winner === 'Black' ? gameInfo.Black : null;
+
+        // Update the game in the database with the winner's handle
+        await db.updateWinner(gameId, winningPlayerHandle);
+
+        // Send the winning player's handle as a websocket message
+        req.wss.clients.forEach(client => {
+            if (client.readyState === WebSocket.OPEN) {
+                client.send(JSON.stringify({ type: 'GAME_OVER', gameId, winner: winningPlayerHandle }));
+            }
+        });
+        
+        // Send the winning player's handle as the response
+        res.json({ winner: winningPlayerHandle });
     } catch (error) {
         next(error); // Pass error to error handling middleware
     }

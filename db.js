@@ -231,6 +231,25 @@ const updateRewardPool = async (gameId, rewardPool) => {
     }
 }
 
+const updateWinner = async (gameId, winnerId) => {
+    try {
+        console.log('updateWinner in db for gameId: ', gameId, 'winnerId: ', winnerId);
+        // log the type of winnerId
+        console.log('type of winnerId: ', typeof winnerId);
+        // if gameId is a bigint, convert to integer
+        if (typeof gameId === 'bigint') {
+            console.log('gameId is a bigint, converting to integer');
+            gameId = parseInt(gameId);
+            console.log('gameId is now', gameId);
+        }
+        const { rows } = await client.query('UPDATE games SET winner = $1 WHERE game_id = $2 RETURNING *', [winnerId, gameId]);
+        return rows;
+    } catch (error) {
+        console.error('Error updating winner', error.stack);
+        throw error;
+    }
+}
+
 const getGameById = async (gameId) => {
     console.log('getGameById in db for gameId: ', gameId);
     try {
@@ -247,6 +266,7 @@ module.exports = {
     connectToDatabase,
     getConfig,
     addUser,
+    getUserById,
     getUserByLichessHandle,
     getUserByWalletAddress,
     createGame,
@@ -256,6 +276,6 @@ module.exports = {
     updateTransactionHash,
     updateLichessId,
     updateRewardPool,
-    getGameById,
-    getUserById
+    updateWinner,
+    getGameById
 };
