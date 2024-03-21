@@ -387,6 +387,7 @@ router.post('/reportGameOver', async (req, res, next) => {
 
         // Get the user id of the winning player
         const winningPlayer = await db.getUserByLichessHandle(winningPlayerHandle);
+        console.log('winningPlayer', winningPlayer);
 
         // Calculate the amount to distribute
         const contractAddress = game.contract_address;
@@ -401,7 +402,7 @@ router.post('/reportGameOver', async (req, res, next) => {
             console.log('winner', winner);
             console.log('winnings', winnings);
             console.log('contractAddress', contractAddress);
-            console.log('winningPlayer.wallet_address', winningPlayer.wallet_address);
+            console.log('winningPlayer.wallet_address', winningPlayer);
             console.log('winningPlayerHandle', winningPlayerHandle);
             console.log('gameId', gameId);
             console.log('game', game);

@@ -46,11 +46,11 @@
     "linkReferences": {},
     "deployedLinkReferences": {},
     "networks": {
-        "5777": {
+        "31337": {
             "events": {},
             "links": {},
-            "address": "0xD4387424E8E218Cf7f9ff256d443bb24bC4555d6",
-            "transactionHash": "0x9283096ac7f86c14acd8b90c15633d869b29f7fc812bfe269388bf3a1a4d8740"
+            "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+            "transactionHash": "0x2c7beb860fb529999ecdac17e93d3fc502eb2229e54d4721fc7d56d89767ee49"
         },
         "0xaa36a7": {
             "events": {},
