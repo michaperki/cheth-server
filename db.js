@@ -29,7 +29,7 @@ const getUserById = async (userId) => {
 }
 
 const getUserByLichessHandle = async (lichessHandle) => {
-    const { rows } = await client.query('SELECT * FROM users WHERE username = $1', [lichessHandle]);
+    const { rows } = await client.query('SELECT * FROM users WHERE username ILIKE $1', [lichessHandle]);
     return rows.length > 0 ? rows[0] : null;
 }
 
