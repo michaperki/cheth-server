@@ -111,6 +111,11 @@ const getRewardPool = async (gameId) => {
     return rows[0].reward_pool;
 }
 
+const toggleDarkMode = async (userId) => {
+    const { rows } = await client.query('UPDATE users SET dark_mode = NOT dark_mode WHERE user_id = $1 RETURNING *', [userId]);
+    return rows[0];
+}
+
 module.exports = {
     connectToDatabase: handleErrors(connectToDatabase),
     getConfig: handleErrors(getConfig),
@@ -130,4 +135,5 @@ module.exports = {
     updateWinner: handleErrors(updateWinner),
     getGameById: handleErrors(getGameById),
     getRewardPool: handleErrors(getRewardPool),
+    toggleDarkMode
 };

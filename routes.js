@@ -471,4 +471,15 @@ router.get('/ethToUsd', async (req, res, next) => {
     }
 });
 
+// toggleDarkMode route
+router.post('/toggleDarkMode', async (req, res, next) => {
+    try {
+        const { userId } = req.body;
+        const user = await db.toggleDarkMode(userId);
+        res.json(user);
+    } catch (error) {
+        next(error); // Pass error to error handling middleware
+    }
+});
+
 module.exports = router;
