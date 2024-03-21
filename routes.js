@@ -457,4 +457,18 @@ router.post('/reportGameOver', async (req, res, next) => {
     }
 });
 
+// ethToUsd route
+router.get('/ethToUsd', async (req, res, next) => {
+    try {
+        const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd');
+        if (!response.ok) {
+            throw new Error('Failed to fetch ETH to USD exchange rate');
+        }
+        const data = await response.json();
+        res.json(data.ethereum.usd);
+    } catch (error) {
+        next(error); // Pass error to error handling middleware
+    }
+});
+
 module.exports = router;
