@@ -176,7 +176,7 @@ router.post('/playGame', async (req, res, next) => {
                     /// get the current reward pool
                     const currentRewardPool = await db.getRewardPool(dbGame.game_id);
                     console.log('currentRewardPool', currentRewardPool);
-                    const newRewardPool = currentRewardPool + entryFee;
+                    const newRewardPool = Number(currentRewardPool) + Number(entryFee);
                     console.log('newRewardPool', newRewardPool);
                     await db.updateRewardPool(dbGame.game_id, newRewardPool);
                     await db.updateGameState(dbGame.game_id, 3);
