@@ -165,14 +165,14 @@ router.post('/playGame', async (req, res, next) => {
 
                 // Subscribe to GameJoined event
                 console.log('subscribing to GameJoined event');
-                // there will bne two GameJoined events, one for each player
+                // there will be two GameJoined events, one for each player
                 gameContract.on('GameJoined', async (player, entryFee) => {
                     console.log('GameJoined event received');
                     console.log('player', player);
                     console.log('entryFee', entryFee);
                     console.log('dbGame.game_id', dbGame.game_id);
                     // convert the entry fee to ether
-                    const entryFeeInEther = ethers.formatEther(entryFee);
+                    const entryFeeInEther = ethers.utils.formatEther(entryFee); // Corrected function name
                     console.log('entryFeeInEther', entryFeeInEther);
                     // update the reward pool in the database
                     await db.updateRewardPool(dbGame.game_id, entryFeeInEther);
