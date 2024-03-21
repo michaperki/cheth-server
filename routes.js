@@ -161,9 +161,28 @@ router.post('/playGame', async (req, res, next) => {
                 db.updateGameState(dbGame.game_id, 2);
                 db.updateGameCreatorAddress(dbGame.game_id, creator);
 
+                const gameContract = new ethers.Contract(game, chessContractAbi.abi, signer);
+
+                // Subscribe to GameJoined event
+                console.log('subscribing to GameJoined event');
+                // there will bne two GameJoined events, one for each player
+                gameContract.on('GameJoined', async (player, entryFee) => {
+                    console.log('GameJoined event received');
+                    console.log('player', player);
+                    console.log('entryFee', entryFee);
+                    console.log('dbGame.game_id', dbGame.game_id);
+                    await db.updateGameState(dbGame.game_id, 3);
+
+                    // Broadcasting the message to all connected WebSocket clients
+                    req.wss.clients.forEach(client => {
+                        if (client.readyState === WebSocket.OPEN) {
+                            client.send(JSON.stringify({ type: 'GAME_JOINED', gameId: dbGame.game_id, player }));
+                        }
+                    });
+                });
+
                 // Subscribe to GamePrimed event
                 console.log('subscribing to GamePrimed event');
-                const gameContract = new ethers.Contract(game, chessContractAbi.abi, signer);
                 gameContract.once('GamePrimed', async (white, black, entryFee) => {
                     console.log('GamePrimed event received');
                     console.log('white', white);
@@ -171,7 +190,7 @@ router.post('/playGame', async (req, res, next) => {
                     console.log('entryFee', entryFee);
                     console.log('dbGame.game_id', dbGame.game_id);
                     console.log('dbCreator', dbGame.creator);
-                    await db.updateGameState(dbGame.game_id, 3);
+                    await db.updateGameState(dbGame.game_id, 4);
 
                     // Broadcasting the message to all connected WebSocket clients
                     req.wss.clients.forEach(client => {
@@ -409,7 +428,7 @@ router.post('/reportGameOver', async (req, res, next) => {
             console.log('game', game);
             
             // Update the game state in the database
-            await db.updateGameState(gameId, 4);
+            await db.updateGameState(gameId, 5);
         });
 
 
