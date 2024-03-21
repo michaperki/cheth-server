@@ -171,8 +171,14 @@ router.post('/playGame', async (req, res, next) => {
                     console.log('player', player);
                     console.log('entryFee', entryFee);
                     console.log('dbGame.game_id', dbGame.game_id);
-                    // update the reward pool in the database
-                    await db.updateRewardPool(dbGame.game_id, entryFee);
+                    // update the reward pool in the database, add the entry fee to the reward pool
+
+                    /// get the current reward pool
+                    const currentRewardPool = await db.getRewardPool(dbGame.game_id);
+                    console.log('currentRewardPool', currentRewardPool);
+                    const newRewardPool = currentRewardPool + entryFee;
+                    console.log('newRewardPool', newRewardPool);
+                    await db.updateRewardPool(dbGame.game_id, newRewardPool);
                     await db.updateGameState(dbGame.game_id, 3);
 
                     // Broadcasting the message to all connected WebSocket clients

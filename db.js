@@ -106,6 +106,11 @@ const getGameById = async (gameId) => {
     return rows[0];
 }
 
+const getRewardPool = async (gameId) => {
+    const { rows } = await client.query('SELECT reward_pool FROM games WHERE game_id = $1', [gameId]);
+    return rows[0].reward_pool;
+}
+
 module.exports = {
     connectToDatabase: handleErrors(connectToDatabase),
     getConfig: handleErrors(getConfig),
@@ -123,5 +128,6 @@ module.exports = {
     updateLichessId: handleErrors(updateLichessId),
     updateRewardPool: handleErrors(updateRewardPool),
     updateWinner: handleErrors(updateWinner),
-    getGameById: handleErrors(getGameById)
+    getGameById: handleErrors(getGameById),
+    getRewardPool: handleErrors(getRewardPool),
 };
