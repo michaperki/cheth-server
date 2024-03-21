@@ -171,6 +171,11 @@ router.post('/playGame', async (req, res, next) => {
                     console.log('player', player);
                     console.log('entryFee', entryFee);
                     console.log('dbGame.game_id', dbGame.game_id);
+                    // convert the entry fee to ether
+                    const entryFeeInEther = ethers.formatEther(entryFee);
+                    console.log('entryFeeInEther', entryFeeInEther);
+                    // update the reward pool in the database
+                    await db.updateRewardPool(dbGame.game_id, entryFeeInEther);
                     await db.updateGameState(dbGame.game_id, 3);
 
                     // Broadcasting the message to all connected WebSocket clients
