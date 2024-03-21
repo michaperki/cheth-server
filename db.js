@@ -81,6 +81,11 @@ const updateTransactionHash = async (gameId, transactionHash) => {
     return rows;
 }
 
+const updateGameCreatorAddress = async (gameId, creatorAddress) => {
+    const { rows } = await client.query('UPDATE games SET game_creator_address = $1 WHERE game_id = $2 RETURNING *', [creatorAddress, gameId]);
+    return rows;
+}
+
 const updateLichessId = async (gameId, lichessId) => {
     const { rows } = await client.query('UPDATE games SET lichess_id = $1 WHERE game_id = $2 RETURNING *', [lichessId, gameId]);
     return rows;
@@ -114,6 +119,7 @@ module.exports = {
     updateGameState: handleErrors(updateGameState),
     updateGameContractAddress: handleErrors(updateGameContractAddress),
     updateTransactionHash: handleErrors(updateTransactionHash),
+    updateGameCreatorAddress: handleErrors(updateGameCreatorAddress),
     updateLichessId: handleErrors(updateLichessId),
     updateRewardPool: handleErrors(updateRewardPool),
     updateWinner: handleErrors(updateWinner),

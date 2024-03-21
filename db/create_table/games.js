@@ -17,6 +17,7 @@ const sqlQuery = `
         game_id SERIAL PRIMARY KEY,
         contract_address VARCHAR(255) NULL,
         transaction_hash VARCHAR(255) NULL,
+        game_creator_address VARCHAR(255) NULL,
         player1_id INTEGER NOT NULL,
         player2_id INTEGER DEFAULT NULL,
         state VARCHAR(255) NOT NULL,

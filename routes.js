@@ -159,6 +159,7 @@ router.post('/playGame', async (req, res, next) => {
                 console.log('creator', creator);
                 db.updateGameContractAddress(dbGame.game_id, game);
                 db.updateGameState(dbGame.game_id, 2);
+                db.updateGameCreatorAddress(dbGame.game_id, creator);
 
                 // Subscribe to GamePrimed event
                 console.log('subscribing to GamePrimed event');
@@ -169,12 +170,13 @@ router.post('/playGame', async (req, res, next) => {
                     console.log('black', black);
                     console.log('entryFee', entryFee);
                     console.log('dbGame.game_id', dbGame.game_id);
+                    console.log('dbCreator', dbGame.creator);
                     await db.updateGameState(dbGame.game_id, 3);
 
                     // Broadcasting the message to all connected WebSocket clients
                     req.wss.clients.forEach(client => {
                         if (client.readyState === WebSocket.OPEN) {
-                            client.send(JSON.stringify({ type: 'GAME_PRIMED', gameId: dbGame.game_id }));
+                            client.send(JSON.stringify({ type: 'GAME_PRIMED', gameId: dbGame.game_id, creator: dbGame.game_creator_address }));
                         }
                     });
                 });
