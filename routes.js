@@ -250,6 +250,21 @@ router.get('/game/:gameId', async (req, res, next) => {
     }
 });
 
+router.post('/cancelGamePairing', async (req, res, next) => {
+    console.log('/cancelGamePairing route');
+    try {
+        const gameId = req.body.gameId;
+        const game = await db.getGameById(gameId);
+        if (!game) {
+            return res.status(404).json({ error: 'Game not found' });
+        }
+        await db.cancelGame(gameId);
+        res.json({ message: 'Game cancelled successfully' });
+    } catch (error) {
+        next(error); // Pass error to error handling middleware
+    }
+});
+
 router.post('/cancelGame', async (req, res, next) => {
     console.log('/cancelGame route')
     try {
@@ -260,6 +275,8 @@ router.post('/cancelGame', async (req, res, next) => {
         }
         const contractAddress = game.contract_address;
         await chessContract.cancelGame(contractAddress);
+        // update the game state in the database
+        await db.updateGameState(gameId, -1);
         res.json({ message: 'Game cancelled successfully' });
     } catch (error) {
         next(error); // Pass error to error handling middleware

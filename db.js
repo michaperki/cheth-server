@@ -61,6 +61,11 @@ const playGame = async (userId) => {
     }
 }
 
+const cancelGame = async (gameId) => {
+    const { rows } = await client.query('DELETE FROM games WHERE game_id = $1 RETURNING *', [gameId]);
+    return rows;
+}
+
 const joinGame = async (gameId, userId) => {
     const { rows } = await client.query('UPDATE games SET player2_id = $1, state = 1 WHERE game_id = $2 RETURNING *', [userId, gameId]);
     return rows;
@@ -125,6 +130,7 @@ module.exports = {
     getUserByWalletAddress: handleErrors(getUserByWalletAddress),
     createGame: handleErrors(createGame),
     playGame: handleErrors(playGame),
+    cancelGame: handleErrors(cancelGame),
     joinGame: handleErrors(joinGame),
     updateGameState: handleErrors(updateGameState),
     updateGameContractAddress: handleErrors(updateGameContractAddress),
