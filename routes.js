@@ -361,7 +361,11 @@ router.post('/createChallenge', async (req, res, next) => {
         // check if the challenge already exists
         const game = await db.getGameById(gameId);
         if (game.lichess_id) {
-            return res.json({ url: `https://lichess.org/${game.lichess_id}` });
+            return res.json({
+                challenge: {
+                    url: `https://lichess.org/${game.lichess_id}`
+                }
+            });
         }
 
         const challengeData = await createChallenge(player1Username, player2Username);
