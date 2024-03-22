@@ -482,4 +482,9 @@ router.post('/toggleDarkMode', async (req, res, next) => {
     }
 });
 
+// New route to get the number of online users
+router.get('/onlineUsersCount', (req, res) => {
+    res.json({ count: wss.clients.size }); // Return the number of connected clients
+});
+
 module.exports = router;

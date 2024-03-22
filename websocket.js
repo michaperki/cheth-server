@@ -1,34 +1,39 @@
 const WebSocket = require('ws');
 
+let onlineUsers = 0; // Initialize the online user count
+
 module.exports = function websocket(server) {
     const wss = new WebSocket.Server({ server });
 
     wss.on('connection', async ws => {
         console.log('Client connected');
+        onlineUsers++; // Increment the online user count when a client connects
+        broadcastOnlineUsers(); // Broadcast the updated online user count to all clients
+
+        ws.on('close', () => {
+            console.log('Client disconnected');
+            onlineUsers--; // Decrement the online user count when a client disconnects
+            broadcastOnlineUsers(); // Broadcast the updated online user count to all clients
+        });
 
         ws.on('message', async message => {
             const data = JSON.parse(message);
             switch (data.type) {
-                case "GET_GAMES":
-                    console.log("Get games request received");
-                    break;
-                case "CREATE_GAME":
-                    console.log("New game created with ID");
-                    break;
-                case "JOIN_GAME":
-                    console.log("Join game request received");
-                    // Broadcast a message to all connected clients when a game is joined
-                    wss.clients.forEach(client => {
-                        if (client.readyState === WebSocket.OPEN) {
-                            client.send(JSON.stringify({ type: "GAME_JOINED", gameData: data.gameData }));
-                        }
-                    });
-                    break;
+                // Handle other message types if needed
                 default:
                     console.log("Unknown message type received");
             }
         });
     });
+
+    function broadcastOnlineUsers() {
+        // Broadcast the online user count to all connected clients
+        wss.clients.forEach(client => {
+            if (client.readyState === WebSocket.OPEN) {
+                client.send(JSON.stringify({ type: "ONLINE_USERS_COUNT", count: onlineUsers }));
+            }
+        });
+    }
 
     return wss;
 };
