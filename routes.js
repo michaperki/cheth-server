@@ -542,6 +542,26 @@ router.post('/forceDraw', async (req, res, next) => {
     }
 });
 
+// delete the game from the database
+router.post('/deleteGame', async (req, res, next) => {
+    console.log('/deleteGame route');
+    try {
+        const { gameId } = req.body;
+        console.log('gameId', gameId);
+        const game = await db.getGameById(gameId);
+        if (!game) {
+            return res.status(404).json({ error: 'Game not found' });
+        }
+        console.log('game', game);
+
+        // delete the game from the database
+        await db.cancelGame(gameId);
+        res.json({ message: 'Game deleted successfully' });
+    } catch (error) {
+        next(error); // Pass error to error handling middleware
+    }
+});
+
 // ethToUsd route
 router.get('/ethToUsd', async (req, res, next) => {
     try {
@@ -551,17 +571,6 @@ router.get('/ethToUsd', async (req, res, next) => {
         }
         const data = await response.json();
         res.json(data.ethereum.usd);
-    } catch (error) {
-        next(error); // Pass error to error handling middleware
-    }
-});
-
-// toggleDarkMode route
-router.post('/toggleDarkMode', async (req, res, next) => {
-    try {
-        const { userId } = req.body;
-        const user = await db.toggleDarkMode(userId);
-        res.json(user);
     } catch (error) {
         next(error); // Pass error to error handling middleware
     }
