@@ -23,6 +23,11 @@ const addUser = async (username, rating, walletAddress, darkMode) => {
     return rows;
 }
 
+const getUsers = async () => {
+    const { rows } = await client.query('SELECT * FROM users');
+    return rows;
+}
+
 const getUserById = async (userId) => {
     const { rows } = await client.query('SELECT * FROM users WHERE user_id = $1', [userId]);
     return rows.length > 0 ? rows[0] : null;
@@ -106,6 +111,11 @@ const updateWinner = async (gameId, winnerId) => {
     return rows;
 }
 
+const getGames = async () => {
+    const { rows } = await client.query('SELECT * FROM games');
+    return rows;
+}
+
 const getGameById = async (gameId) => {
     const { rows } = await client.query('SELECT * FROM games WHERE game_id = $1', [gameId]);
     return rows[0];
@@ -125,6 +135,7 @@ module.exports = {
     connectToDatabase: handleErrors(connectToDatabase),
     getConfig: handleErrors(getConfig),
     addUser: handleErrors(addUser),
+    getUsers: handleErrors(getUsers),
     getUserById: handleErrors(getUserById),
     getUserByLichessHandle: handleErrors(getUserByLichessHandle),
     getUserByWalletAddress: handleErrors(getUserByWalletAddress),
@@ -139,6 +150,7 @@ module.exports = {
     updateLichessId: handleErrors(updateLichessId),
     updateRewardPool: handleErrors(updateRewardPool),
     updateWinner: handleErrors(updateWinner),
+    getGames: handleErrors(getGames),
     getGameById: handleErrors(getGameById),
     getRewardPool: handleErrors(getRewardPool),
     toggleDarkMode

@@ -236,6 +236,15 @@ router.post('/playGame', async (req, res, next) => {
     }
 });
 
+router.get('/games', async (req, res, next) => {
+    try {
+        const games = await db.getGames();
+        res.json(games);
+    } catch (error) {
+        next(error); // Pass error to error handling middleware
+    }
+});
+
 router.get('/game/:gameId', async (req, res, next) => {
     try {
         const gameId = req.params.gameId;
@@ -278,6 +287,15 @@ router.post('/cancelGame', async (req, res, next) => {
         // update the game state in the database
         await db.updateGameState(gameId, -1);
         res.json({ message: 'Game cancelled successfully' });
+    } catch (error) {
+        next(error); // Pass error to error handling middleware
+    }
+});
+
+router.get('/users', async (req, res, next) => {
+    try {
+        const users = await db.getUsers();
+        res.json(users);
     } catch (error) {
         next(error); // Pass error to error handling middleware
     }
