@@ -15,7 +15,13 @@ const finishGame = async (contractAddress, winnerAddress) => {
     await contract.finishGame(winnerAddress);
 }
 
+const getContractBalance = async (contractAddress) => {
+    const balance = await provider.getBalance(contractAddress);
+    return balance;
+}
+
 module.exports = {
     cancelGame,
-    finishGame
+    finishGame,
+    getContractBalance // Add the new function to export
 };

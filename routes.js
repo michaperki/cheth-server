@@ -581,4 +581,32 @@ router.get('/onlineUsersCount', (req, res) => {
     res.json({ count: wss.clients.size }); // Return the number of connected clients
 });
 
+// Route to refresh data
+router.get('/refreshContractBalances', async (req, res, next) => {
+    try {
+        // Get all game contracts from the database
+        const games = await db.getGames();
+
+        // Iterate over each game and update the reward pool
+        for (const game of games) {
+            // if the game reward pool is not 0
+            if (game.reward_pool === '0') {
+                continue; 
+            }  
+            const contractAddress = game.contract_address;
+
+            // Get the balance of the contract
+            const balance = await chessContract.getContractBalance(contractAddress);
+
+            // Update the reward pool in the database with the contract balance
+            await db.updateRewardPool(game.game_id, balance.toString());
+        }
+
+        // Send a success response
+        res.json({ message: 'Data refreshed successfully' });
+    } catch (error) {
+        next(error); // Pass error to error handling middleware
+    }
+});
+
 module.exports = router;
