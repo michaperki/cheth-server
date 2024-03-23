@@ -398,13 +398,13 @@ router.post('/createChallenge', async (req, res, next) => {
 
 function parseGameInfo(gameInfo) {
     console.log('parseGameInfo function');
-    
+
     // Split the response text by line breaks
     const lines = gameInfo.split('\n');
-    
+
     // Initialize an object to store the extracted information
     const parsedInfo = {};
-    
+
     // Iterate over each line and parse the key-value pairs
     lines.forEach(line => {
         // Extract key-value pairs using regex
@@ -415,7 +415,7 @@ function parseGameInfo(gameInfo) {
             parsedInfo[key] = value;
         }
     });
-    
+
     return parsedInfo;
 }
 
@@ -442,11 +442,11 @@ router.post('/reportGameOver', async (req, res, next) => {
         }
         const responseText = await response.text();
         console.log('Response Text:', responseText);
-        
+
         // Process the response text and extract necessary information
         const gameInfo = parseGameInfo(responseText);
         console.log('Game Info:', gameInfo);
-        
+
         // Determine the winner and get their handle
         const winner = gameInfo.Result === '1-0' ? 'White' : gameInfo.Result === '0-1' ? 'Black' : 'Draw';
         const winningPlayerHandle = winner === 'White' ? gameInfo.White : winner === 'Black' ? gameInfo.Black : null;
@@ -473,7 +473,7 @@ router.post('/reportGameOver', async (req, res, next) => {
             console.log('winningPlayerHandle', winningPlayerHandle);
             console.log('gameId', gameId);
             console.log('game', game);
-            
+
             // Update the game state in the database
             await db.updateGameState(gameId, 5);
         });
@@ -488,9 +488,55 @@ router.post('/reportGameOver', async (req, res, next) => {
                 client.send(JSON.stringify({ type: 'GAME_OVER', gameId, winner: winningPlayerHandle }));
             }
         });
-        
+
         // Send the winning player's handle as the response
         res.json({ winner: winningPlayerHandle });
+    } catch (error) {
+        next(error); // Pass error to error handling middleware
+    }
+});
+
+router.post('/forceDraw', async (req, res, next) => {
+    console.log('/forceGameOver route');
+    try {
+        const { gameId } = req.body;
+        console.log('gameId', gameId);
+        const game = await db.getGameById(gameId);
+        if (!game) {
+            return res.status(404).json({ error: 'Game not found' });
+        }
+        console.log('game', game);
+
+        const contractAddress = game.contract_address;
+        const gameContract = new ethers.Contract(contractAddress, chessContractAbi.abi, signer);
+
+        // subscribe to the GameFinished event
+        //            emit GameFinished(_winner, winnings);
+        gameContract.once('GameFinished', async (winner, winnings) => {
+            console.log('GameFinished event received');
+            console.log('winner', winner);
+            console.log('winnings', winnings);
+            console.log('contractAddress', contractAddress);
+            console.log('gameId', gameId);
+            console.log('game', game);
+
+            // Update the game state in the database
+            await db.updateGameState(gameId, 5);
+        });
+
+        // Finish the game in the contract and distribute funds
+        // use the clause in the contract for draWS --         
+        // if (_winner == address(0)) {
+        // how to send the address(0) as the winner?
+
+        await chessContract.finishGame(contractAddress, '0x0000000000000000000000000000000000000000');
+        // Send the draw message to the clients
+        req.wss.clients.forEach(client => {
+            if (client.readyState === WebSocket.OPEN) {
+                client.send(JSON.stringify({ type: 'GAME_OVER', gameId, winner: 'Draw' }));
+            }
+        });
+        res.json({ winner: 'Draw' });
     } catch (error) {
         next(error); // Pass error to error handling middleware
     }
