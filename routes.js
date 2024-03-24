@@ -297,10 +297,13 @@ router.post('/cancelGame', async (req, res, next) => {
             console.log('Recipient:', to);
             console.log('Amount:', amount);
 
+            // Convert BigInt amount to string
+            const amountString = amount.toString();
+
             // send a message to the client
             req.wss.clients.forEach(client => {
                 if (client.readyState === WebSocket.OPEN) {
-                    client.send(JSON.stringify({ type: 'FUNDS_TRANSFERRED', to, amount })); // Send the message
+                    client.send(JSON.stringify({ type: 'FUNDS_TRANSFERRED', to, amount: amountString })); // Send the message with amount as string
                 }
             });
 
@@ -322,6 +325,7 @@ router.post('/cancelGame', async (req, res, next) => {
         next(error); // Pass error to error handling middleware
     }
 });
+
 
 router.get('/users', async (req, res, next) => {
     try {
