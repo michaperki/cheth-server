@@ -605,7 +605,7 @@ router.get('/ethToUsd', async (req, res, next) => {
             throw new Error('Failed to fetch ETH to USD exchange rate');
         }
         const data = await response.json();
-        res.json(data.ethereum.usd);
+        res.json(data.USD);
     } catch (error) {
         next(error); // Pass error to error handling middleware
     }
