@@ -583,6 +583,7 @@ router.get('/onlineUsersCount', (req, res) => {
 
 // Refresh a specific game's contract balance
 router.post('/refreshContractBalance', async (req, res, next) => {
+    console.log('/refreshContractBalance route');
     try {
         const gameId = req.body.gameId;
         const game = await db.getGameById(gameId);
@@ -590,8 +591,16 @@ router.post('/refreshContractBalance', async (req, res, next) => {
             return res.status(404).json({ error: 'Game not found' });
         }
 
+        console.log('game', game);
+
         const contractAddress = game.contract_address;
+        // if the contract address is null, then the contract has not been created, so return an error
+        if (!contractAddress) {
+            return res.status(400).json({ error: 'Contract not created' });
+        }
+        console.log('contractAddress', contractAddress);
         const balance = await chessContract.getContractBalance(contractAddress);
+        console.log('balance', balance);
         await db.updateRewardPool(gameId, balance.toString());
         res.json({ message: 'Data refreshed successfully' });
     } catch (error) {
