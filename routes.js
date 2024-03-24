@@ -275,17 +275,41 @@ router.post('/cancelGamePairing', async (req, res, next) => {
 });
 
 router.post('/cancelGame', async (req, res, next) => {
-    console.log('/cancelGame route')
+    console.log('/cancelGame route');
     try {
         const gameId = req.body.gameId;
         const game = await db.getGameById(gameId);
         if (!game) {
             return res.status(404).json({ error: 'Game not found' });
         }
+
         const contractAddress = game.contract_address;
+        if (!contractAddress) {
+            return res.status(400).json({ error: 'Contract address not found' });
+        }
+
+        // Instantiate the contract
+        const currentGameContract = new ethers.Contract(contractAddress, chessContractAbi.abi, signer);
+
+        // Subscribe to the FundsTransferred event
+        currentGameContract.once('FundsTransferred', async (to, amount) => {
+            console.log('FundsTransferred event received');
+            console.log('Recipient:', to);
+            console.log('Amount:', amount);
+
+            // Update the reward pool in the database (subtract the amount)
+            const currentRewardPool = await db.getRewardPool(gameId);
+            const newRewardPool = Number(currentRewardPool) - Number(amount);
+            await db.updateRewardPool(gameId, newRewardPool);
+        });
+
+        // Cancel the game in the contract
         await chessContract.cancelGame(contractAddress);
-        // update the game state in the database
+
+        // Update the game state in the database
         await db.updateGameState(gameId, -1);
+
+        // Send a confirmation message to the client
         res.json({ message: 'Game cancelled successfully' });
     } catch (error) {
         next(error); // Pass error to error handling middleware
