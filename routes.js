@@ -296,6 +296,16 @@ router.post('/cancelGame', async (req, res, next) => {
             console.log('FundsTransferred event received');
             console.log('Recipient:', to);
             console.log('Amount:', amount);
+            // Send a message to the client
+            // get the user id for the recipient
+            const recipient = await db.getUserByWalletAddress(to);
+            console.log('recipient', recipient);
+            // send a message to the recipient
+            req.wss.clients.forEach(client => {
+                if (client.readyState === WebSocket.OPEN) {
+                    client.send(JSON.stringify({ type: 'FUNDS_RETURNED', gameId, recipient: recipient.username }));
+                }
+            });
 
             // Update the reward pool in the database (subtract the amount)
             const currentRewardPool = await db.getRewardPool(gameId);
