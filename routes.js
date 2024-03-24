@@ -296,20 +296,11 @@ router.post('/cancelGame', async (req, res, next) => {
             console.log('FundsTransferred event received');
             console.log('Recipient:', to);
             console.log('Amount:', amount);
-            // Send a message to the client
-            // get the user id for the recipient
-            // log the type of to
-            console.log('typeof address in cancelGame', typeof to);
-            const recipient = await db.getUserByWalletAddress(to);
-            // to is the wallet address of the recipient
-            // but the recipient is the user object
-            // why is the get user by wallet address not returning the user object?
-            // do we need to conv
-            console.log('recipient', recipient);
-            // send a message to the recipient
+
+            // send a message to the client
             req.wss.clients.forEach(client => {
                 if (client.readyState === WebSocket.OPEN) {
-                    client.send(JSON.stringify({ type: 'FUNDS_RETURNED', gameId, recipient: recipient.username }));
+                    client.send(JSON.stringify({ type: 'FUNDS_TRANSFERRED', to, amount })); // Send the message
                 }
             });
 
@@ -352,10 +343,6 @@ router.post('/getUser', async (req, res, next) => {
         } else if (req.body.walletAddress) {
             // If walletAddress is provided, fetch user by wallet address
             const walletAddress = req.body.walletAddress;
-            // log the wallet address
-            console.log('walletAddress', walletAddress);
-            // log the type of wallet address
-            console.log('typeof walletAddress in getUser', typeof walletAddress);
             user = await db.getUserByWalletAddress(walletAddress);
         } else {
             return res.status(400).json({ error: 'Missing userId or walletAddress in request body' });
