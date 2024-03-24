@@ -600,7 +600,7 @@ router.post('/deleteGame', async (req, res, next) => {
 // ethToUsd route
 router.get('/ethToUsd', async (req, res, next) => {
     try {
-        const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd');
+        const response = await fetch('https://min-api.cryptocompare.com/data/price?fsym=ETH&tsyms=USD');
         if (!response.ok) {
             throw new Error('Failed to fetch ETH to USD exchange rate');
         }
