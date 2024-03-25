@@ -20,6 +20,10 @@ module.exports = function websocket(server) {
             const data = JSON.parse(message);
             switch (data.type) {
                 // Handle other message types if needed
+                case 'PING':
+                    console.log('Received ping from client');
+                    ws.send(JSON.stringify({ type: 'PONG' }));
+                    break;
                 default:
                     console.log("Unknown message type received");
             }
