@@ -4,13 +4,9 @@ const cors = require('cors');
 const db = require('./db');
 const http = require('http');
 const websocket = require('./websocket'); // Import the websocket function
-const gameRoutes = require('./routes/gameRoutes');
-const userRoutes = require('./routes/userRoutes');
-const utilityRoutes = require('./routes/utilityRoutes');
-const cryptoRoutes = require('./routes/cryptoRoutes');
-
 const app = express();
 const server = http.createServer(app);
+const router = require('./routes');
 
 app.use(express.json());
 
@@ -30,11 +26,8 @@ app.use((req, res, next) => {
     next();
 });
 
-app.use('/game', gameRoutes);
-app.use('/user', userRoutes);
-app.use('/utility', utilityRoutes);
-app.use('/crypto', cryptoRoutes);
 
+app.use(router);
 
 const PORT = process.env.PORT || 5000;
 
