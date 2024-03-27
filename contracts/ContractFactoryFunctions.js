@@ -4,8 +4,8 @@ const db = require('../db'); // Import your database module
 
 const contractAddress = abi.networks[process.env.CHAIN_ID].address;
 const privateKey = process.env.SEPOLIA_PRIVATE_KEY;
-const wallet = new ethers.Wallet(privateKey);
 const provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
+const wallet = new ethers.Wallet(privateKey);
 const signer = wallet.connect(provider);
 const contract = new ethers.Contract(contractAddress, abi.abi, signer);
 
@@ -25,6 +25,7 @@ const createGame = async (gameId) => {
         // Wait for the transaction to be mined
         console.log("Waiting for the transaction to be mined...");
         const receipt = await tx.wait();
+        console.log(receipt);
         console.log("Transaction was mined!");
         
         return "Game created successfully!";

@@ -3,15 +3,17 @@
 const db = require('../db');
 const WebSocket = require('ws');
 const ethers = require('ethers');
-const chessContractAbi = require('../abis/Chess.json');
-const chessContract = require('../contracts/ChessContractFunctions');
-const factoryContractAbi = require('../abis/ChessFactory.json');
-const factoryContractAddress = factoryContractAbi.networks[process.env.CHAIN_ID].address;
-const contractFactoryFunctions = require('../contracts/ContractFactoryFunctions');
-const provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
-const signer = new ethers.Wallet(process.env.SEPOLIA_PRIVATE_KEY, provider);
-const factoryContract = new ethers.Contract(factoryContractAddress, factoryContractAbi.abi, signer);
 
+const chessContractAbi = require('../abis/Chess.json');
+const factoryContractAbi = require('../abis/ChessFactory.json');
+const chessContract = require('../contracts/ChessContractFunctions');
+const contractFactoryFunctions = require('../contracts/ContractFactoryFunctions');
+const factoryContractAddress = factoryContractAbi.networks[process.env.CHAIN_ID].address;
+const provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
+const privateKey = process.env.SEPOLIA_PRIVATE_KEY;
+const wallet = new ethers.Wallet(privateKey);
+const signer = wallet.connect(provider);
+const factoryContract = new ethers.Contract(factoryContractAddress, factoryContractAbi.abi, signer);
 
 const GameController = {
     async playGame(req, res, next) {
@@ -101,6 +103,8 @@ const GameController = {
 
 
         };
+
+        console.log('factoryContract', factoryContract);
 
         // Add the event handler
         factoryContract.on('GameCreated', handleGameCreated);
