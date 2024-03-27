@@ -127,7 +127,7 @@ const GameController = {
 
     async getGame(req, res, next) {
         try {
-            const gameId = req.body.gameId; // Retrieve gameId from request body
+            const gameId = req.query.gameId; // Retrieve gameId from query parameters
             const gameInfo = await db.getGameById(gameId);
             if (!gameInfo) {
                 return res.status(404).json({ error: 'Game not found' });
