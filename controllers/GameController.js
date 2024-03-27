@@ -127,13 +127,12 @@ const GameController = {
 
     async getGame(req, res, next) {
         try {
-            const gameId = req.query.gameId; // Retrieve gameId from query parameters
-            const gameInfo = await db.getGameById(gameId);
-            if (!gameInfo) {
+            const gameId = req.params.gameId;
+            const game = await db.getGameById(gameId);
+            if (!game) {
                 return res.status(404).json({ error: 'Game not found' });
-            } else {
-                res.json(gameInfo);
             }
+            res.json(game);
         } catch (error) {
             next(error); // Pass error to error handling middleware
         }
