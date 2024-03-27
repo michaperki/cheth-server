@@ -5,7 +5,7 @@ const GameController = require('../controllers/GameController');
 
 router.post('/playGame', GameController.playGame);
 // getGame route
-router.get('/getGame', GameController.getGame);
+router.post('/getGame', GameController.getGame);
 // getGames route
 router.get('/getGames', GameController.getGames);
 // cancel game pairing route
