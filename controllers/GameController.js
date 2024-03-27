@@ -56,6 +56,9 @@ const GameController = {
                 }
             });
 
+            // Instantiate the contract
+            const gameContract = new ethers.Contract(game, chessContractAbi.abi, signer);
+
             // Subscribe to GameJoined event
             console.log('subscribing to GameJoined event');
             // there will be two GameJoined events, one for each player
