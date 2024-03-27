@@ -4,10 +4,10 @@ const db = require('../db');
 const WebSocket = require('ws');
 const ethers = require('ethers');
 const chessContractAbi = require('../abis/Chess.json');
-const chessContract = require('../contracts/Chess');
+const chessContract = require('../contracts/ChessContractFunctions');
 const factoryContractAbi = require('../abis/ChessFactory.json');
 const factoryContractAddress = factoryContractAbi.networks[process.env.CHAIN_ID].address;
-const factoryContractFunctions = require('../contractFactory');
+const contractFactoryFunctions = require('../contracts/ContractFactoryFunctions');
 const provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
 const signer = new ethers.Wallet(process.env.SEPOLIA_PRIVATE_KEY, provider);
 const factoryContract = new ethers.Contract(factoryContractAddress, factoryContractAbi.abi, signer);
@@ -53,7 +53,6 @@ const GameController = {
                     client.send(JSON.stringify({ type: 'CONTRACT_READY', gameId: dbGame.game_id }));
                 }
             });
-            const gameContract = new ethers.Contract(game, chessContractAbi.abi, signer);
 
             // Subscribe to GameJoined event
             console.log('subscribing to GameJoined event');
@@ -107,7 +106,7 @@ const GameController = {
         factoryContract.on('GameCreated', handleGameCreated);
 
         // Call the function to create a new game
-        factoryContractFunctions.createGame(dbGame.game_id);
+        contractFactoryFunctions.createGame(dbGame.game_id);
 
         const message = JSON.stringify({ type: 'START_GAME', gameId: dbGame.game_id });
         // Broadcasting the message to all connected WebSocket clients
