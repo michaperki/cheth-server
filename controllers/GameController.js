@@ -137,7 +137,7 @@ const GameController = {
             next(error); // Pass error to error handling middleware
         }
     },
-
+    
     async getGames(req, res, next) {
         try {
             const games = await db.getGames();
