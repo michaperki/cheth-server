@@ -29,7 +29,6 @@ const getUsers = async () => {
 }
 
 const getUserById = async (userId) => {
-    console.log('userId:', userId);
     const { rows } = await client.query('SELECT * FROM users WHERE user_id = $1', [userId]);
     return rows.length > 0 ? rows[0] : null;
 }
@@ -40,7 +39,6 @@ const getUserByLichessHandle = async (lichessHandle) => {
 }
 
 const getUserByWalletAddress = async (walletAddress) => {
-    console.log('walletAddress:', walletAddress);
     const { rows } = await client.query('SELECT * FROM users WHERE wallet_address = $1', [walletAddress]);
     return rows.length > 0 ? rows[0] : null;
 }
