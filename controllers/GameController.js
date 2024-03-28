@@ -100,8 +100,8 @@ const GameController = {
                 // get the lichess handles of the players
                 // the dbGame has the player ids, get the lichess handles of the players
                 // from the db using the player ids
-                const player1 = db.getUserById(dbGame.player1_id);
-                const player2 = db.getUserById(dbGame.player2_id);
+                const player1 = await db.getUserById(dbGame.player1_id);
+                const player2 = await db.getUserById(dbGame.player2_id);
                 console.log('player1', player1);
                 console.log('player2', player2);
 
