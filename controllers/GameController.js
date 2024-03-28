@@ -8,6 +8,7 @@ const chessContractAbi = require('../abis/Chess.json');
 const factoryContractAbi = require('../abis/ChessFactory.json');
 const chessContract = require('../contracts/ChessContractFunctions');
 const contractFactoryFunctions = require('../contracts/ContractFactoryFunctions');
+const { createChallenge } = require('../utils/lichessUtils');
 const factoryContractAddress = factoryContractAbi.networks[process.env.CHAIN_ID].address;
 const provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
 const privateKey = process.env.SEPOLIA_PRIVATE_KEY;
@@ -94,6 +95,24 @@ const GameController = {
                 console.log('entryFee', entryFee);
                 console.log('dbGame.game_id', dbGame.game_id);
                 console.log('dbCreator', dbGame.creator);
+
+                // create a challenge on lichess
+                // get the lichees handle of the white and black players
+                const whitePlayer = await db.getUserByWalletAddress(white);
+                const blackPlayer = await db.getUserByWalletAddress(black);
+                
+                const whiteHandle = whitePlayer.username;
+                const blackHandle = blackPlayer.username;
+                console.log('whiteHandle', whiteHandle);
+                console.log('blackHandle', blackHandle);
+
+                const challengeData = await createChallenge(whiteHandle, blackHandle);
+                console.log('challengeData', challengeData);
+
+                // update the lichess_id in the database
+                await db.updateLichessId(dbGame.game_id, challengeData.challenge.id);
+
+
                 await db.updateGameState(dbGame.game_id, 4);
 
                 // Broadcasting the message to all connected WebSocket clients
