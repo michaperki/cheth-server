@@ -40,6 +40,7 @@ const getUserByLichessHandle = async (lichessHandle) => {
 }
 
 const getUserByWalletAddress = async (walletAddress) => {
+    console.log('walletAddress:', walletAddress);
     const { rows } = await client.query('SELECT * FROM users WHERE wallet_address = $1', [walletAddress]);
     return rows.length > 0 ? rows[0] : null;
 }
