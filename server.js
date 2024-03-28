@@ -4,13 +4,23 @@ const cors = require('cors');
 const db = require('./db');
 const http = require('http');
 const websocket = require('./websocket'); // Import the websocket function
+const pino = require('pino'); // Import Pino
+const expressPino = require('pino-http'); // Import Pino-HTTP for Express
+
 const app = express();
 const server = http.createServer(app);
 const router = require('./routes');
-// import middleware
 
+// Create a Pino logger instance
+const logger = pino({
+    level: 'info' // Set log level to 'info' (default is 'info')
+});
+
+// Create an Express middleware with Pino logger
+const expressLogger = expressPino({ logger });
 
 app.use(express.json());
+app.use(expressLogger); // Use Pino middleware for logging
 
 const corsOptions = {
     origin: process.env.CORS_ORIGIN,
@@ -33,15 +43,15 @@ app.use(router);
 const PORT = process.env.PORT || 5000;
 
 server.listen(PORT, () => {
-    console.log(`Server listening on port ${PORT}`);
+    logger.info(`Server listening on port ${PORT}`);
 });
 
 db.connectToDatabase(
     () => {
-        console.log('Connected to the database');
+        logger.info('Connected to the database');
     },
     (error) => {
-        console.error('Error connecting to the database:', error);
+        logger.error('Error connecting to the database:', error);
     }
 );
 

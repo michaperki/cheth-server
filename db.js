@@ -1,5 +1,12 @@
+const pino = require('pino'); // Import Pino
+
 // errorHandlingMiddleware.js
 const handleErrors = require('./middleware/errorHandlingMiddleware');
+
+const logger = pino({
+    level: 'info' // Set log level to 'info' (default is 'info')
+});
+
 const { Client } = require('pg');
 const client = new Client({
     connectionString: process.env.DATABASE_URL,
@@ -10,7 +17,7 @@ const client = new Client({
 
 const connectToDatabase = async () => {
     await client.connect();
-    console.log('Connected to the database');
+    logger.info('Connected to the database');
 };
 
 const getConfig = async () => {
