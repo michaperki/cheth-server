@@ -9,14 +9,33 @@ const wallet = new ethers.Wallet(privateKey);
 const signer = wallet.connect(provider);
 const contract = new ethers.Contract(contractAddress, abi.abi, signer);
 
+
+const getEthToUsd = async () => {
+    try {
+        const url = "https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd";
+        const response = await fetch(url);
+        const data = await response.json();
+        return data.ethereum.usd;
+    } catch (error) {
+        console.error("Error getting ETH to USD:", error);
+        throw error;
+    }
+}
+
 const createGame = async (gameId) => {
     try {
-        // Convert entry fee and commission to wei
-        const entryFeeInEther = ethers.parseEther("0.01");
+        const ethToUsd = await getEthToUsd();
+        console.log("ETH to USD:", ethToUsd);
+
+        // Calculate the entry fee in ether
+        const entryFeeInUsd = 5;
+        const entryFeeInEther = (entryFeeInUsd / ethToUsd).toFixed(18); // Round to 18 decimal places
+        console.log("Entry fee in ether:", entryFeeInEther);
+
         const commission = 5;
 
         // Send the transaction to create the game
-        const tx = await contract.createGame(entryFeeInEther, commission);
+        const tx = await contract.createGame(ethers.parseEther(entryFeeInEther), commission);
         console.log("Transaction hash:", tx.hash);
         
         // Save the transaction hash to the database
