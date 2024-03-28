@@ -91,6 +91,15 @@ const UserController = {
         }
     },
 
+    async getUserById(req, res, next) {
+        try {
+            const userId = req.params.userId;
+            const user = await db.getUserById(userId);
+            res.json(user);
+        } catch (error) {
+            next(error); // Pass error to error handling middleware
+        }
+    },
 };
 
 module.exports = UserController;

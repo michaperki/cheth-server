@@ -103,8 +103,6 @@ const GameController = {
                     }
                 });
             });
-
-
         };
 
         console.log('factoryContract', factoryContract);
@@ -137,7 +135,7 @@ const GameController = {
             next(error); // Pass error to error handling middleware
         }
     },
-    
+
     async getGames(req, res, next) {
         try {
             const games = await db.getGames();
@@ -382,3 +380,8 @@ const GameController = {
 };
 
 module.exports = GameController;
+
+
+// Suggestions for improvement:
+// - Add error handling middleware to handle errors in a centralized way.
+//

@@ -7,5 +7,6 @@ router.post('/checkEligibility', UserController.checkEligibility);
 router.post('/addUser', UserController.addUser);
 router.post('/checkUser', UserController.checkUser);
 router.post('/getUser', UserController.getUser);
+router.post(':userId', UserController.getUserById);
 
 module.exports = router;
