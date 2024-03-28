@@ -100,6 +100,8 @@ const GameController = {
                 // get the lichees handle of the white and black players
                 const whitePlayer = await db.getUserByWalletAddress(white);
                 const blackPlayer = await db.getUserByWalletAddress(black);
+                console.log('whitePlayer', whitePlayer);
+                console.log('blackPlayer', blackPlayer);
                 
                 const whiteHandle = whitePlayer.username;
                 const blackHandle = blackPlayer.username;
