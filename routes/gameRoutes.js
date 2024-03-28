@@ -4,8 +4,6 @@ const router = express.Router();
 const GameController = require('../controllers/GameController');
 
 router.post('/playGame', GameController.playGame);
-// getGame route
-router.get('/:gameId', GameController.getGame);
 // getGames route
 router.get('/getGames', GameController.getGames);
 // cancel game pairing route
@@ -16,5 +14,7 @@ router.post('/cancelGame', GameController.cancelGame);
 router.post('/deleteGame', GameController.deleteGame);
 // refresh contract balance route
 router.post('/refreshContractBalance', GameController.refreshContractBalance);
+// getGame route
+router.get('/:gameId', GameController.getGame);
 
 module.exports = router;
