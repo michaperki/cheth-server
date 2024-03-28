@@ -7,8 +7,15 @@ const logger = pino({
     transport: {
         target: 'pino-pretty'
     },
+    
     redact: {
-        paths: ['req.headers', 'req.connection.remoteAddress'], // Redact sensitive information
+        paths: [
+            'req.headers', 
+            'req.connection.remoteAddress',
+            'req.connection.remotePort',
+            'req.connection.remoteAddress',
+            'res.headers',
+            ], // Redact sensitive information
         remove: true, // Remove the redacted fields completely from the log
     },
 });
