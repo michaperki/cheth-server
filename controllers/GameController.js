@@ -100,15 +100,17 @@ const GameController = {
                 // get the lichess handles of the players
                 // the dbGame has the player ids, get the lichess handles of the players
                 // from the db using the player ids
-                const whiteUser = await db.getUserById(white);
-                const blackUser = await db.getUserById(black);
-                const whiteHandle = whiteUser.username;
-                const blackHandle = blackUser.username;
-                console.log('whiteHandle', whiteHandle);
-                console.log('blackHandle', blackHandle);
+                const player1 = db.getUsersById(dbGame.player1_id);
+                const player2 = db.getUsersById(dbGame.player2_id);
+                console.log('player1', player1);
+                console.log('player2', player2);
 
+                const username1 = player1.username;
+                const username2 = player2.username;
+                console.log('username1', username1);
+                console.log('username2', username2);
 
-                const challengeData = await createChallenge(whiteHandle, blackHandle);
+                const challengeData = await createChallenge(username1, username2);
                 console.log('challengeData', challengeData);
 
                 // update the lichess_id in the database
