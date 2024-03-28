@@ -1,7 +1,7 @@
 // controllers/UserController.js (Controller for user-related operations)
 const db = require('../db');
 const { fetchLichessUserInfo } = require('../utils/lichessUtils');
-
+const { logger } = require('../utils/LoggerUtils'); // Import the logger instance and expressLogger middleware
 const UserController = {
     async checkEligibility(req, res, next) {
         try {
@@ -65,7 +65,7 @@ const UserController = {
         }
     },
     async checkUser(req, res, next) {
-        console.log('/checkUser route')
+        logger.info('Checking user');
         try {
             const walletAddress = req.body.walletAddress;
             const userExists = await db.getUserByWalletAddress(walletAddress);

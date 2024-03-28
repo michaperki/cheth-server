@@ -1,4 +1,5 @@
 const WebSocket = require('ws');
+const { logger } = require('./utils/LoggerUtils'); // Import the logger instance and expressLogger middleware
 
 let onlineUsers = 0; // Initialize the online user count
 
@@ -6,12 +7,12 @@ module.exports = function websocket(server) {
     const wss = new WebSocket.Server({ server });
 
     wss.on('connection', async ws => {
-        console.log('Client connected');
+        logger.info('Client connected');
         onlineUsers++; // Increment the online user count when a client connects
         broadcastOnlineUsers(); // Broadcast the updated online user count to all clients
 
         ws.on('close', () => {
-            console.log('Client disconnected');
+            logger.info('Client disconnected');
             onlineUsers--; // Decrement the online user count when a client disconnects
             broadcastOnlineUsers(); // Broadcast the updated online user count to all clients
         });
@@ -21,11 +22,12 @@ module.exports = function websocket(server) {
             switch (data.type) {
                 // Handle other message types if needed
                 case 'PING':
-                    console.log('Received ping from client');
+                    logger.info('Received PING message');
                     ws.send(JSON.stringify({ type: 'PONG' }));
                     break;
                 default:
-                    console.log("Unknown message type received");
+                    logger.info('Received unknown message type:', data.type);
+                    break;
             }
         });
     });

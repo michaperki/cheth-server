@@ -1,11 +1,6 @@
-const pino = require('pino'); // Import Pino
-
 // errorHandlingMiddleware.js
 const handleErrors = require('./middleware/errorHandlingMiddleware');
-
-const logger = pino({
-    level: 'info' // Set log level to 'info' (default is 'info')
-});
+const { logger } = require('./utils/LoggerUtils'); // Import the logger instance and expressLogger middleware
 
 const { Client } = require('pg');
 const client = new Client({

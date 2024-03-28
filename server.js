@@ -4,20 +4,12 @@ const cors = require('cors');
 const db = require('./db');
 const http = require('http');
 const websocket = require('./websocket'); // Import the websocket function
-const pino = require('pino'); // Import Pino
-const expressPino = require('pino-http'); // Import Pino-HTTP for Express
+const { logger, expressLogger } = require('./utils/LoggerUtils'); // Import the logger instance and expressLogger middleware
+const router = require('./routes');
 
 const app = express();
 const server = http.createServer(app);
-const router = require('./routes');
 
-// Create a Pino logger instance
-const logger = pino({
-    level: 'info' // Set log level to 'info' (default is 'info')
-});
-
-// Create an Express middleware with Pino logger
-const expressLogger = expressPino({ logger });
 
 app.use(express.json());
 app.use(expressLogger); // Use Pino middleware for logging
@@ -37,6 +29,18 @@ app.use((req, res, next) => {
     req.wss = wss;
     next();
 });
+
+// Custom middleware for logging only necessary requests
+app.use((req, res, next) => {
+    if (req.originalUrl !== '/crypto/ethToUsd') {
+        logger.info('Request completed', {
+            req,
+            res
+        });
+    }
+    next();
+});
+
 
 app.use(router);
 
