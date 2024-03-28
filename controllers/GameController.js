@@ -97,16 +97,16 @@ const GameController = {
                 console.log('dbCreator', dbGame.creator);
 
                 // create a challenge on lichess
-                // get the lichees handle of the white and black players
-                const whitePlayer = await db.getUserByWalletAddress(white);
-                const blackPlayer = await db.getUserByWalletAddress(black);
-                console.log('whitePlayer', whitePlayer);
-                console.log('blackPlayer', blackPlayer);
-                
-                const whiteHandle = whitePlayer.username;
-                const blackHandle = blackPlayer.username;
+                // get the lichess handles of the players
+                // the dbGame has the player ids, get the lichess handles of the players
+                // from the db using the player ids
+                const whiteUser = await db.getUserById(white);
+                const blackUser = await db.getUserById(black);
+                const whiteHandle = whiteUser.username;
+                const blackHandle = blackUser.username;
                 console.log('whiteHandle', whiteHandle);
                 console.log('blackHandle', blackHandle);
+
 
                 const challengeData = await createChallenge(whiteHandle, blackHandle);
                 console.log('challengeData', challengeData);
