@@ -105,6 +105,7 @@ const GameController = {
                 console.log('entryFee', entryFee);
                 console.log('dbGame.game_id', dbGame.game_id);
                 console.log('dbCreator', dbGame.creator);
+                console.log('dbGame.time_control', dbGame.time_control);
 
                 // create a challenge on lichess
                 // get the lichess handles of the players
@@ -120,7 +121,7 @@ const GameController = {
                 console.log('username1', username1);
                 console.log('username2', username2);
 
-                const challengeData = await createChallenge(username1, username2);
+                const challengeData = await createChallenge(username1, username2, dbGame.time_control);
                 console.log('challengeData', challengeData);
 
                 // update the lichess_id in the database
