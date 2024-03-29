@@ -17,4 +17,6 @@ router.post('/refreshContractBalance', GameController.refreshContractBalance);
 // getGame route
 router.get('/:gameId', GameController.getGame);
 
+router.post('/reportGameOver', GameController.reportGameOver);
+
 module.exports = router;
