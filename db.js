@@ -133,6 +133,18 @@ const toggleDarkMode = async (userId) => {
     return rows[0];
 }
 
+const getGameCount = async () => {
+    logger.info('Fetching game count...');
+    const { rows } = await client.query('SELECT COUNT(*) FROM games');
+    return rows[0].count;
+}
+
+const getTotalWagered = async () => {
+    logger.info('Fetching total wagered amount...');
+    const { rows } = await client.query('SELECT SUM(reward_pool) FROM games');
+    return rows[0].sum;
+}
+
 module.exports = {
     connectToDatabase: handleErrors(connectToDatabase),
     getConfig: handleErrors(getConfig),
@@ -155,5 +167,7 @@ module.exports = {
     getGames: handleErrors(getGames),
     getGameById: handleErrors(getGameById),
     getRewardPool: handleErrors(getRewardPool),
-    toggleDarkMode
+    toggleDarkMode: handleErrors(toggleDarkMode),
+    getGameCount: handleErrors(getGameCount),
+    getTotalWagered: handleErrors(getTotalWagered)
 };

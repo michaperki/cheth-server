@@ -15,8 +15,12 @@ router.post('/deleteGame', GameController.deleteGame);
 // refresh contract balance route
 router.post('/refreshContractBalance', GameController.refreshContractBalance);
 // getGame route
-router.get('/:gameId', GameController.getGame);
-
 router.post('/reportGameOver', GameController.reportGameOver);
+
+router.get('/getGameCount', GameController.getGameCount);
+
+router.get('/getTotalWagered', GameController.getTotalWagered);
+
+router.get('/:gameId', GameController.getGame);
 
 module.exports = router;

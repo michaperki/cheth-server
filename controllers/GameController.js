@@ -399,7 +399,25 @@ const GameController = {
         } catch (error) {
             next(error); // Pass error to error handling middleware
         }
-    }
+    },
+
+    async getGameCount(req, res, next) {
+        try {
+            const gameCount = await db.getGameCount();
+            res.json({ count: gameCount });
+        } catch (error) {
+            next(error); // Pass error to error handling middleware
+        }
+    },
+
+    async getTotalWagered(req, res, next) {
+        try {
+            const totalWagered = await db.getTotalWagered();
+            res.json({ totalWagered });
+        } catch (error) {
+            next(error); // Pass error to error handling middleware
+        }
+    },
 };
 
 module.exports = GameController;
