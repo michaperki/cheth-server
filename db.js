@@ -45,13 +45,13 @@ const getUserByWalletAddress = async (walletAddress) => {
     return rows.length > 0 ? rows[0] : null;
 }
 
-const createGame = async (whiteUserId) => {
+const createGame = async (whiteUserId, timeControl, wagerSize) => {
     const checkIfUserHasActiveGame = await client.query('SELECT * FROM games WHERE player1_id = $1 AND state = $2', [whiteUserId, '0']);
 
     if (checkIfUserHasActiveGame.rows.length > 0) {
         return checkIfUserHasActiveGame.rows;
     } else {
-        const { rows } = await client.query('INSERT INTO games (player1_id, state) VALUES ($1, $2) RETURNING *', [whiteUserId, '0']);
+        const { rows } = await client.query('INSERT INTO games (player1_id, time_control, wager, state) VALUES ($1, $2, $3, $4) RETURNING *', [whiteUserId, timeControl, wagerSize, '0']);
         return rows;
     }
 }
@@ -113,8 +113,13 @@ const updateWinner = async (gameId, winnerId) => {
     return rows;
 }
 
-const getGames = async () => {
-    const { rows } = await client.query('SELECT * FROM games');
+const getGames = async (timeControl, wagerSize) => {
+    const { rows } = await client.query('SELECT * FROM games WHERE time_control = $1 AND wager = $2', [timeControl, wagerSize]);
+    return rows;
+}
+
+const getAvailableGames = async () => {
+    const { rows } = await client.query('SELECT * FROM games WHERE player2_id IS NULL');
     return rows;
 }
 
@@ -165,6 +170,7 @@ module.exports = {
     updateRewardPool: handleErrors(updateRewardPool),
     updateWinner: handleErrors(updateWinner),
     getGames: handleErrors(getGames),
+    getAvailableGames: handleErrors(getAvailableGames),
     getGameById: handleErrors(getGameById),
     getRewardPool: handleErrors(getRewardPool),
     toggleDarkMode: handleErrors(toggleDarkMode),

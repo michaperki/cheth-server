@@ -22,13 +22,12 @@ const getEthToUsd = async () => {
     }
 }
 
-const createGame = async (gameId) => {
+const createGame = async (gameId, entryFeeInUsd) => {
     try {
         const ethToUsd = await getEthToUsd();
         console.log("ETH to USD:", ethToUsd);
 
         // Calculate the entry fee in ether
-        const entryFeeInUsd = 5;
         const entryFeeInEther = (entryFeeInUsd / ethToUsd).toFixed(18); // Round to 18 decimal places
         console.log("Entry fee in ether:", entryFeeInEther);
 

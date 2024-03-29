@@ -21,20 +21,30 @@ const GameController = {
         console.log('/playGame route');
         try {
             const userId = req.body.userId;
-            const dbGames = await db.playGame(userId);
-            const dbGame = dbGames[0];
-            console.log('dbGame', dbGame);
-            // if the game state is 1, then the game is started
-            if (dbGame.state === '1') {
-                await GameController.startGame(dbGame, req.wss);
+            const timeControl = req.body.timeControl; // Get the time control from the request body
+            const wagerSize = req.body.wagerSize; // Get the wager size from the request body
+
+            // Check if there are any available games with matching time control and wager size
+            const availableGames = await db.getAvailableGames(timeControl, wagerSize);
+
+            if (availableGames.length > 0) {
+                // If there are available games, join the first one found
+                const gameId = availableGames[0].game_id;
+                await db.joinGame(gameId, userId);
+                const dbGame = await db.getGameById(gameId);
+                await GameController.startGame(dbGame, req.wss, wagerSize);
+                res.json(dbGame);
+            } else {
+                // If no available games with matching criteria, create a new game
+                const newGame = await db.createGame(userId, timeControl, wagerSize);
+                res.json(newGame);
             }
-            res.json(dbGame);
         } catch (error) {
             next(error); // Pass error to error handling middleware
         }
     },
 
-    async startGame(dbGame, wss) {
+    async startGame(dbGame, wss, wagerSize) {
         // Send a message to the client to start the game
         console.log('game started');
 
@@ -134,7 +144,7 @@ const GameController = {
         factoryContract.on('GameCreated', handleGameCreated);
 
         // Call the function to create a new game
-        contractFactoryFunctions.createGame(dbGame.game_id);
+        contractFactoryFunctions.createGame(dbGame.game_id, wagerSize);
 
         const message = JSON.stringify({ type: 'START_GAME', gameId: dbGame.game_id });
         // Broadcasting the message to all connected WebSocket clients
