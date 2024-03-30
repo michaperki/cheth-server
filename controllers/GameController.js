@@ -9,6 +9,7 @@ const factoryContractAbi = require('../abis/ChessFactory.json');
 const chessContract = require('../contracts/ChessContractFunctions');
 const contractFactoryFunctions = require('../contracts/ContractFactoryFunctions');
 const { createChallenge } = require('../utils/lichessUtils');
+const { parseGameInfo } = require('../utils/gameUtils');
 const factoryContractAddress = factoryContractAbi.networks[process.env.CHAIN_ID].address;
 const provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
 const privateKey = process.env.SEPOLIA_PRIVATE_KEY;
