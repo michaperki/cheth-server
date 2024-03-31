@@ -144,7 +144,7 @@ const GameController = {
 
                 await db.updateGameState(dbGame.game_id, 4);
 
-                message = JSON.stringify({ type: 'GAME_PRIMED', gameId: dbGame.game_id, creator: dbGame.game_creator_address });
+                const message = JSON.stringify({ type: 'GAME_PRIMED', gameId: dbGame.game_id, creator: dbGame.game_creator_address });
 
                 // Broadcasting the message to all connected WebSocket clients
                 Object.values(clients).forEach(ws => {
