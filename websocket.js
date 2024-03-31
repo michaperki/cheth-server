@@ -1,56 +1,72 @@
 const WebSocket = require('ws');
-const { logger } = require('./utils/LoggerUtils'); // Import the logger instance and expressLogger middleware
+const { logger } = require('./utils/LoggerUtils');
 
-let onlineUsers = new Map(); // Initialize a Map to keep track of online users and their corresponding WebSocket connections
+let onlineUsers = 0;
+let clients = {}; // Object to store WebSocket clients and their associated user IDs
 
-module.exports = {
-    onlineUsers,
-    startWebSocketServer: function(server) {
-        const wss = new WebSocket.Server({ server });
+function websocket(server) {
+    const wss = new WebSocket.Server({ server });
 
-        wss.on('connection', async ws => {
-            logger.info('Client connected');
-            
-            ws.on('message', async message => {
-                const data = JSON.parse(message);
-                switch (data.type) {
-                    case 'CONNECT': // When receiving user ID from client
-                        onlineUsers.set(data.userId, ws); // Associate user ID with WebSocket connection
-                        logger.info(`User ${data.userId} connected`);
-                        broadcastOnlineUsers();
-                        break;
-                    // Handle other message types if needed
-                    case 'PING':
-                        logger.info('Received PING message');
-                        ws.send(JSON.stringify({ type: 'PONG' }));
-                        break;
-                    default:
-                        logger.info('Received unknown message type:', data.type);
-                        break;
-                }
-            });
+    wss.on('connection', async ws => {
+        logger.info('Client connected');
+        onlineUsers++;
+        broadcastOnlineUsers();
 
-            ws.on('close', () => {
-                logger.info('Client disconnected');
-                // Remove user from the Map when WebSocket connection is closed
-                onlineUsers.forEach((value, key) => {
-                    if (value === ws) {
-                        onlineUsers.delete(key);
-                        logger.info(`User ${key} disconnected`);
-                    }
-                });
-            });
+        ws.on('close', () => {
+            logger.info('Client disconnected');
+            onlineUsers--;
+            removeClient(ws);
+            broadcastOnlineUsers();
         });
 
-        function broadcastOnlineUsers() {
-            // Broadcast the online user count to all connected clients
-            wss.clients.forEach(client => {
-                if (client.readyState === WebSocket.OPEN) {
-                    client.send(JSON.stringify({ type: "ONLINE_USERS_COUNT", count: onlineUsers.size }));
-                }
-            });
-        }
+        ws.on('message', async message => {
+            const data = JSON.parse(message);
+            console.log('Received message:', data);
+            switch (data.type) {
+                case 'CONNECT':
+                    // Set the user ID for the client
+                    logger.info('CONNECT message received');
+                    // why is the data not available here?
+                    // answer: the data is available here, but the logger is not printing it
+                    // you can use console.log to print the data
+                    console.log('Data:', data);
+                    ws.userId = data.userId; // Store the user ID in the WebSocket client object
+                    clients[data.userId] = ws;
 
-        return wss;
+                    
+                    broadcastOnlineUsers();
+                    // log the user IDs of all connected clients
+                    logger.info('Connected clients:', Object.keys(clients));
+                    console.log('Connected clients:', Object.keys(clients));
+
+
+                    break;
+                case 'PING':
+                    logger.info('Received PING message');
+                    ws.send(JSON.stringify({ type: 'PONG' }));
+                    break;
+                default:
+                    logger.info('Received unknown message type:', data.type);
+                    break;
+            }
+        });
+    });
+
+    function broadcastOnlineUsers() {
+        wss.clients.forEach(client => {
+            if (client.readyState === WebSocket.OPEN) {
+                client.send(JSON.stringify({ type: "ONLINE_USERS_COUNT", count: onlineUsers }));
+            }
+        });
     }
-};
+
+    function removeClient(ws) {
+        // Remove the WebSocket client from the clients object
+        const userId = Object.keys(clients).find(key => clients[key] === ws);
+        delete clients[userId];
+    }
+
+    return { wss, clients }; // Return WebSocket Server instance and clients dictionary
+}
+
+module.exports = websocket;

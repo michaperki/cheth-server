@@ -33,7 +33,7 @@ const GameController = {
                 const gameId = availableGames[0].game_id;
                 await db.joinGame(gameId, userId);
                 const dbGame = await db.getGameById(gameId);
-                await GameController.startGame(dbGame, req.wss, wagerSize);
+                await GameController.startGame(dbGame, req.clients, wagerSize);
                 res.json(dbGame);
             } else {
                 // If no available games with matching criteria, create a new game
@@ -45,7 +45,7 @@ const GameController = {
         }
     },
 
-    async startGame(dbGame, wss, wagerSize) {
+    async startGame(dbGame, clients, wagerSize) {
         // Send a message to the client to start the game
         console.log('game started');
 
@@ -62,9 +62,18 @@ const GameController = {
             db.updateGameState(dbGame.game_id, 2);
             db.updateGameCreatorAddress(dbGame.game_id, creator);
             // Broadcasting the message to all connected WebSocket clients
-            wss.clients.forEach(client => {
-                if (client.readyState === WebSocket.OPEN) {
-                    client.send(JSON.stringify({ type: 'CONTRACT_READY', gameId: dbGame.game_id }));
+            const message = JSON.stringify({ type: 'CONTRACT_READY', gameId: dbGame.game_id });
+
+            const { player1_id, player2_id } = dbGame;
+            console.log('player1_id', player1_id);
+            console.log('player2_id', player2_id);
+            console.log('client ids', Object.keys(clients));
+            Object.values(clients).forEach(ws => {
+                if (ws.readyState === WebSocket.OPEN) {
+                    // send the message to the player 1 and player 2
+                    if (parseInt(ws.userId) === player1_id || parseInt(ws.userId) === player2_id) {
+                        ws.send(message);
+                    }
                 }
             });
 
@@ -90,7 +99,7 @@ const GameController = {
                 await db.updateGameState(dbGame.game_id, 3);
 
                 // Broadcasting the message to all connected WebSocket clients
-                wss.clients.forEach(client => {
+                Object.values(clients).forEach(client => {
                     if (client.readyState === WebSocket.OPEN) {
                         client.send(JSON.stringify({ type: 'GAME_JOINED', gameId: dbGame.game_id, player }));
                     }
@@ -132,46 +141,46 @@ const GameController = {
                 await db.updateGameState(dbGame.game_id, 4);
 
                 // Broadcasting the message to all connected WebSocket clients
-                wss.clients.forEach(client => {
+                Object.values(clients).forEach(client => {
                     if (client.readyState === WebSocket.OPEN) {
                         client.send(JSON.stringify({ type: 'GAME_PRIMED', gameId: dbGame.game_id, creator: dbGame.game_creator_address }));
                     }
                 });
             });
 
-            // Subscribe to the FundsTransferred event
-            gameContract.on('FundsTransferred', async (to, amount) => {
-                console.log('FundsTransferred event received');
-                console.log('Recipient:', to);
-                console.log('Amount:', amount);
+            // // Subscribe to the FundsTransferred event
+            // gameContract.on('FundsTransferred', async (to, amount) => {
+            //     console.log('FundsTransferred event received');
+            //     console.log('Recipient:', to);
+            //     console.log('Amount:', amount);
 
-                // Convert BigInt amount to string
-                const amountString = amount.toString();
+            //     // Convert BigInt amount to string
+            //     const amountString = amount.toString();
 
-                // send a message to the client
-                wss.clients.forEach(client => {
-                    if (client.readyState === WebSocket.OPEN) {
-                        client.send(JSON.stringify({ type: 'FUNDS_TRANSFERRED', to, amount: amountString })); // Send the message with amount as string
-                    }
-                });
+            //     // send a message to the client
+            //     wss.clients.forEach(client => {
+            //         if (client.readyState === WebSocket.OPEN) {
+            //             client.send(JSON.stringify({ type: 'FUNDS_TRANSFERRED', to, amount: amountString })); // Send the message with amount as string
+            //         }
+            //     });
 
-                // Update the reward pool in the database (subtract the amount)
-                const currentRewardPool = await db.getRewardPool(dbGame.game_id);
-                const newRewardPool = Number(currentRewardPool) - Number(amount);
-                await db.updateRewardPool(dbGame.game_id, newRewardPool);
-            });
+            //     // Update the reward pool in the database (subtract the amount)
+            //     const currentRewardPool = await db.getRewardPool(dbGame.game_id);
+            //     const newRewardPool = Number(currentRewardPool) - Number(amount);
+            //     await db.updateRewardPool(dbGame.game_id, newRewardPool);
+            // });
 
-            // Subscribe to the GameFinished event
-            gameContract.once('GameFinished', async (winner, winnings) => {
-                console.log('GameFinished event received');
-                console.log('winner', winner);
-                console.log('winnings', winnings);
-                console.log('gameId', dbGame.game_id);
-                console.log('game', dbGame);
+            // // Subscribe to the GameFinished event
+            // gameContract.once('GameFinished', async (winner, winnings) => {
+            //     console.log('GameFinished event received');
+            //     console.log('winner', winner);
+            //     console.log('winnings', winnings);
+            //     console.log('gameId', dbGame.game_id);
+            //     console.log('game', dbGame);
 
-                // Update the game state in the database
-                await db.updateGameState(dbGame.game_id, 5);
-            });
+            //     // Update the game state in the database
+            //     await db.updateGameState(dbGame.game_id, 5);
+            // });
 
             factoryContract.off('GameCreated', handleGameCreated);
         };
@@ -186,7 +195,7 @@ const GameController = {
 
         const message = JSON.stringify({ type: 'START_GAME', gameId: dbGame.game_id });
         // Broadcasting the message to all connected WebSocket clients
-        wss.clients.forEach(client => {
+        Object.values(clients).forEach(client => {
             if (client.readyState === WebSocket.OPEN) {
                 client.send(message);
             }
@@ -300,39 +309,39 @@ const GameController = {
                 return res.status(404).json({ error: 'Game not found' });
             }
             console.log('game', game);
-    
+
             const lichessId = game.lichess_id;
             const headers = { Authorization: 'Bearer ' + process.env.LICHESS_TOKEN };
             // get the game info from lichess
             const url = `https://lichess.org/game/export/${lichessId}`;
             console.log('url', url);
             const response = await fetch(url, { headers });
-    
+
             if (!response.ok) {
                 throw new Error('Failed to fetch game information from Lichess');
             }
             const responseText = await response.text();
             console.log('Response Text:', responseText);
-    
+
             // Process the response text and extract necessary information
             const gameInfo = parseGameInfo(responseText);
             console.log('Game Info:', gameInfo);
-    
+
             // Determine the winner and get their handle
             const winner = gameInfo.Result === '1-0' ? 'White' : gameInfo.Result === '0-1' ? 'Black' : 'Draw';
             const winningPlayerHandle = winner === 'White' ? gameInfo.White : winner === 'Black' ? gameInfo.Black : null;
             console.log('winningPlayerHandle', winningPlayerHandle);
-    
+
             // Get the user id of the winning player
             const winningPlayer = await db.getUserByLichessHandle(winningPlayerHandle);
             console.log('winningPlayer', winningPlayer);
-    
+
             // Calculate the amount to distribute
             const contractAddress = game.contract_address;
-    
+
             // instantiate the contract
             const gameContract = new ethers.Contract(contractAddress, chessContractAbi.abi, signer);
-    
+
             // subscribe to the GameFinished event
             //            emit GameFinished(_winner, winnings);
             gameContract.once('GameFinished', async (winner, winnings) => {
@@ -344,28 +353,28 @@ const GameController = {
                 console.log('winningPlayerHandle', winningPlayerHandle);
                 console.log('gameId', gameId);
                 console.log('game', game);
-    
+
                 // Update the game state in the database
                 await db.updateGameState(gameId, 5);
             });
-    
-    
+
+
             // Finish the game in the contract and distribute funds
             await chessContract.finishGame(contractAddress, winningPlayer.wallet_address);
-    
+
             // Send the winning player's handle as a websocket message
             req.wss.clients.forEach(client => {
                 if (client.readyState === WebSocket.OPEN) {
                     client.send(JSON.stringify({ type: 'GAME_OVER', gameId, winner: winningPlayerHandle }));
                 }
             });
-    
+
             // Send the winning player's handle as the response
             res.json({ winner: winningPlayerHandle });
         } catch (error) {
             next(error); // Pass error to error handling middleware
         }
-    }, 
+    },
 
     async forceDraw(req, res, next) {
         console.log('/forceGameOver route');
@@ -377,10 +386,10 @@ const GameController = {
                 return res.status(404).json({ error: 'Game not found' });
             }
             console.log('game', game);
-    
+
             const contractAddress = game.contract_address;
             const gameContract = new ethers.Contract(contractAddress, chessContractAbi.abi, signer);
-    
+
             // subscribe to the GameFinished event
             //            emit GameFinished(_winner, winnings);
             gameContract.once('GameFinished', async (winner, winnings) => {
@@ -390,16 +399,16 @@ const GameController = {
                 console.log('contractAddress', contractAddress);
                 console.log('gameId', gameId);
                 console.log('game', game);
-    
+
                 // Update the game state in the database
                 await db.updateGameState(gameId, 5);
             });
-    
+
             // Finish the game in the contract and distribute funds
             // use the clause in the contract for draws
             // if (_winner == address(0)) {
             // how to send the address(0) as the winner?
-    
+
             await gameContract.finishGame('0x0000000000000000000000000000000000000000');
             // Send the draw message to the clients
             req.wss.clients.forEach(client => {
@@ -412,7 +421,7 @@ const GameController = {
             next(error); // Pass error to error handling middleware
         }
     },
-    
+
 
     async deleteGame(req, res, next) {
         try {
@@ -440,9 +449,9 @@ const GameController = {
             if (!game) {
                 return res.status(404).json({ error: 'Game not found' });
             }
-    
+
             console.log('game', game);
-    
+
             const contractAddress = game.contract_address;
             // if the contract address is null, then the contract has not been created, so return an error
             if (!contractAddress) {
