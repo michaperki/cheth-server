@@ -216,6 +216,15 @@ const GameController = {
         }
     },
 
+    async getAllGames(req, res, next) {
+        try {
+            const games = await db.getAllGames();
+            res.json(games);
+        } catch (error) {
+            next(error); // Pass error to error handling middleware
+        }
+    },
+
     async cancelGamePairing(req, res, next) {
         try {
             const gameId = req.params.gameId;

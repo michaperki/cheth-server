@@ -118,6 +118,11 @@ const getGames = async (timeControl, wagerSize) => {
     return rows;
 }
 
+const getAllGames = async () => {
+    const { rows } = await client.query('SELECT * FROM games');
+    return rows;
+}
+
 const getAvailableGames = async () => {
     const { rows } = await client.query('SELECT * FROM games WHERE player2_id IS NULL');
     return rows;
@@ -170,6 +175,7 @@ module.exports = {
     updateRewardPool: handleErrors(updateRewardPool),
     updateWinner: handleErrors(updateWinner),
     getGames: handleErrors(getGames),
+    getAllGames: handleErrors(getAllGames),
     getAvailableGames: handleErrors(getAvailableGames),
     getGameById: handleErrors(getGameById),
     getRewardPool: handleErrors(getRewardPool),
