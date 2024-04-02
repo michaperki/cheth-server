@@ -40,6 +40,7 @@ function websocket(server) {
                     break;
                 case 'CANCEL_SEARCH':
                     logger.info('CANCEL_SEARCH message received');
+                    console.log('CANCEL_SEARCH message received');
                     // Implement logic to cancel the search
                     userId = data.userId;
                     db.cancelGameSearch(userId);
