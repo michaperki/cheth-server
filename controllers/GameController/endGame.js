@@ -63,7 +63,7 @@ async function cancelGame(req, res, next) {
         });
 
         // Cancel the game in the contract
-        await chessContract.cancelGame(contractAddress);
+        await currentGameContract.cancelGame(contractAddress);
 
         // Update the game state in the database
         await db.updateGameState(gameId, -1);
