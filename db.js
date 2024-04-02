@@ -155,6 +155,11 @@ const getTotalWagered = async () => {
     return rows[0].sum;
 }
 
+const getUserGames = async (userId) => {
+    const { rows } = await client.query('SELECT * FROM games WHERE player1_id = $1 OR player2_id = $1', [userId]);
+    return rows;
+}
+
 module.exports = {
     connectToDatabase: handleErrors(connectToDatabase),
     getConfig: handleErrors(getConfig),
@@ -181,5 +186,6 @@ module.exports = {
     getRewardPool: handleErrors(getRewardPool),
     toggleDarkMode: handleErrors(toggleDarkMode),
     getGameCount: handleErrors(getGameCount),
-    getTotalWagered: handleErrors(getTotalWagered)
+    getTotalWagered: handleErrors(getTotalWagered),
+    getUserGames: handleErrors(getUserGames)
 };

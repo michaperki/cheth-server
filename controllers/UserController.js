@@ -100,6 +100,16 @@ const UserController = {
             next(error); // Pass error to error handling middleware
         }
     },
+
+    async getUserGames(req, res, next) {
+        try {
+            const userId = req.body.userId;
+            const games = await db.getUserGames(userId);
+            res.json(games);
+        } catch (error) {
+            next(error); // Pass error to error handling middleware
+        }
+    }
 };
 
 module.exports = UserController;
