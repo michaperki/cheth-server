@@ -40,6 +40,8 @@ async function cancelGame(req, res, next) {
         // Instantiate the contract
         const currentGameContract = new ethers.Contract(contractAddress, chessContractAbi.abi, signer);
 
+        console.log('Cancelling game with contract address:', contractAddress);
+
         // Subscribe to the FundsTransferred event
         currentGameContract.once('FundsTransferred', async (to, amount) => {
             console.log('FundsTransferred event received');
