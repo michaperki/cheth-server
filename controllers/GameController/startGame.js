@@ -16,31 +16,14 @@ const signer = wallet.connect(provider);
 const factoryContract = new ethers.Contract(factoryContractAddress, factoryContractAbi.abi, signer);
 
 async function startGame(dbGame, clients, wagerSize) {
-    try {
-        console.log('Starting game...');
-        console.log('Game ID:', dbGame.game_id);
+    // Send a message to the client to start the game
+    console.log('game started');
+    // create a new game in the contract
+    console.log('creating a new game contract using factory contract');
+    console.log('db game_id', dbGame.game_id);
+    // const { player1_id, player2_id } = dbGame;
 
-        // Create game contract using factory contract
-        console.log('Creating new game contract using factory contract...');
-        const gameContractAddress = await contractFactoryFunctions.createGame(dbGame.game_id, wagerSize);
-        console.log('Game contract created:', gameContractAddress);
-
-        // Update game contract address and state in the database
-        await db.updateGameContractAddress(dbGame.game_id, gameContractAddress);
-        await db.updateGameState(dbGame.game_id, 2);
-
-        // Subscribe to contract events
-        subscribeToContractEvents(dbGame, clients);
-
-        // Send start game message to players
-        sendStartGameMessage(dbGame, clients);
-    } catch (error) {
-        console.error('Error starting game:', error);
-    }
-}
-
-function subscribeToContractEvents(dbGame, clients) {
-    // Event handler for GameCreated event
+    // Define the event handler outside of the route handler to avoid adding multiple event handlers
     const handleGameCreated = (game, creator) => {
         console.log('GameCreated event received');
         console.log('game', game);
@@ -183,21 +166,29 @@ function subscribeToContractEvents(dbGame, clients) {
 
         factoryContract.off('GameCreated', handleGameCreated);
     };
-    
-    // Subscribe to GameCreated event
+
+    console.log('factoryContract', factoryContract);
+
+    // Add the event handler
     factoryContract.on('GameCreated', handleGameCreated);
-}
 
-function sendStartGameMessage(dbGame, clients) {
+    // Call the function to create a new game
+    contractFactoryFunctions.createGame(dbGame.game_id, wagerSize);
+
+    // get the player ids
     const { player1_id, player2_id } = dbGame;
-    const message = JSON.stringify({ type: 'START_GAME', gameId: dbGame.game_id });
 
-    // Broadcast start game message to players
+    const message = JSON.stringify({ type: 'START_GAME', gameId: dbGame.game_id });
+    // Broadcasting the message to all connected WebSocket clients
     Object.values(clients).forEach(ws => {
-        if (ws.readyState === WebSocket.OPEN && (parseInt(ws.userId) === player1_id || parseInt(ws.userId) === player2_id)) {
-            ws.send(message);
+        if (ws.readyState === WebSocket.OPEN) {
+            // send the message to the player 1 and player 2
+            if (parseInt(ws.userId) === player1_id || parseInt(ws.userId) === player2_id) {
+                ws.send(message);
+            }
         }
     });
+
 }
 
 module.exports = startGame;
