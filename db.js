@@ -73,6 +73,12 @@ const cancelGame = async (gameId) => {
     return rows;
 }
 
+const cancelGameSearch = async (userId) => {
+    const { rows } = await client.query('DELETE FROM games WHERE player1_id = $1 AND player2_id IS NULL RETURNING *', [userId]);
+    return rows;
+}
+
+
 const joinGame = async (gameId, userId) => {
     const { rows } = await client.query('UPDATE games SET player2_id = $1, state = 1 WHERE game_id = $2 RETURNING *', [userId, gameId]);
     return rows;
@@ -123,8 +129,8 @@ const getAllGames = async () => {
     return rows;
 }
 
-const getAvailableGames = async () => {
-    const { rows } = await client.query('SELECT * FROM games WHERE player2_id IS NULL');
+const getAvailableGames = async (timeControl, wagerSize, userId) => {
+    const { rows } = await client.query('SELECT * FROM games WHERE time_control = $1 AND wager = $2 AND player1_id != $3 AND player2_id IS NULL', [timeControl, wagerSize, userId]);
     return rows;
 }
 
@@ -171,6 +177,7 @@ module.exports = {
     createGame: handleErrors(createGame),
     playGame: handleErrors(playGame),
     cancelGame: handleErrors(cancelGame),
+    cancelGameSearch: handleErrors(cancelGameSearch),
     joinGame: handleErrors(joinGame),
     updateGameState: handleErrors(updateGameState),
     updateGameContractAddress: handleErrors(updateGameContractAddress),

@@ -12,7 +12,7 @@ async function playGame(req, res, next) {
         const wagerSize = req.body.wagerSize; // Get the wager size from the request body
 
         // Check if there are any available games with matching time control and wager size
-        const availableGames = await db.getAvailableGames(timeControl, wagerSize);
+        const availableGames = await db.getAvailableGames(timeControl, wagerSize, userId);
 
         if (availableGames.length > 0) {
             // If there are available games, join the first one found
