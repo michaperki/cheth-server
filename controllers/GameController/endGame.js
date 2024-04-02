@@ -9,37 +9,6 @@ const privateKey = process.env.SEPOLIA_PRIVATE_KEY;
 const wallet = new ethers.Wallet(privateKey);
 const signer = wallet.connect(provider);
 
-async function getGame(req, res, next) {
-    try {
-        const gameId = req.params.gameId;
-        const game = await db.getGameById(gameId);
-        if (!game) {
-            return res.status(404).json({ error: 'Game not found' });
-        }
-        res.json(game);
-    } catch (error) {
-        next(error); // Pass error to error handling middleware
-    }
-}
-
-async function getGames(req, res, next) {
-    try {
-        const games = await db.getGames();
-        res.json(games);
-    } catch (error) {
-        next(error); // Pass error to error handling middleware
-    }
-}
-
-async function getAllGames(req, res, next) {
-    try {
-        const games = await db.getAllGames();
-        res.json(games);
-    } catch (error) {
-        next(error); // Pass error to error handling middleware
-    }
-}
-
 async function cancelGamePairing(req, res, next) {
     try {
         const gameId = req.params.gameId;
@@ -247,61 +216,10 @@ async function deleteGame(req, res, next) {
     }
 }
 
-async function refreshContractBalance(req, res, next) {
-    console.log('/refreshContractBalance route');
-    try {
-        const gameId = req.body.gameId;
-        const game = await db.getGameById(gameId);
-        if (!game) {
-            return res.status(404).json({ error: 'Game not found' });
-        }
-
-        console.log('game', game);
-
-        const contractAddress = game.contract_address;
-        // if the contract address is null, then the contract has not been created, so return an error
-        if (!contractAddress) {
-            return res.status(400).json({ error: 'Contract not created' });
-        }
-        console.log('contractAddress', contractAddress);
-        const balance = await chessContract.getContractBalance(contractAddress);
-        console.log('balance', balance);
-        await db.updateRewardPool(gameId, balance.toString());
-        res.json({ message: 'Data refreshed successfully' });
-    } catch (error) {
-        next(error); // Pass error to error handling middleware
-    }
-}
-
-async function getGameCount(req, res, next) {
-    try {
-        const gameCount = await db.getGameCount();
-        res.json({ count: gameCount });
-    } catch (error) {
-        next(error); // Pass error to error handling middleware
-    }
-}
-
-async function getTotalWagered(req, res, next) {
-    try {
-        const totalWagered = await db.getTotalWagered();
-        res.json({ totalWagered });
-    } catch (error) {
-        next(error); // Pass error to error handling middleware
-    }
-}
-
-
 module.exports = {
-    getGame,
-    getGames,
-    getAllGames,
     cancelGamePairing,
     cancelGame,
     reportGameOver,
     forceDraw,
-    deleteGame,
-    refreshContractBalance,
-    getGameCount,
-    getTotalWagered
+    deleteGame
 };
