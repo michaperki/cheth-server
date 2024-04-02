@@ -1,5 +1,6 @@
 const WebSocket = require('ws');
 const { logger } = require('./utils/LoggerUtils');
+const db = require('./db');
 
 let onlineUsers = 0;
 let clients = {}; // Object to store WebSocket clients and their associated user IDs
@@ -32,13 +33,16 @@ function websocket(server) {
                     console.log('Data:', data);
                     ws.userId = data.userId; // Store the user ID in the WebSocket client object
                     clients[data.userId] = ws;
-
-                    
                     broadcastOnlineUsers();
                     // log the user IDs of all connected clients
                     logger.info('Connected clients:', Object.keys(clients));
                     console.log('Connected clients:', Object.keys(clients));
-
+                    break;
+                case 'CANCEL_SEARCH':
+                    logger.info('CANCEL_SEARCH message received');
+                    // Implement logic to cancel the search
+                    userId = data.userId;
+                    db.cancelGameSearch(userId);
 
                     break;
                 case 'PING':
