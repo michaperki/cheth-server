@@ -182,6 +182,8 @@ async function reportGameOver(req, res, next) {
             const amountString = amount.toString();
 
             const message = JSON.stringify({ type: 'FUNDS_TRANSFERRED', to, amount: amountString });
+            console.log("sending FundsTransferred message to the client")
+            console.log("player.user_id", player.user_id)
 
             // send a message to the client
             req.wss.clients.forEach(client => {
