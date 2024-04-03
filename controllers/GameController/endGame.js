@@ -4,6 +4,7 @@ const db = require('../../db');
 const WebSocket = require('ws');
 const ethers = require('ethers');
 const chessContractAbi = require('../../abis/Chess.json');
+const chessContract = require('../../contracts/ChessContractFunctions');
 const provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
 const privateKey = process.env.SEPOLIA_PRIVATE_KEY;
 const wallet = new ethers.Wallet(privateKey);
@@ -65,7 +66,7 @@ async function cancelGame(req, res, next) {
         });
 
         // Cancel the game in the contract
-        await currentGameContract.cancelGame(contractAddress);
+        await chessContract.cancelGame(contractAddress);
 
         // Update the game state in the database
         await db.updateGameState(gameId, -1);
