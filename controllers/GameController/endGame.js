@@ -165,6 +165,53 @@ async function reportGameOver(req, res, next) {
             await db.updateGameState(gameId, 5);
         });
 
+        // subscribe to the FundsTransferred event
+        // there will be two
+        // one for the winner and one for the commission
+        // can we use .once ?
+        gameContract.on('FundsTransferred', async (to, amount) => {
+            console.log('FundsTransferred event received');
+            console.log('Recipient:', to);
+            console.log('Amount:', amount);
+
+            // get the player id from the wallet address
+            const player = await db.getUserByWalletAddress(to);
+
+            // Convert BigInt amount to string
+            const amountString = amount.toString();
+
+            const message = JSON.stringify({ type: 'FUNDS_TRANSFERRED', to, amount: amountString });
+
+            // send a message to the client
+            req.wss.clients.forEach(client => {
+                if (client.readyState === WebSocket.OPEN) {
+                    if (parseInt(client.userId) === player.user_id) {
+                        client.send(message);
+                    }
+                }
+            }); 
+            
+            // check if the recipient's user ID matches either player1_id or player2_id
+            // if it does, update the game balance for the recipient
+            if (player.user_id === game.player1_id) {
+                const newBalance = Number(game.player1_payout) + Number(amount);
+                await db.updateGameBalanceForPlayer1(gameId, newBalance);
+            } else if (player.user_id === game.player2_id) {
+                const newBalance = Number(game.player2_payout) + Number(amount);
+                await db.updateGameBalanceForPlayer2(gameId, newBalance);
+            } else {
+                // if the recipient is not a player, assume it is the commission
+                const newBalance = Number(game.commission) + Number(amount);
+                await db.updateCommission(gameId, newBalance);
+            }
+
+            // Update the reward pool in the database (subtract the amount)
+            const currentRewardPool = await db.getRewardPool(gameId);
+            const newRewardPool = Number(currentRewardPool) - Number(amount);
+            await db.updateRewardPool(gameId, newRewardPool);
+        });
+
+
 
         // Finish the game in the contract and distribute funds
         await chessContract.finishGame(contractAddress, winningPlayer.wallet_address);
