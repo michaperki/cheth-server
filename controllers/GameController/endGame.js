@@ -9,7 +9,7 @@ const provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
 const privateKey = process.env.SEPOLIA_PRIVATE_KEY;
 const wallet = new ethers.Wallet(privateKey);
 const signer = wallet.connect(provider);
-const parseGameInfo = require('../../utils/gameUtils');
+const { parseGameInfo } = require('../../utils/gameUtils');
 
 async function cancelGamePairing(req, res, next) {
     try {
