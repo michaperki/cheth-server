@@ -31,8 +31,6 @@ async function createChallenge(player1Username, player2Username, timeControl) {
     console.log('player1Username', player1Username);
     console.log('player2Username', player2Username);
     console.log('timeControl', timeControl);
-    const timeControlSeconds = timeControl * 60;
-    console.log('timeControlSeconds', timeControlSeconds);
     try {
         const lichessApiUrl = 'https://lichess.org/api/challenge/open';
         const headers = {
@@ -44,7 +42,7 @@ async function createChallenge(player1Username, player2Username, timeControl) {
             variant: 'standard',
             rated: 'false',
             color: 'random',
-            'clock.limit': timeControlSeconds,
+            'clock.limit': timeControl,
             'clock.increment': '0',
             users: `${player1Username},${player2Username}`,
             rules: 'noRematch,noGiveTime,noEarlyDraw',
