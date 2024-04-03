@@ -16,8 +16,8 @@ const pool = new Pool({
 // Define your SQL query
 const sqlQuery = `
     ALTER TABLE games
-    ADD COLUMN wager integer,
-    ADD COLUMN time_control integer;
+    ADD COLUMN player1_ready BOOLEAN DEFAULT FALSE,
+    ADD COLUMN player2_ready BOOLEAN DEFAULT FALSE
 `;
 
 // Execute the SQL query

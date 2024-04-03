@@ -68,6 +68,22 @@ const playGame = async (userId) => {
     }
 }
 
+const setPlayerReady = async (gameId, userId) => {
+    // Check if the user is player 1 or player 2
+    console.log('userId:', userId);
+    console.log('gameId:', gameId);
+    const game = await getGameById(gameId);
+    console.log('game:', game);
+    if (game.player1_id === userId) {
+        await client.query('UPDATE games SET player1_ready = TRUE WHERE game_id = $1', [gameId]);
+
+    } else if (game.player2_id === userId) {
+        await client.query('UPDATE games SET player2_ready = TRUE WHERE game_id = $1', [gameId]);
+    }
+
+    console.log('Player ready status updated');
+}
+
 const cancelGame = async (gameId) => {
     const { rows } = await client.query('DELETE FROM games WHERE game_id = $1 RETURNING *', [gameId]);
     return rows;
@@ -176,6 +192,7 @@ module.exports = {
     getUserByWalletAddress: handleErrors(getUserByWalletAddress),
     createGame: handleErrors(createGame),
     playGame: handleErrors(playGame),
+    setPlayerReady: handleErrors(setPlayerReady),
     cancelGame: handleErrors(cancelGame),
     cancelGameSearch: handleErrors(cancelGameSearch),
     joinGame: handleErrors(joinGame),

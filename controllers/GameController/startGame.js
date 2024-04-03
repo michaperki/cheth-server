@@ -60,6 +60,22 @@ async function startGame(dbGame, clients, wagerSize) {
             console.log('dbGame.game_id', dbGame.game_id);
             // update the reward pool in the database, add the entry fee to the reward pool
 
+            // get the user data from the database for dbGame.player1_id and dbGame.player2_id
+            // get the wallet address of the player
+            // get the player id from the dbGame
+
+            const player1_details = await db.getUserById(dbGame.player1_id);
+            const player2_details = await db.getUserById(dbGame.player2_id);
+
+            console.log('player1_details', player1_details);
+            console.log('player2_details', player2_details);
+
+            const player_id = player === player1_details.wallet_address ? dbGame.player1_id : dbGame.player2_id;
+            console.log('player_id', player_id);
+            
+            // send db.setPlayerReady(dbGame.game_id, player_id);
+            await db.setPlayerReady(dbGame.game_id, player_id);
+
             /// get the current reward pool
             const currentRewardPool = await db.getRewardPool(dbGame.game_id);
             console.log('currentRewardPool', currentRewardPool);
