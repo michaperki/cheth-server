@@ -45,7 +45,7 @@ async function cancelGame(req, res, next) {
         console.log('Cancelling game with contract address:', contractAddress);
 
         // Subscribe to the FundsTransferred event
-        currentGameContract.once('FundsTransferred', async (to, amount) => {
+        currentGameContract.on('FundsTransferred', async (to, amount) => {
             console.log('FundsTransferred event received');
             console.log('Recipient:', to);
             console.log("type of recipient", typeof to);
@@ -54,13 +54,24 @@ async function cancelGame(req, res, next) {
             // Convert BigInt amount to string
             const amountString = amount.toString();
 
+            // conver
+
+            // get the player id from the wallet address
+            const player = await db.getUserByWalletAddress(to);
+
+            // send a message to the client
+            const message = JSON.stringify({ type: 'FUNDS_TRANSFERRED', to, amount: amountString });
+
             // send a message to the client
             req.wss.clients.forEach(client => {
                 if (client.readyState === WebSocket.OPEN) {
-                    client.send(JSON.stringify({ type: 'FUNDS_TRANSFERRED', to, amount: amountString })); // Send the message with amount as string
+                    if (parseInt(client.userId) === player.user_id) {
+                        client.send(message);
+                    }
                 }
-            });
+            });    
 
+            // Update the game balance for the recipient            
             console.log('updating the database with the amount transferred');
             console.log('gameId', gameId);
             console.log('game', game);
@@ -93,6 +104,9 @@ async function cancelGame(req, res, next) {
             const currentRewardPool = await db.getRewardPool(gameId);
             const newRewardPool = Number(currentRewardPool) - Number(amount);
             await db.updateRewardPool(gameId, newRewardPool);
+
+            // subscribe to the GameCancelled event
+            
         });
 
         // Cancel the game in the contract
