@@ -47,6 +47,7 @@ async function cancelGame(req, res, next) {
         currentGameContract.once('FundsTransferred', async (to, amount) => {
             console.log('FundsTransferred event received');
             console.log('Recipient:', to);
+            console.log("type of recipient", typeof to);
             console.log('Amount:', amount);
 
             // Convert BigInt amount to string
@@ -58,6 +59,34 @@ async function cancelGame(req, res, next) {
                     client.send(JSON.stringify({ type: 'FUNDS_TRANSFERRED', to, amount: amountString })); // Send the message with amount as string
                 }
             });
+
+            console.log('updating the database with the amount transferred');
+            console.log('gameId', gameId);
+            console.log('game', game);
+
+            // get the user informaton from the database for player1_id and player2_id
+            const player1 = await db.getUserById(game.player1_id);
+            const player2 = await db.getUserById(game.player2_id);
+
+            // Normalize the addresses to lowercase
+            const normalizedTo = to.toLowerCase();
+            const normalizedPlayer1Address = player1.wallet_address.toLowerCase();
+            const normalizedPlayer2Address = player2.wallet_address.toLowerCase();
+
+            // Check if either of the players is the recipient
+            if (normalizedPlayer1Address === normalizedTo) {
+                // update the game balance for player1
+                const newBalance = Number(game.player1_payout) + Number(amount);
+                await db.updateGameBalanceForPlayer2(gameId, newBalance);
+            } else if (normalizedPlayer2Address === normalizedTo) {
+                // update the game balance for player2
+                const newBalance = Number(game.player2_payout) + Number(amount);
+                await db.updateGameBalanceForPlayer2(gameId, newBalance);
+            } else {
+                console.log('Recipient is not a player in the game, assuming commission');
+                const newBalance = Number(game.commission) + Number(amount);
+                await db.updateCommission(gameId, newBalance);
+            }
 
             // Update the reward pool in the database (subtract the amount)
             const currentRewardPool = await db.getRewardPool(gameId);

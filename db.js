@@ -41,7 +41,14 @@ const getUserByLichessHandle = async (lichessHandle) => {
 }
 
 const getUserByWalletAddress = async (walletAddress) => {
+    // print the wallet address surrounded by single quotes
+    console.log("fetching user by wallet address...")
+    console.log(`'${walletAddress}'`);
     const { rows } = await client.query('SELECT * FROM users WHERE wallet_address = $1', [walletAddress]);
+    // why is the rows empty?
+    // answer: the wallet address is not stored in the database with single quotes
+    // you can add single quotes to the query parameter
+    console.log('rows:', rows); 
     return rows.length > 0 ? rows[0] : null;
 }
 
@@ -182,6 +189,21 @@ const getUserGames = async (userId) => {
     return rows;
 }
 
+const updateGameBalanceForPlayer1 = async (gameId, amount) => {
+    const { rows } = await client.query('UPDATE games SET player1_payout = $1 WHERE game_id = $2 RETURNING *', [amount, gameId]);
+    return rows;
+}
+
+const updateGameBalanceForPlayer2 = async (gameId, amount) => {
+    const { rows } = await client.query('UPDATE games SET player2_payout = $1 WHERE game_id = $2 RETURNING *', [amount, gameId]);
+    return rows;
+}
+
+const updateCommission = async (gameId, amount) => {
+    const { rows } = await client.query('UPDATE games SET commission = $1 WHERE game_id = $2 RETURNING *', [amount, gameId]);
+    return rows;
+}
+
 module.exports = {
     connectToDatabase: handleErrors(connectToDatabase),
     getConfig: handleErrors(getConfig),
@@ -211,5 +233,8 @@ module.exports = {
     toggleDarkMode: handleErrors(toggleDarkMode),
     getGameCount: handleErrors(getGameCount),
     getTotalWagered: handleErrors(getTotalWagered),
-    getUserGames: handleErrors(getUserGames)
+    getUserGames: handleErrors(getUserGames),
+    updateGameBalanceForPlayer1: handleErrors(updateGameBalanceForPlayer1),
+    updateGameBalanceForPlayer2: handleErrors(updateGameBalanceForPlayer2),
+    updateCommission: handleErrors(updateCommission)
 };

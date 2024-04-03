@@ -16,8 +16,9 @@ const pool = new Pool({
 // Define your SQL query
 const sqlQuery = `
     ALTER TABLE games
-    ADD COLUMN player1_ready BOOLEAN DEFAULT FALSE,
-    ADD COLUMN player2_ready BOOLEAN DEFAULT FALSE
+    ADD COLUMN player1_payout bigint DEFAULT 0,
+    ADD COLUMN player2_payout bigint DEFAULT 0,
+    ADD COLUMN commission bigint DEFAULT 0;
 `;
 
 // Execute the SQL query
