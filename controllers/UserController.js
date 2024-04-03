@@ -90,6 +90,15 @@ const UserController = {
             next(error); // Pass error to error handling middleware
         }
     },
+    
+    async getUsers(req, res, next) {
+        try {
+            const users = await db.getUsers();
+            res.json(users);
+        } catch (error) {
+            next(error); // Pass error to error handling middleware
+        }
+    },
 
     async getUserById(req, res, next) {
         try {
