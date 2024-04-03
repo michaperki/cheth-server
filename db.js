@@ -190,17 +190,34 @@ const getUserGames = async (userId) => {
 }
 
 const updateGameBalanceForPlayer1 = async (gameId, amount) => {
-    const { rows } = await client.query('UPDATE games SET player1_payout = $1 WHERE game_id = $2 RETURNING *', [amount, gameId]);
+    console.log('Updating game balance for player 1...');
+    console.log('gameId:', gameId);
+    console.log('amount:', amount);
+    const bigIntAmount = BigInt(amount);
+
+    const { rows } = await client.query('UPDATE games SET player1_payout = $1 WHERE game_id = $2 RETURNING *', [bigIntAmount, gameId]);
+
+    console.log('rows:', rows);
     return rows;
 }
 
 const updateGameBalanceForPlayer2 = async (gameId, amount) => {
-    const { rows } = await client.query('UPDATE games SET player2_payout = $1 WHERE game_id = $2 RETURNING *', [amount, gameId]);
+    console.log('Updating game balance for player 2...');
+    console.log('gameId:', gameId);
+    console.log('amount:', amount);
+    const bigIntAmount = BigInt(amount);
+
+    const { rows } = await client.query('UPDATE games SET player2_payout = $1 WHERE game_id = $2 RETURNING *', [bigIntAmount, gameId]);
+
+    console.log('rows:', rows);
     return rows;
 }
 
 const updateCommission = async (gameId, amount) => {
-    const { rows } = await client.query('UPDATE games SET commission = $1 WHERE game_id = $2 RETURNING *', [amount, gameId]);
+    console.log('Updating commission...');
+    const bigIntAmount = BigInt(amount);
+    const { rows } = await client.query('UPDATE games SET commission = $1 WHERE game_id = $2 RETURNING *', [bigIntAmount, gameId]);
+    console.log('rows:', rows);
     return rows;
 }
 

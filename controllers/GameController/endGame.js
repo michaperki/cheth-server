@@ -77,7 +77,7 @@ async function cancelGame(req, res, next) {
             if (normalizedPlayer1Address === normalizedTo) {
                 // update the game balance for player1
                 const newBalance = Number(game.player1_payout) + Number(amount);
-                await db.updateGameBalanceForPlayer2(gameId, newBalance);
+                await db.updateGameBalanceForPlayer1(gameId, newBalance);
             } else if (normalizedPlayer2Address === normalizedTo) {
                 // update the game balance for player2
                 const newBalance = Number(game.player2_payout) + Number(amount);
