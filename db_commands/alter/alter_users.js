@@ -16,9 +16,7 @@ const pool = new Pool({
 // Define your SQL query
 const sqlQuery = `
     ALTER TABLE users
-    ADD COLUMN user_role VARCHAR(255) NOT NULL DEFAULT 'user';
-    ALTER TABLE users
-    DROP COLUMN userRole;
+    ADD COLUMN avatar VARCHAR(255) NOT NULL DEFAULT 'none';
 `;
 
 // Execute the SQL query

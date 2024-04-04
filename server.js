@@ -6,6 +6,7 @@ const http = require('http');
 const websocket = require('./websocket'); // Import the websocket function
 const { logger, expressLogger } = require('./utils/LoggerUtils'); // Import the logger instance and expressLogger middleware
 const router = require('./routes');
+const path = require('path');
 
 const app = express();
 const server = http.createServer(app);
@@ -42,6 +43,13 @@ app.use((req, res, next) => {
     next();
 });
 
+// add a route to get the icons
+// the icons route should serve all the icons in the icons folder
+app.use('/icons', express.static(path.join(__dirname, 'icons')));
+
+app.use('/allIcons', (req, res) => {
+    res.json({ icons: ['broccoli.svg', 'calculator.svg', 'dog.svg'] });
+});
 
 app.use(router);
 
