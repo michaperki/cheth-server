@@ -1,3 +1,5 @@
+// Path: server/db_commands/alter/alter_games.js
+
 require('dotenv').config();
 const { Pool } = require('pg');
 
@@ -13,13 +15,10 @@ const pool = new Pool({
 
 // Define your SQL query
 const sqlQuery = `
-CREATE TABLE users (
-    user_id SERIAL PRIMARY KEY,
-    username VARCHAR(255) NOT NULL,
-    rating INTEGER NOT NULL,
-    wallet_address VARCHAR(255) NOT NULL,
-    user_role VARCHAR(255) NOT NULL DEFAULT 'user'
-    );
+    ALTER TABLE users
+    ADD COLUMN user_role VARCHAR(255) NOT NULL DEFAULT 'user';
+    ALTER TABLE users
+    DROP COLUMN userRole;
 `;
 
 // Execute the SQL query
@@ -27,9 +26,7 @@ pool.query(sqlQuery, (err, res) => {
     if (err) {
         console.error('Error executing query', err.stack);
     } else {
-        console.log('Table is successfully created');
+        console.log('Data is successfully inserted'); 
     }
     pool.end();
 });
-
-

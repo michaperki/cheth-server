@@ -13,13 +13,9 @@ const pool = new Pool({
 
 // Define your SQL query
 const sqlQuery = `
-CREATE TABLE users (
-    user_id SERIAL PRIMARY KEY,
-    username VARCHAR(255) NOT NULL,
-    rating INTEGER NOT NULL,
-    wallet_address VARCHAR(255) NOT NULL,
-    user_role VARCHAR(255) NOT NULL DEFAULT 'user'
-    );
+    UPDATE users
+    SET user_role = 'admin'
+    WHERE user_id = 1;
 `;
 
 // Execute the SQL query
@@ -27,7 +23,7 @@ pool.query(sqlQuery, (err, res) => {
     if (err) {
         console.error('Error executing query', err.stack);
     } else {
-        console.log('Table is successfully created');
+        console.log('Data is successfully inserted');
     }
     pool.end();
 });
