@@ -222,6 +222,11 @@ const updateCommission = async (gameId, amount) => {
     return rows;
 }
 
+const setAvatar = async (userId, avatar) => {
+    const { rows } = await client.query('UPDATE users SET avatar = $1 WHERE user_id = $2 RETURNING *', [avatar, userId]);
+    return rows;
+}
+
 module.exports = {
     connectToDatabase: handleErrors(connectToDatabase),
     getConfig: handleErrors(getConfig),
@@ -254,5 +259,6 @@ module.exports = {
     getUserGames: handleErrors(getUserGames),
     updateGameBalanceForPlayer1: handleErrors(updateGameBalanceForPlayer1),
     updateGameBalanceForPlayer2: handleErrors(updateGameBalanceForPlayer2),
-    updateCommission: handleErrors(updateCommission)
+    updateCommission: handleErrors(updateCommission),
+    setAvatar: handleErrors(setAvatar),
 };

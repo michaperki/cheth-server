@@ -118,6 +118,17 @@ const UserController = {
         } catch (error) {
             next(error); // Pass error to error handling middleware
         }
+    },
+
+    async setAvatar(req, res, next) {
+        try {
+            const { userId, avatar } = req.body;
+            console.log('Setting avatar for user', userId);
+            const user = await db.setAvatar(userId, avatar);
+            res.json(user);
+        } catch (error) {
+            next(error); // Pass error to error handling middleware
+        }
     }
 };
 

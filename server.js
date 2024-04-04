@@ -7,6 +7,7 @@ const websocket = require('./websocket'); // Import the websocket function
 const { logger, expressLogger } = require('./utils/LoggerUtils'); // Import the logger instance and expressLogger middleware
 const router = require('./routes');
 const path = require('path');
+const fs = require('fs');
 
 const app = express();
 const server = http.createServer(app);
@@ -48,7 +49,17 @@ app.use((req, res, next) => {
 app.use('/icons', express.static(path.join(__dirname, 'icons')));
 
 app.use('/allIcons', (req, res) => {
-    res.json({ icons: ['broccoli.svg', 'calculator.svg', 'dog.svg'] });
+    const iconsDir = path.join(__dirname, 'icons');
+
+    fs.readdir(iconsDir, (err, files) => {
+        if (err) {
+            console.error('Error reading icons directory:', err);
+            return res.status(500).json({ error: 'Internal Server Error' });
+        }
+
+        const iconFiles = files.filter(file => /\.(svg)$/i.test(file));
+        res.json({ icons: iconFiles });
+    });
 });
 
 app.use(router);
