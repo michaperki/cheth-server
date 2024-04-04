@@ -142,49 +142,6 @@ async function startGame(dbGame, clients, wagerSize) {
             });
         });
 
-        // // Subscribe to the FundsTransferred event
-        // gameContract.on('FundsTransferred', async (to, amount) => {
-        //     console.log('FundsTransferred event received');
-        //     console.log('Recipient:', to);
-        //     console.log('Amount:', amount);
-
-        //     // get the player id from the wallet address
-        //     const player = await db.getUserByWalletAddress(to);
-        //     console.log('player', player);
-
-        //     // Convert BigInt amount to string
-        //     const amountString = amount.toString();
-
-        //     const message = JSON.stringify({ type: 'FUNDS_TRANSFERRED', to, amount: amountString });
-
-        //     // send a message to the client
-        //     Object.values(clients).forEach(ws => {
-        //         if (ws.readyState === WebSocket.OPEN) {
-        //             if (parseInt(ws.userId) === player.user_id) {
-        //                 ws.send(message);
-        //             }
-        //         }
-        //     });
-
-
-        //     // Update the reward pool in the database (subtract the amount)
-        //     const currentRewardPool = await db.getRewardPool(dbGame.game_id);
-        //     const newRewardPool = Number(currentRewardPool) - Number(amount);
-        //     await db.updateRewardPool(dbGame.game_id, newRewardPool);
-        // });
-
-        // // Subscribe to the GameFinished event
-        // gameContract.once('GameFinished', async (winner, winnings) => {
-        //     console.log('GameFinished event received');
-        //     console.log('winner', winner);
-        //     console.log('winnings', winnings);
-        //     console.log('gameId', dbGame.game_id);
-        //     console.log('game', dbGame);
-
-        //     // Update the game state in the database
-        //     await db.updateGameState(dbGame.game_id, 5);
-        // });
-
         factoryContract.off('GameCreated', handleGameCreated);
     };
 
