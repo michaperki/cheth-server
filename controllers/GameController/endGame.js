@@ -59,17 +59,19 @@ async function cancelGame(req, res, next) {
             // get the player id from the wallet address
             const player = await db.getUserByWalletAddress(to);
 
+            const userID = player.user_id;
+
             // send a message to the client
-            const message = JSON.stringify({ type: 'FUNDS_TRANSFERRED', to, amount: amountString });
+            const message = JSON.stringify({ type: 'FUNDS_TRANSFERRED', userID, to, amount: amountString });
+
+            console.log("sending FundsTransferred message to the client")
 
             // send a message to the client
             req.wss.clients.forEach(client => {
                 if (client.readyState === WebSocket.OPEN) {
-                    if (parseInt(client.userId) === player.user_id) {
-                        client.send(message);
-                    }
+                    client.send(message);
                 }
-            });    
+            });
 
             // Update the game balance for the recipient            
             console.log('updating the database with the amount transferred');
@@ -106,7 +108,7 @@ async function cancelGame(req, res, next) {
             await db.updateRewardPool(gameId, newRewardPool);
 
             // subscribe to the GameCancelled event
-            
+
         });
 
         // Cancel the game in the contract
@@ -206,8 +208,8 @@ async function reportGameOver(req, res, next) {
                         client.send(message);
                     }
                 }
-            }); 
-            
+            });
+
             // check if the recipient's user ID matches either player1_id or player2_id
             // if it does, update the game balance for the recipient
             if (player.user_id === game.player1_id) {
