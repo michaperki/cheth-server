@@ -40,14 +40,14 @@ async function requestRematch(req, res, next) {
     console.log('message', message);
 
     // print whether or not the req.clients object contains the user ID
-    console.log("first client userId", req.clients[0].userId);
+    console.log("indexing including wss", req.wss.clients[0].userId);
+    console.log("indexing excluding wss", req.clients[0].userId);
 
-    // Broadcasting the message to all connected WebSocket clients
-    Object.values(req.clients).forEach(ws => {
-        if (ws.readyState === WebSocket.OPEN) {
-            console.log('ws.userId', ws.userId);
-            if (parseInt(ws.userId) === to) {
-                ws.send(message);
+    // send a message to the client
+    req.wss.clients.forEach(client => {
+        if (client.readyState === WebSocket.OPEN) {
+            if (parseInt(client.userId) === to) {
+                client.send(message);
             }
         }
     });

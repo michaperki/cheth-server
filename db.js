@@ -59,14 +59,13 @@ const getUserByLichessHandle = async (lichessHandle) => {
 
 const getUserByWalletAddress = async (walletAddress) => {
     // print the wallet address surrounded by single quotes
-    console.log("fetching user by wallet address...")
+    console.log("in database, fetching user by wallet address...")
     walletAddress = walletAddress.toLowerCase();
     console.log('walletAddress:', walletAddress);
     const { rows } = await client.query('SELECT * FROM users WHERE wallet_address = $1', [walletAddress]);
     // why is the rows empty?
     // answer: the wallet address is not stored in the database with single quotes
     // you can add single quotes to the query parameter
-    console.log('rows:', rows);
     return rows.length > 0 ? rows[0] : null;
 }
 
