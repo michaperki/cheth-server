@@ -19,6 +19,8 @@ router.post('/refreshContractBalance', GameController.refreshContractBalance);
 // getGame route
 router.post('/reportGameOver', GameController.reportGameOver);
 
+router.post('/requestRematch', GameController.requestRematch);
+
 router.get('/getGameCount', GameController.getGameCount);
 
 router.get('/getTotalWagered', GameController.getTotalWagered);

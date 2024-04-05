@@ -34,11 +34,9 @@ function websocket(server) {
                     ws.userId = data.userId; // Store the user ID in the WebSocket client object
                     clients[data.userId] = ws;
                     // log the user IDs of all connected clients
-                    logger.info('Connected clients:', Object.keys(clients));
                     console.log('Connected clients:', Object.keys(clients));
                     break;
                 case 'CANCEL_SEARCH':
-                    logger.info('CANCEL_SEARCH message received');
                     console.log('CANCEL_SEARCH message received');
                     // Implement logic to cancel the search
                     userId = data.userId;
