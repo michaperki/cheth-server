@@ -5,6 +5,7 @@ const startGame = require('./startGame');
 const { getGame, getGames, getAllGames } = require('./fetchGame');
 const { cancelGamePairing, cancelGame, reportGameOver, forceDraw, deleteGame } = require('./endGame');
 const { refreshContractBalance, getGameCount, getTotalWagered } = require('./utilis');
+const { requestRematch } = require('./rematch');
 
 module.exports = {
     playGame,
@@ -19,5 +20,6 @@ module.exports = {
     deleteGame,
     refreshContractBalance,
     getGameCount,
-    getTotalWagered
+    getTotalWagered,
+    requestRematch
 };

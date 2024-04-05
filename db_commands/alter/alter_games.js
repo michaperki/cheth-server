@@ -16,9 +16,12 @@ const pool = new Pool({
 // Define your SQL query
 const sqlQuery = `
     ALTER TABLE games
-    ADD COLUMN player1_payout bigint DEFAULT 0,
-    ADD COLUMN player2_payout bigint DEFAULT 0,
-    ADD COLUMN commission bigint DEFAULT 0;
+    ADD COLUMN rematch_requested BOOLEAN DEFAULT FALSE,
+    ADD COLUMN rematch_requested_by INTEGER DEFAULT NULL,
+    ADD COLUMN rematch_accepted BOOLEAN DEFAULT FALSE,
+    ADD COLUMN rematch_declined BOOLEAN DEFAULT FALSE,
+
+    ADD FOREIGN KEY (rematch_requested_by) REFERENCES users(user_id);
 `;
 
 // Execute the SQL query
@@ -26,7 +29,7 @@ pool.query(sqlQuery, (err, res) => {
     if (err) {
         console.error('Error executing query', err.stack);
     } else {
-        console.log('Data is successfully inserted');
+        console.log('Data is successfully altered');
     }
     pool.end();
 });
