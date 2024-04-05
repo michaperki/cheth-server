@@ -38,9 +38,10 @@ async function requestRematch(req, res, next) {
     const message = JSON.stringify({ type: 'REMATCH_REQUESTED', gameId: gameId, from: from, to: to, wagerSize: wagerSize, timeControl: timeControl });
 
     console.log('message', message);
-    console.log('Object.values(req.clients)', Object.values(req.clients));
-    console.log('req.clients', req.clients);
 
+    // print whether or not the req.clients object contains the user ID
+    console.log("first client", req.clients[0]);
+    console.log("first client userId", req.clients[0].userId);
 
     // Broadcasting the message to all connected WebSocket clients
     Object.values(req.clients).forEach(ws => {
