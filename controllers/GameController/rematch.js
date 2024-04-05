@@ -11,11 +11,15 @@ async function requestRematch(req, res, next) {
     // Get the user ID from the request body
     const userId = req.body.userId;
 
+    console.log('requestRematch', gameId, userId);
+
     // update the game status to rematch requested
     await db.requestRematch(gameId, userId);
 
     // get the game from the database
     const game = await db.getGameById(gameId);
+
+    console.log('game', game);
 
     const from = userId;
     const to = game.player1_id === userId ? game.player2_id : game.player1_id;
