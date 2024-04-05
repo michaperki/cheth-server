@@ -26,24 +26,6 @@ const UserController = {
                 return res.json({ isEligible: false, reason: 'Account created after specified date' });
             }
     
-            // Checking if the time control matches the configured time control
-            const timeControl = config.find(item => item.name === 'time_control').value;
-            if (userInfo.perfs[timeControl].games === 0) {
-                return res.json({ isEligible: false, reason: 'No games in specified time control' });
-            }
-    
-            // Checking if the user has played enough games
-            const minGames = parseInt(config.find(item => item.name === 'min_games').value);
-            if (userInfo.perfs[timeControl].games < minGames) {
-                return res.json({ isEligible: false, reason: 'Not enough games played' });
-            }
-    
-            // Checking if the user's rating is below the threshold
-            const ratingThreshold = parseInt(config.find(item => item.name === 'rating_threshold').value);
-            if (userInfo.perfs[timeControl].rating >= ratingThreshold) {
-                return res.json({ isEligible: false, reason: 'User rating exceeds threshold' });
-            }
-    
             // If all checks passed, the user is eligible
             res.json({ isEligible: true });
         } catch (error) {
@@ -52,13 +34,18 @@ const UserController = {
 
     async addUser(req, res, next) {
         try {
-            const { lichessHandle, walletAddress, darkMode } = req.body;
+            const { lichessHandle, walletAddress } = req.body;
     
             // get the rating from lichess
             const userInfo = await fetchLichessUserInfo(lichessHandle);
-            const rating = userInfo.perfs.blitz.rating;
+            const bullet_rating = userInfo.perfs.bullet.rating;
+            const bullet_games = userInfo.perfs.bullet.games;
+            const blitz_rating = userInfo.perfs.blitz.rating;
+            const blitz_games = userInfo.perfs.blitz.games;
+            const rapid_rating = userInfo.perfs.rapid.rating;
+            const rapid_games = userInfo.perfs.rapid.games;
     
-            const user = await db.addUser(lichessHandle, rating, walletAddress, darkMode);
+            const user = await db.addUser(lichessHandle, walletAddress, bullet_rating, blitz_rating, rapid_rating, bullet_games, blitz_games, rapid_games);
             res.json(user);
         } catch (error) {
             next(error); // Pass error to error handling middleware

@@ -13,9 +13,24 @@ const pool = new Pool({
 
 // Define your SQL query
 const sqlQuery = `
+    -- Update blitz_rating if it's at its default value
     UPDATE users
-    SET user_role = 'admin'
-    WHERE user_id = 1;
+    SET blitz_rating = rating
+    WHERE blitz_rating = 1000;
+
+    -- Update bullet_rating if it's at its default value
+    UPDATE users
+    SET bullet_rating = rating
+    WHERE bullet_rating = 1000;
+
+    -- Update rapid_rating if it's at its default value
+    UPDATE users
+    SET rapid_rating = rating
+    WHERE rapid_rating = 1000;
+
+    -- Drop the rating column
+    ALTER TABLE users
+    DROP COLUMN rating;
 `;
 
 // Execute the SQL query
@@ -23,7 +38,7 @@ pool.query(sqlQuery, (err, res) => {
     if (err) {
         console.error('Error executing query', err.stack);
     } else {
-        console.log('Data is successfully inserted');
+        console.log('Data is successfully updated');
     }
     pool.end();
 });

@@ -20,10 +20,27 @@ const getConfig = async () => {
     return rows;
 };
 
-const addUser = async (username, rating, walletAddress, darkMode) => {
-    const { rows } = await client.query('INSERT INTO users (username, rating, wallet_address, dark_mode) VALUES ($1, $2, $3, $4) RETURNING *', [username, rating, walletAddress, darkMode]);
+const addUser = async (
+    username, 
+    walletAddress, 
+    bulletRating, 
+    blitzRating, 
+    rapidRating, 
+    bulletGames, 
+    blitzGames, 
+    rapidGames
+) => {
+    const queryText = `
+        INSERT INTO users 
+            (username, wallet_address, bullet_rating, blitz_rating, rapid_rating, bullet_games, blitz_games, rapid_games) 
+        VALUES 
+            ($1, $2, $3, $4, $5, $6, $7, $8) 
+        RETURNING *;
+    `;
+    const values = [username, walletAddress, bulletRating, blitzRating, rapidRating, bulletGames, blitzGames, rapidGames];
+    const { rows } = await client.query(queryText, values);
     return rows;
-}
+};
 
 const getUsers = async () => {
     const { rows } = await client.query('SELECT * FROM users');
@@ -49,7 +66,7 @@ const getUserByWalletAddress = async (walletAddress) => {
     // why is the rows empty?
     // answer: the wallet address is not stored in the database with single quotes
     // you can add single quotes to the query parameter
-    console.log('rows:', rows); 
+    console.log('rows:', rows);
     return rows.length > 0 ? rows[0] : null;
 }
 
