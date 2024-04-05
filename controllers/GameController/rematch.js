@@ -40,7 +40,6 @@ async function requestRematch(req, res, next) {
     console.log('message', message);
 
     // print whether or not the req.clients object contains the user ID
-    console.log("first client", req.clients[0]);
     console.log("first client userId", req.clients[0].userId);
 
     // Broadcasting the message to all connected WebSocket clients
