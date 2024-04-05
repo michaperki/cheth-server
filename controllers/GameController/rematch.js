@@ -26,15 +26,26 @@ async function requestRematch(req, res, next) {
     const from = userId;
     const to = game.player1_id === userId ? game.player2_id : game.player1_id;
 
+    console.log('from', from);
+    console.log('to', to);
+
     const wagerSize = game.wager_size;
     const timeControl = game.time_control;
 
+    console.log('wagerSize', wagerSize);
+    console.log('timeControl', timeControl);
+
     const message = JSON.stringify({ type: 'REMATCH_REQUESTED', gameId: gameId, from: from, to: to, wagerSize: wagerSize, timeControl: timeControl });
+
+    console.log('message', message);
+    console.log('Object.values(req.clients)', Object.values(req.clients));
+    console.log('req.clients', req.clients);
 
 
     // Broadcasting the message to all connected WebSocket clients
     Object.values(req.clients).forEach(ws => {
         if (ws.readyState === WebSocket.OPEN) {
+            console.log('ws.userId', ws.userId);
             if (parseInt(ws.userId) === to) {
                 ws.send(message);
             }

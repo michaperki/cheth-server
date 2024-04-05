@@ -107,7 +107,8 @@ async function cancelGame(req, res, next) {
             const newRewardPool = Number(currentRewardPool) - Number(amount);
             await db.updateRewardPool(gameId, newRewardPool);
 
-            // subscribe to the GameCancelled event
+            // update the winner in the database
+            await db.updateWinner(gameId, 'Cancelled');        
 
         });
 
@@ -215,9 +216,13 @@ async function reportGameOver(req, res, next) {
             if (player.user_id === game.player1_id) {
                 const newBalance = Number(game.player1_payout) + Number(amount);
                 await db.updateGameBalanceForPlayer1(gameId, newBalance);
+                // Update the Winner in the database
+                await db.updateWinner(gameId, game.player1_id);
             } else if (player.user_id === game.player2_id) {
                 const newBalance = Number(game.player2_payout) + Number(amount);
                 await db.updateGameBalanceForPlayer2(gameId, newBalance);
+                // Update the Winner in the database
+                await db.updateWinner(gameId, game.player2_id);
             } else {
                 // if the recipient is not a player, assume it is the commission
                 const newBalance = Number(game.commission) + Number(amount);
@@ -273,6 +278,9 @@ async function forceDraw(req, res, next) {
             console.log('gameId', gameId);
             console.log('game', game);
 
+            // Update the winner in the database
+            await db.updateWinner(gameId, 'Draw');
+            
             // Update the game state in the database
             await db.updateGameState(gameId, 5);
         });
