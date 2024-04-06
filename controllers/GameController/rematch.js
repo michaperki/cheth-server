@@ -67,7 +67,7 @@ async function acceptRematch(req, res, next) {
         sendRematchAcceptedMessage(req.wss.clients, gameId, userId, opponentId, wager, timeControl);
 
         // Start a new game
-        const newGame = await initiateNewGame(userId, opponentId, timeControl, wager, req.wss);
+        const newGame = await initiateNewGame(userId, opponentId, timeControl, wager, req.wss.clients);
 
         res.json(newGame);
     } catch (error) {
@@ -96,13 +96,13 @@ function sendRematchAcceptedMessage(clients, gameId, fromUserId, toUserId, wager
 }
 
 // Helper function to initiate a new game
-async function initiateNewGame(player1Id, player2Id, timeControl, wagerSize, wss) {
+async function initiateNewGame(player1Id, player2Id, timeControl, wagerSize, clients) {
     console.log('Initiating new game:', player1Id, player2Id, timeControl, wagerSize);
     const newGame = await db.createGame(player1Id, timeControl, wagerSize);
     console.log('New game created:', newGame);
     const dbGame = await db.joinGame(newGame.game_id, player2Id);
     console.log('DB game:', dbGame);
-    await startGame(dbGame, wss.clients, wagerSize);
+    await startGame(dbGame, clients, wagerSize);
     return dbGame;
 }
 
