@@ -50,56 +50,58 @@ async function requestRematch(req, res, next) {
 }
 
 async function acceptRematch(req, res, next) {
+    try {
+        const { gameId, userId } = req.body;
+        console.log('acceptRematch', gameId, userId);
 
-    // Get the game ID from the request body
-    const gameId = req.body.gameId;
+        // Update the game status and get updated game details
+        await db.acceptRematch(gameId, userId);
+        const game = await db.getGameById(gameId);
+        console.log('game', game);
 
-    // Get the user ID from the request body
-    const userId = req.body.userId;
+        const opponentId = game.player1_id === userId ? game.player2_id : game.player1_id;
+        const { wager, time_control: timeControl } = game;
+        console.log('Opponent ID:', opponentId, 'Wager Size:', wager, 'Time Control:', timeControl);
 
-    console.log('acceptRematch', gameId, userId);
+        // Notify players about the rematch acceptance
+        sendRematchAcceptedMessage(req.wss.clients, gameId, userId, opponentId, wager, timeControl);
 
-    // update the game status to rematch requested
-    await db.acceptRematch(gameId, userId);
+        // Start a new game
+        const newGame = await initiateNewGame(userId, opponentId, timeControl, wager, req.wss);
 
-    // get the game from the database
-    const game = await db.getGameById(gameId);
+        res.json(newGame);
+    } catch (error) {
+        next(error);
+    }
+}
 
-    console.log('game', game);
+// Helper function to send rematch accepted message to WebSocket clients
+function sendRematchAcceptedMessage(clients, gameId, fromUserId, toUserId, wagerSize, timeControl) {
+    const message = JSON.stringify({ 
+        type: 'REMATCH_ACCEPTED', 
+        gameId, 
+        from: fromUserId, 
+        to: toUserId, 
+        wagerSize, 
+        timeControl 
+    });
 
-    const from = userId;
-    const to = game.player1_id === userId ? game.player2_id : game.player1_id;
-
-    console.log('from', from);
-    console.log('to', to);
-
-    const wagerSize = game.wager;
-    const timeControl = game.time_control;
-
-    console.log('wagerSize', wagerSize);
-    console.log('timeControl', timeControl);
-
-    const message = JSON.stringify({ type: 'REMATCH_ACCEPTED', gameId: gameId, from: from, to: to, wagerSize: wagerSize, timeControl: timeControl });
-
-    console.log('message', message);
-
-    // Broadcasting the message to all connected WebSocket clients
-    req.wss.clients.forEach(client => {
+    clients.forEach(client => {
         if (client.readyState === WebSocket.OPEN) {
-            if (parseInt(client.userId) === to || parseInt(client.userId) === from) {
+            if (parseInt(client.userId) === toUserId || parseInt(client.userId) === fromUserId) {
                 client.send(message);
             }
         }
     });
+}
 
-    // start the game
-    const newGame = await db.createGame(from, timeControl, wagerSize);
-    await db.joinGame(newGame.game_id, to);
+// Helper function to initiate a new game
+async function initiateNewGame(player1Id, player2Id, timeControl, wagerSize, wss) {
+    const newGame = await db.createGame(player1Id, timeControl, wagerSize);
+    await db.joinGame(newGame.game_id, player2Id);
     const dbGame = await db.getGameById(newGame.game_id);
-    await db.startGame(dbGame, req.wss, wagerSize);
-
-
-
+    await startGame(dbGame, wss.clients, wagerSize);
+    return dbGame;
 }
 
 module.exports = { requestRematch, acceptRematch };

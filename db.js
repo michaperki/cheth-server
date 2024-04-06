@@ -248,6 +248,11 @@ const requestRematch = async (gameId, userId) => {
     return rows;
 }
 
+const acceptRematch = async (gameId, userId) => {
+    const { rows } = await client.query('UPDATE games SET rematch_accepted = TRUE WHERE game_id = $1 AND rematch_requested_by != $2 RETURNING *', [gameId, userId]);
+    return rows;
+}
+
 module.exports = {
     connectToDatabase: handleErrors(connectToDatabase),
     getConfig: handleErrors(getConfig),
@@ -282,5 +287,6 @@ module.exports = {
     updateGameBalanceForPlayer2: handleErrors(updateGameBalanceForPlayer2),
     updateCommission: handleErrors(updateCommission),
     setAvatar: handleErrors(setAvatar),
-    requestRematch: handleErrors(requestRematch)
+    requestRematch: handleErrors(requestRematch),
+    acceptRematch: handleErrors(acceptRematch)
 };
