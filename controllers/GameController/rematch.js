@@ -40,13 +40,16 @@ async function requestRematch(req, res, next) {
     console.log('message', message);
 
     // send a message to the client
-    req.wss.clients.forEach(ws => {
+    const clients = req.app.get('clients');
+    Object.values(clients).forEach(ws => {
         if (ws.readyState === WebSocket.OPEN) {
             if (parseInt(ws.userId) === to) {
+                console.log('sending message to', to);
                 ws.send(message);
             }
         }
     });
+
 }
 
 module.exports = { requestRematch };
