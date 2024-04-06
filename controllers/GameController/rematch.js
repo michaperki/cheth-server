@@ -39,15 +39,14 @@ async function requestRematch(req, res, next) {
 
     console.log('message', message);
 
-    // print whether or not the req.clients object contains the user ID
-    console.log("indexing excluding wss", req.clients[0].userId);
+    console.log('req.wss.clients', req.wss.clients);
+
+
 
     // send a message to the client
     req.wss.clients.forEach(client => {
         if (client.readyState === WebSocket.OPEN) {
-            if (parseInt(client.userId) === to) {
                 client.send(message);
-            }
         }
     });
 }
