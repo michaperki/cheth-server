@@ -97,7 +97,9 @@ function sendRematchAcceptedMessage(clients, gameId, fromUserId, toUserId, wager
 
 // Helper function to initiate a new game
 async function initiateNewGame(player1Id, player2Id, timeControl, wagerSize, wss) {
+    console.log('Initiating new game:', player1Id, player2Id, timeControl, wagerSize);
     const newGame = await db.createGame(player1Id, timeControl, wagerSize);
+    console.log('New game created:', newGame);
     await db.joinGame(newGame.game_id, player2Id);
     const dbGame = await db.getGameById(newGame.game_id);
     await startGame(dbGame, wss.clients, wagerSize);
