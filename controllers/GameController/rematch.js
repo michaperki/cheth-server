@@ -29,7 +29,7 @@ async function requestRematch(req, res, next) {
     console.log('from', from);
     console.log('to', to);
 
-    const wagerSize = game.wager_size;
+    const wagerSize = game.wager;
     const timeControl = game.time_control;
 
     console.log('wagerSize', wagerSize);
