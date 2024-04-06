@@ -102,6 +102,7 @@ async function initiateNewGame(player1Id, player2Id, timeControl, wagerSize, wss
     console.log('New game created:', newGame);
     await db.joinGame(newGame.game_id, player2Id);
     const dbGame = await db.getGameById(newGame.game_id);
+    console.log('DB game:', dbGame);
     await startGame(dbGame, wss.clients, wagerSize);
     return dbGame;
 }
