@@ -40,7 +40,6 @@ async function requestRematch(req, res, next) {
     console.log('message', message);
 
     // print whether or not the req.clients object contains the user ID
-    console.log("indexing including wss", req.wss.clients[0].userId);
     console.log("indexing excluding wss", req.clients[0].userId);
 
     // send a message to the client
