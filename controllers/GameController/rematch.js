@@ -40,11 +40,10 @@ async function requestRematch(req, res, next) {
     console.log('message', message);
 
     // Broadcasting the message to all connected WebSocket clients
-    req.clients.forEach(ws => {
-        if (ws.readyState === WebSocket.OPEN) {
-            console.log('ws.userId', ws.userId);
-            if (parseInt(ws.userId) === from || parseInt(ws.userId) === to) {
-                ws.send(message);
+    req.wss.clients.forEach(client => {
+        if (client.readyState === WebSocket.OPEN) {
+            if (parseInt(client.userId) === to) {
+                client.send(message);
             }
         }
     });
