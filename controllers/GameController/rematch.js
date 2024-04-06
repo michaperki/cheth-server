@@ -42,7 +42,7 @@ async function requestRematch(req, res, next) {
     // Broadcasting the message to all connected WebSocket clients
     req.wss.clients.forEach(client => {
         if (client.readyState === WebSocket.OPEN) {
-            if (parseInt(client.userId) === to) {
+            if (parseInt(client.userId) === to || parseInt(client.userId) === from) {
                 client.send(message);
             }
         }
