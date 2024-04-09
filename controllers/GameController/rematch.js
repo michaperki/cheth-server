@@ -68,7 +68,7 @@ async function acceptRematch(req, res, next) {
         sendRematchAcceptedMessage(clientList, gameId, userId, opponentId, wager, timeControl);
 
         // Start a new game
-        const newGame = await initiateNewGame(userId, opponentId, timeControl, wager, clientList);
+        const newGame = await initiateNewGame(userId, opponentId, timeControl, wager, req.clients);
 
         res.json(newGame);
     } catch (error) {
