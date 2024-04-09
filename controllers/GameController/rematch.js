@@ -52,6 +52,7 @@ async function requestRematch(req, res, next) {
 async function acceptRematch(req, res, next) {
     try {
         const { gameId, userId } = req.body;
+        const clientList = req.wss.clients;
         console.log('acceptRematch', gameId, userId);
 
         // Update the game status and get updated game details
@@ -64,10 +65,10 @@ async function acceptRematch(req, res, next) {
         console.log('Opponent ID:', opponentId, 'Wager Size:', wager, 'Time Control:', timeControl);
 
         // Notify players about the rematch acceptance
-        sendRematchAcceptedMessage(req.wss.clients, gameId, userId, opponentId, wager, timeControl);
+        sendRematchAcceptedMessage(clientList, gameId, userId, opponentId, wager, timeControl);
 
         // Start a new game
-        const newGame = await initiateNewGame(userId, opponentId, timeControl, wager, req.wss.clients);
+        const newGame = await initiateNewGame(userId, opponentId, timeControl, wager, clientList);
 
         res.json(newGame);
     } catch (error) {
@@ -105,7 +106,6 @@ async function initiateNewGame(player1Id, player2Id, timeControl, wagerSize, cli
     const dbGame = await db.joinGame(newGameId, player2Id);
     console.log('DB game:', dbGame);
     console.log('Starting the rematch...');
-    console.log('Clients:', clients);
     await startGame(dbGame[0], clients, wagerSize);
     return dbGame;
 }
