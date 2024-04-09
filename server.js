@@ -24,13 +24,12 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 // Initialize WebSocket and get the instance
-const { wss, clients, sendMessageToUser } = websocket(server);
+const { wss, clients } = websocket(server);
 
 // Middleware to inject WebSocket instance into request object
 app.use((req, res, next) => {
     req.wss = wss;
     req.clients = clients;
-    req.sendMessageToUser = sendMessageToUser;
     next();
 });
 

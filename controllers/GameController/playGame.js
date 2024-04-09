@@ -19,7 +19,7 @@ async function playGame(req, res, next) {
             const gameId = availableGames[0].game_id;
             await db.joinGame(gameId, userId);
             const dbGame = await db.getGameById(gameId);
-            await startGame(dbGame, req.clients, wagerSize, req.sendMessageToUser);
+            await startGame(dbGame, req.clients, wagerSize);
             res.json(dbGame);
         } else {
             // If no available games with matching criteria, create a new game

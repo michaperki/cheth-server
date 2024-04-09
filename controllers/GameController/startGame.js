@@ -15,7 +15,7 @@ const wallet = new ethers.Wallet(privateKey);
 const signer = wallet.connect(provider);
 const factoryContract = new ethers.Contract(factoryContractAddress, factoryContractAbi.abi, signer);
 
-async function startGame(dbGame, clients, wagerSize, sendMessageToUser) {
+async function startGame(dbGame, clients, wagerSize) {
     // Send a message to the client to start the game
     console.log('game started');
     // create a new game in the contract
@@ -38,18 +38,15 @@ async function startGame(dbGame, clients, wagerSize, sendMessageToUser) {
         console.log('player1_id', player1_id);
         console.log('player2_id', player2_id);
         console.log('client ids', Object.keys(clients));
-        console.log('clients', clients);
-        // Object.values(clients).forEach(ws => {
-        //     if (ws.readyState === WebSocket.OPEN) {
-        //         // send the message to the player 1 and player 2
-        //         if (parseInt(ws.userId) === player1_id || parseInt(ws.userId) === player2_id) {
-        //             ws.send(message);
-        //         }
-        //     }
-        // });
-        // Broadcasting the message to all connected WebSocket clients
-        sendMessageToUser(player1_id, message);
-        sendMessageToUser(player2_id, message);
+        console.log('first client', clients[0]);
+        Object.values(clients).forEach(ws => {
+            if (ws.readyState === WebSocket.OPEN) {
+                // send the message to the player 1 and player 2
+                if (parseInt(ws.userId) === player1_id || parseInt(ws.userId) === player2_id) {
+                    ws.send(message);
+                }
+            }
+        });
 
         // Instantiate the contract
         const gameContract = new ethers.Contract(game, chessContractAbi.abi, signer);
