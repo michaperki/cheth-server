@@ -68,7 +68,16 @@ function websocket(server) {
         delete clients[userId];
     }
 
-    return { wss, clients }; // Return WebSocket Server instance and clients dictionary
+    // Define sendMessageToUser inside the websocket function
+    function sendMessageToUser(userId, message) {
+        const client = clients[userId];
+        if (client && client.readyState === WebSocket.OPEN) {
+            client.send(JSON.stringify(message));
+        }
+    }
+
+
+    return { wss, clients, sendMessageToUser };
 }
 
 module.exports = websocket;
