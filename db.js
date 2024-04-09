@@ -120,6 +120,7 @@ const cancelGameSearch = async (userId) => {
 
 
 const joinGame = async (gameId, userId) => {
+    console.log('Joining game..., gameId:', gameId, 'userId:', userId);
     const { rows } = await client.query('UPDATE games SET player2_id = $1, state = 1 WHERE game_id = $2 RETURNING *', [userId, gameId]);
     return rows;
 }
