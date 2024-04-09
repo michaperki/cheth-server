@@ -38,6 +38,7 @@ async function startGame(dbGame, clients, wagerSize) {
         console.log('player1_id', player1_id);
         console.log('player2_id', player2_id);
         console.log('client ids', Object.keys(clients));
+        console.log('clients', clients);
         Object.values(clients).forEach(ws => {
             if (ws.readyState === WebSocket.OPEN) {
                 // send the message to the player 1 and player 2
