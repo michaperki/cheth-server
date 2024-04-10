@@ -108,6 +108,10 @@ const setPlayerReady = async (gameId, userId) => {
     console.log('Player ready status updated');
 }
 
+const setBothPlayersReady = async (gameId) => {
+    await client.query('UPDATE games SET player1_ready = TRUE, player2_ready = TRUE WHERE game_id = $1', [gameId]);
+}
+
 const cancelGame = async (gameId) => {
     const { rows } = await client.query('DELETE FROM games WHERE game_id = $1 RETURNING *', [gameId]);
     return rows;
@@ -276,6 +280,7 @@ module.exports = {
     createGame: handleErrors(createGame),
     playGame: handleErrors(playGame),
     setPlayerReady: handleErrors(setPlayerReady),
+    setBothPlayersReady: handleErrors(setBothPlayersReady),
     cancelGame: handleErrors(cancelGame),
     cancelGameSearch: handleErrors(cancelGameSearch),
     joinGame: handleErrors(joinGame),
