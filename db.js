@@ -254,6 +254,17 @@ const acceptRematch = async (gameId, userId) => {
     return rows;
 }
 
+const declineRematch = async (gameId) => {
+    const { rows } = await client.query('UPDATE games SET rematch_requested = FALSE, rematch_requested_by = NULL WHERE game_id = $1 RETURNING *', [gameId]);
+    return rows;
+}
+
+const cancelRematch = async (gameId) => {
+    const { rows } = await client.query('UPDATE games SET rematch_requested = FALSE, rematch_requested_by = NULL, rematch_accepted = FALSE WHERE game_id = $1 RETURNING *', [gameId]);
+    return rows;
+}
+
+
 module.exports = {
     connectToDatabase: handleErrors(connectToDatabase),
     getConfig: handleErrors(getConfig),
@@ -289,5 +300,7 @@ module.exports = {
     updateCommission: handleErrors(updateCommission),
     setAvatar: handleErrors(setAvatar),
     requestRematch: handleErrors(requestRematch),
-    acceptRematch: handleErrors(acceptRematch)
+    acceptRematch: handleErrors(acceptRematch),
+    declineRematch: handleErrors(declineRematch),
+    cancelRematch: handleErrors(cancelRematch)
 };

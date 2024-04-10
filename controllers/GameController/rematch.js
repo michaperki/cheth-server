@@ -76,10 +76,99 @@ async function acceptRematch(req, res, next) {
     }
 }
 
+async function declineRematch(req, res, next) {
+    try {
+        const { gameId, userId } = req.body;
+        const clientList = req.wss.clients;
+        console.log('declineRematch', gameId, userId);
+
+        // Update the game status and get updated game details
+        await db.declineRematch(gameId, userId);
+        const game = await db.getGameById(gameId);
+        console.log('game', game);
+
+        const opponentId = game.player1_id === userId ? game.player2_id : game.player1_id;
+        const { wager, time_control: timeControl } = game;
+        console.log('Opponent ID:', opponentId, 'Wager Size:', wager, 'Time Control:', timeControl);
+
+        // Notify players about the rematch acceptance
+        sendRematchDeclinedMessage(clientList, gameId, userId, opponentId, wager, timeControl);
+
+        res.json({ message: 'Rematch declined' });
+    } catch (error) {
+        next(error);
+    }
+}
+
+async function cancelRematch(req, res, next) {
+    try {
+        const { gameId, userId } = req.body;
+        const clientList = req.wss.clients;
+        console.log('cancelRematch', gameId, userId);
+
+        // Update the game status and get updated game details
+        await db.cancelRematch(gameId, userId);
+        const game = await db.getGameById(gameId);
+        console.log('game', game);
+
+        const opponentId = game.player1_id === userId ? game.player2_id : game.player1_id;
+        const { wager, time_control: timeControl } = game;
+        console.log('Opponent ID:', opponentId, 'Wager Size:', wager, 'Time Control:', timeControl);
+
+        // Notify players about the rematch acceptance
+        sendRematchCancelledMessage(clientList, gameId, userId, opponentId, wager, timeControl);
+
+        res.json({ message: 'Rematch cancelled' });
+    } catch (error) {
+        next(error);
+    }
+}
+
+
 // Helper function to send rematch accepted message to WebSocket clients
 function sendRematchAcceptedMessage(clients, gameId, fromUserId, toUserId, wagerSize, timeControl) {
     const message = JSON.stringify({ 
         type: 'REMATCH_ACCEPTED', 
+        gameId, 
+        from: fromUserId, 
+        to: toUserId, 
+        wagerSize, 
+        timeControl 
+    });
+
+    clients.forEach(client => {
+        if (client.readyState === WebSocket.OPEN) {
+            if (parseInt(client.userId) === toUserId || parseInt(client.userId) === fromUserId) {
+                client.send(message);
+            }
+        }
+    });
+}
+
+// Helper function to send rematch declined message to WebSocket clients
+function sendRematchDeclinedMessage(clients, gameId, fromUserId, toUserId, wagerSize, timeControl) {
+    const message = JSON.stringify({ 
+        type: 'REMATCH_DECLINED', 
+        gameId, 
+        from: fromUserId, 
+        to: toUserId, 
+        wagerSize, 
+        timeControl 
+    });
+
+    clients.forEach(client => {
+        if (client.readyState === WebSocket.OPEN) {
+            if (parseInt(client.userId) === toUserId || parseInt(client.userId) === fromUserId) {
+                client.send(message);
+            }
+        }
+    });
+}
+
+// Helper function to send rematch cancelled message to WebSocket clients
+function sendRematchCancelledMessage(clients, gameId, fromUserId, toUserId, wagerSize, timeControl) {
+    const message = JSON.stringify({ 
+        type: 'REMATCH_CANCELLED', 
         gameId, 
         from: fromUserId, 
         to: toUserId, 
@@ -110,4 +199,4 @@ async function initiateNewGame(player1Id, player2Id, timeControl, wagerSize, cli
     return dbGame;
 }
 
-module.exports = { requestRematch, acceptRematch };
+module.exports = { requestRematch, acceptRematch, declineRematch, cancelRematch };
