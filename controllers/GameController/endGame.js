@@ -106,10 +106,6 @@ async function cancelGame(req, res, next) {
             const currentRewardPool = await db.getRewardPool(gameId);
             const newRewardPool = Number(currentRewardPool) - Number(amount);
             await db.updateRewardPool(gameId, newRewardPool);
-
-            // update the winner in the database
-            await db.updateWinner(gameId, 'Cancelled');        
-
         });
 
         // Cancel the game in the contract
