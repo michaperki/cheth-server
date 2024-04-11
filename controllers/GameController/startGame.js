@@ -117,6 +117,8 @@ async function startGame(dbGame, clients, wagerSize) {
             console.log('player1', player1);
             console.log('player2', player2);
 
+            await db.setBothPlayersReady(dbGame.game_id);
+
             const username1 = player1.username;
             const username2 = player2.username;
             console.log('username1', username1);
