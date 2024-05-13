@@ -1,2 +1,3 @@
 # cheth backend server
-## express app deployed to Heroku
+
+```npm start``` starts the backend server locally
