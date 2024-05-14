@@ -3,7 +3,7 @@ const express = require('express');
 const router = express.Router();
 const GameController = require('../controllers/GameController');
 
-router.post('/playGame', GameController.playGame);
+router.post('/findOpponent', GameController.findOpponent);
 // getGames route
 router.get('/getGames', GameController.getGames);
 // getAllGames route
