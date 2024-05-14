@@ -153,9 +153,12 @@ async function startGame(dbGame, clients, wagerSize) {
     // Add the event handler
     factoryContract.on('GameCreated', handleGameCreated);
 
+    console.log('handle game creation completed by factory');
+	  
     // Call the function to create a new game
     contractFactoryFunctions.createGame(dbGame.game_id, wagerSize);
 
+    console.log('handle game creation factory funcs completed');
     // get the player ids
     const { player1_id, player2_id } = dbGame;
 
