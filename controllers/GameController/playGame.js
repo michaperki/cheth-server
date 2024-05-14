@@ -4,8 +4,8 @@ const db = require('../../db');
 const startGame = require('./startGame');
 
 
-async function findOpponent(req, res, next) {
-    console.log('/findOpponent route');
+async function playGame(req, res, next) {
+    console.log('/playGame route');
     try {
         const userId = req.body.userId;
         const timeControl = req.body.timeControl; // Get the time control from the request body
@@ -31,4 +31,4 @@ async function findOpponent(req, res, next) {
     }
 }
 
-module.exports = findOpponent;
+module.exports = playGame;
