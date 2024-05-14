@@ -1,7 +1,7 @@
 {
   "scripts": {
     "start": "node server.js",
-    "test": "jest"
+    "test": "mocha --exit"
   },
   "dependencies": {
     "cors": "^2.8.5",
@@ -16,7 +16,11 @@
     "pino-http": "^9.0.0",
     "pino-pretty": "^11.0.0",
     "socket.io": "^4.7.4",
-    "supertest": "^6.3.4",
     "ws": "^8.16.0"
+  },
+  "devDependencies": {
+    "chai": "^5.1.1",
+    "mocha": "^10.4.0",
+    "supertest": "^7.0.0"
   }
 }
