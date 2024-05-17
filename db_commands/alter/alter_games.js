@@ -5,6 +5,7 @@ const { Pool } = require('pg');
 
 const DATABASE_URL = process.env.DATABASE_URL;
 
+
 // Configure the connection to your Heroku Postgres database
 const pool = new Pool({
     connectionString: DATABASE_URL,
@@ -16,12 +17,8 @@ const pool = new Pool({
 // Define your SQL query
 const sqlQuery = `
     ALTER TABLE games
-    ADD COLUMN rematch_requested BOOLEAN DEFAULT FALSE,
-    ADD COLUMN rematch_requested_by INTEGER DEFAULT NULL,
-    ADD COLUMN rematch_accepted BOOLEAN DEFAULT FALSE,
-    ADD COLUMN rematch_declined BOOLEAN DEFAULT FALSE,
-
-    ADD FOREIGN KEY (rematch_requested_by) REFERENCES users(user_id);
+    ADD COLUMN player1_rating INTEGER DEFAULT NULL,
+    ADD COLUMN player2_rating INTEGER DEFAULT NULL;
 `;
 
 // Execute the SQL query
