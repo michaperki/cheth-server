@@ -1,36 +1,37 @@
 // routes/userRoutes.js (Routes for user-related operations)
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const GameController = require('../controllers/GameController');
+const GameController = require("../controllers/GameController");
 
-router.post('/findOpponent', GameController.findOpponent);
+router.post("/findOpponent", GameController.findOpponent);
 // getGames route
-router.get('/getGames', GameController.getGames);
+router.get("/getGames", GameController.getGames);
 // getAllGames route
-router.get('/getAllGames', GameController.getAllGames);
+router.get("/getAllGames", GameController.getAllGames);
 // cancel game pairing route
-router.post('/cancelGamePairing', GameController.cancelGamePairing);
+router.post("/cancelGamePairing", GameController.cancelGamePairing);
 // cancel game route
-router.post('/cancelGame', GameController.cancelGame);
+router.post("/cancelGame", GameController.cancelGame);
 // delete game route
-router.post('/deleteGame', GameController.deleteGame);
+router.post("/deleteGame", GameController.deleteGame);
 // refresh contract balance route
-router.post('/refreshContractBalance', GameController.refreshContractBalance);
-// getGame route
-router.post('/reportGameOver', GameController.reportGameOver);
+router.post("/refreshContractBalance", GameController.refreshContractBalance);
+router.post("/reportGameOver", GameController.reportGameOver);
 
-router.post('/requestRematch', GameController.requestRematch);
+router.post("/requestRematch", GameController.requestRematch);
 
-router.post('/acceptRematch', GameController.acceptRematch);
+router.post("/acceptRematch", GameController.acceptRematch);
 
-router.post('/declineRematch', GameController.declineRematch);
+router.post("/declineRematch", GameController.declineRematch);
 
-router.post('/cancelRematch', GameController.cancelRematch);
+router.post("/cancelRematch", GameController.cancelRematch);
 
-router.get('/getGameCount', GameController.getGameCount);
+router.get("/getGameCount", GameController.getGameCount);
 
-router.get('/getTotalWagered', GameController.getTotalWagered);
+router.get("/getTotalWagered", GameController.getTotalWagered);
 
-router.get('/:gameId', GameController.getGame);
+router.get("/:gameId", GameController.getGame);
+
+router.post("/reportIssue", GameController.reportIssue);
 
 module.exports = router;
