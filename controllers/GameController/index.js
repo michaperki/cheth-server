@@ -21,7 +21,8 @@ const {
   declineRematch,
   cancelRematch,
 } = require("./rematch");
-const { lockGame, unlockGame, reportIssue } = require("./lockGame");
+const { lockGame, reportIssue } = require("./lockGame");
+const { resolveGame } = require("./resolveGame");
 
 module.exports = {
   findOpponent,
@@ -42,6 +43,6 @@ module.exports = {
   declineRematch,
   cancelRematch,
   lockGame,
-  unlockGame,
   reportIssue,
+  resolveGame,
 };

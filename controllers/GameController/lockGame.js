@@ -19,16 +19,6 @@ async function lockGame(contractAddress) {
   console.log(`Game at ${contractAddress} has been locked.`);
 }
 
-async function unlockGame(contractAddress) {
-  const gameContract = new ethers.Contract(
-    contractAddress,
-    chessContractAbi.abi,
-    signer,
-  );
-  await gameContract.unlock();
-  console.log(`Game at ${contractAddress} has been unlocked.`);
-}
-
 async function reportIssue(req, res) {
   try {
     const { gameId } = req.body;
@@ -66,6 +56,5 @@ async function reportIssue(req, res) {
 
 module.exports = {
   lockGame,
-  unlockGame,
   reportIssue,
 };
