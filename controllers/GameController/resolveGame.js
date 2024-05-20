@@ -28,7 +28,14 @@ async function distributeFunds(contractAddress, winner) {
     chessContractAbi.abi,
     signer,
   );
-  await gameContract.finishGame(winner);
+  const gasPrice = await provider.getGasPrice();
+  const increasedGasPrice = gasPrice.mul(ethers.BigNumber.from(2)); // Increase gas price
+
+  const transaction = await gameContract.finishGame(winner, {
+    gasPrice: increasedGasPrice,
+  });
+
+  await transaction.wait();
   console.log(`Funds distributed for game at ${contractAddress} to ${winner}.`);
 }
 
