@@ -28,15 +28,30 @@ async function distributeFunds(contractAddress, winner) {
     chessContractAbi.abi,
     signer,
   );
-  const gasPrice = await provider.getGasPrice();
+
+  let gasPrice;
+  if (typeof provider.getGasPrice === "function") {
+    gasPrice = await provider.getGasPrice();
+  } else if (typeof provider.getFeeData === "function") {
+    const feeData = await provider.getFeeData();
+    gasPrice = feeData.gasPrice;
+  } else {
+    throw new Error("Unable to fetch gas price");
+  }
+
   const increasedGasPrice = gasPrice.mul(ethers.BigNumber.from(2)); // Increase gas price
 
+  console.log(
+    `Submitting transaction to finish game at ${contractAddress} with winner ${winner} and gas price ${increasedGasPrice.toString()}`,
+  );
   const transaction = await gameContract.finishGame(winner, {
     gasPrice: increasedGasPrice,
   });
 
   await transaction.wait();
-  console.log(`Funds distributed for game at ${contractAddress} to ${winner}.`);
+  console.log(
+    `Transaction confirmed for game at ${contractAddress} with winner ${winner}`,
+  );
 }
 
 async function resolveGame(req, res) {
