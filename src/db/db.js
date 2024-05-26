@@ -1,20 +1,19 @@
-const { Client } = require('pg');
-const { logger } = require('../utils/LoggerUtils');
+const { Client } = require("pg");
+const { logger } = require("../../dist/utils/LoggerUtils");
 
 const client = new Client({
-    connectionString: process.env.DATABASE_URL,
-    ssl: {
-        rejectUnauthorized: false
-    }
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false,
+  },
 });
 
 const connectToDatabase = async () => {
-    await client.connect();
-    logger.info('Connected to the database');
+  await client.connect();
+  logger.info("Connected to the database");
 };
 
 module.exports = {
-    client,
-    connectToDatabase
+  client,
+  connectToDatabase,
 };
-

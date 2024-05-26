@@ -2,12 +2,14 @@
 
 ## Commands
 
-```npm start``` starts the backend server locally
+`npx tsc` compiles typescript files
 
-```npm test``` runs the tests
+`npm start` starts the backend server locally
 
-```heroku logs --tail``` displays the server logs
+`npm test` runs the tests
 
-```node db_commands/alter/alter_games.js``` example execution of db command
+`heroku logs --tail` displays the server logs
+
+`node db_commands/alter/alter_games.js` example execution of db command
 
 - note: dotenv import must be replaced manually

@@ -1,12 +1,14 @@
-const logger = require('../utils/LoggerUtils').logger;
+const logger = require("../../dist/utils/LoggerUtils").logger;
 
-const handleErrors = (fn) => async (...args) => {
+const handleErrors =
+  (fn) =>
+  async (...args) => {
     try {
-        return await fn(...args);
+      return await fn(...args);
     } catch (error) {
-        logger.error(error);
-        throw error;
+      logger.error(error);
+      throw error;
     }
-};
+  };
 
 module.exports = handleErrors;
