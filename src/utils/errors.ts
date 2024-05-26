@@ -1,17 +1,17 @@
+// errors.ts
+
 class GameNotFoundError extends Error {
-  constructor(message) {
+  constructor(message: string) {
     super(message);
     this.name = "GameNotFoundError";
   }
 }
 
 class InvalidGameStateError extends Error {
-  constructor(message) {
+  constructor(message: string) {
     super(message);
     this.name = "InvalidGameStateError";
   }
 }
 
-module.exports = {
-  GameNotFoundError,
-};
+export { GameNotFoundError, InvalidGameStateError };

@@ -1,7 +1,7 @@
 // controllers/GameController.js
 
 const db = require("../../db");
-const { GameNotFoundError } = require("../../utils/errors");
+const { GameNotFoundError } = require("../../../dist/utils/errors");
 
 async function refreshContractBalance(req, res, next) {
   console.log("/refreshContractBalance route");

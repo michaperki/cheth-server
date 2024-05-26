@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "start": "node server.js",
+    "start": "node src/server.js",
     "test": "mocha 'test/**/*.test.js' --exit"
   },
   "dependencies": {
@@ -19,8 +19,13 @@
     "ws": "^8.16.0"
   },
   "devDependencies": {
+    "@types/node": "^20.12.12",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
     "chai": "^5.1.1",
     "mocha": "^10.4.0",
-    "supertest": "^7.0.0"
+    "supertest": "^7.0.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.4.5"
   }
 }
