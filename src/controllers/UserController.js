@@ -1,6 +1,6 @@
 // controllers/UserController.js (Controller for user-related operations)
 const db = require("../db");
-const { fetchLichessUserInfo } = require("../utils/lichessUtils");
+const { fetchLichessUserInfo } = require("../../dist/utils/lichessUtils");
 const { logger } = require("../../dist/utils/LoggerUtils"); // Import the logger instance and expressLogger middleware
 const UserController = {
   async checkEligibility(req, res, next) {
