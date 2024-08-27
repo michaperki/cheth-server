@@ -157,7 +157,7 @@ async function startGame(dbGame, clients, wagerSize) {
       console.log("challengeData", challengeData);
 
       // update the lichess_id in the database
-      await db.updateLichessId(dbGame.game_id, challengeData.id);
+      await db.updateLichessId(dbGame.game_id, challengeData.challenge.id);
 
       await db.updateGameState(dbGame.game_id, 4);
 
