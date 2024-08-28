@@ -75,17 +75,30 @@ async function handleGameJoined(dbGame, player, entryFee, clients) {
     db.getUserById(dbGame.player1_id),
     db.getUserById(dbGame.player2_id)
   ]);
+  
+  console.log("player1_details.wallet_address:", player1_details.wallet_address.toLowerCase());
+  console.log("player2_details.wallet_address:", player2_details.wallet_address.toLowerCase());
+  console.log("player:", player.toLowerCase());
 
-  console.log("player1_details.wallet_address");
-  console.log(player1_details.wallet_address);
-  console.log("player2_details.wallet_address");
-  console.log(player2_details.wallet_address);
+  // Convert all addresses to lowercase for comparison
+  const player1Address = player1_details.wallet_address.toLowerCase();
+  const player2Address = player2_details.wallet_address.toLowerCase();
+  const joinedPlayerAddress = player.toLowerCase();
 
-  console.log("player");
-  console.log(player);
+  let player_id;
+  if (joinedPlayerAddress === player1Address) {
+    player_id = dbGame.player1_id;
+    console.log("Player 1 joined");
+  } else if (joinedPlayerAddress === player2Address) {
+    player_id = dbGame.player2_id;
+    console.log("Player 2 joined");
+  } else {
+    console.error("Joined player address doesn't match either player");
+    return;
+  }
 
-  const player_id = player === player1_details.wallet_address ? dbGame.player1_id : dbGame.player2_id;
   await db.setPlayerReady(dbGame.game_id, player_id);
+  console.log(`Player ${player_id} set as ready`);
 
   const currentRewardPool = await db.getRewardPool(dbGame.game_id);
   const newRewardPool = Number(currentRewardPool) + Number(entryFee);
