@@ -76,6 +76,14 @@ async function handleGameJoined(dbGame, player, entryFee, clients) {
     db.getUserById(dbGame.player2_id)
   ]);
 
+  console.log("player1_details.wallet_address");
+  console.log(player1_details.wallet_address);
+  console.log("player2_details.wallet_address");
+  console.log(player2_details.wallet_address);
+
+  console.log("player");
+  console.log(player);
+
   const player_id = player === player1_details.wallet_address ? dbGame.player1_id : dbGame.player2_id;
   await db.setPlayerReady(dbGame.game_id, player_id);
 
