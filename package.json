@@ -1,7 +1,7 @@
 {
   "scripts": {
     "start": "node server.js",
-    "test": "mocha 'test/**/*.test.js' --exit"
+    "test": "mocha --exit"
   },
   "dependencies": {
     "cors": "^2.8.5",
