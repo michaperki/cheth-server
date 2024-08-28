@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "start": "node src/server.js",
+    "start": "node server.js",
     "test": "mocha 'test/**/*.test.js' --exit"
   },
   "dependencies": {
