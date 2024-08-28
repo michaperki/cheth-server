@@ -98,11 +98,13 @@ async function handleGamePrimed(dbGame, clients) {
   const challengeData = await createChallenge(player1.username, player2.username, dbGame.time_control);
   console.log("after creating challenge in Lichess");
   console.log(challengeData);
-  if (!challengeData || !challengeData.challenge || !challengeData.challenge.id) {
+  console.log("challengeData ID");
+  console.log(challengeData.id);
+  if (!challengeData || !challengeData.id) {
     throw new Error("Failed to create Lichess challenge");
   }
 
-  await db.updateLichessId(dbGame.game_id, challengeData.challenge.id);
+  await db.updateLichessId(dbGame.game_id, challengeData.id);
   await db.updateGameState(dbGame.game_id, 4);
 
   sendWebSocketMessage(clients, dbGame, "GAME_PRIMED", { creator: dbGame.game_creator_address });
