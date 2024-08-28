@@ -1,128 +1,219 @@
+// controllers/GameController.js
+
 const db = require("../../db");
 const WebSocket = require("ws");
 const ethers = require("ethers");
+
 const chessContractAbi = require("../../abis/Chess.json");
 const factoryContractAbi = require("../../abis/ChessFactory.json");
 const contractFactoryFunctions = require("../../contracts/ContractFactoryFunctions");
 const { createChallenge } = require("../../../dist/utils/lichessUtils");
-const { logger } = require("../../../dist/utils/LoggerUtils");
-
-const factoryContractAddress = factoryContractAbi.networks[process.env.CHAIN_ID].address;
+const factoryContractAddress =
+  factoryContractAbi.networks[process.env.CHAIN_ID].address;
 const provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
 const privateKey = process.env.SEPOLIA_PRIVATE_KEY;
 const wallet = new ethers.Wallet(privateKey);
 const signer = wallet.connect(provider);
-const factoryContract = new ethers.Contract(factoryContractAddress, factoryContractAbi.abi, signer);
+const factoryContract = new ethers.Contract(
+  factoryContractAddress,
+  factoryContractAbi.abi,
+  signer,
+);
 
 async function startGame(dbGame, clients, wagerSize) {
-  try {
-    logger.info(`Starting game for game_id: ${dbGame.game_id}`);
+  // Send a message to the client to start the game
+  console.log("game started");
+  // create a new game in the contract
+  console.log("creating a new game contract using factory contract");
+  console.log("db game_id", dbGame.game_id);
+  // const { player1_id, player2_id } = dbGame;
 
-    const handleGameCreated = async (game, creator) => {
-      try {
-        logger.info(`GameCreated event received for game: ${game}, creator: ${creator}`);
-        await updateGameDetails(dbGame.game_id, game, creator);
-        sendWebSocketMessage(clients, dbGame, "CONTRACT_READY");
-        
-        const gameContract = new ethers.Contract(game, chessContractAbi.abi, signer);
-        setupGameEventListeners(gameContract, dbGame, clients);
-      } catch (error) {
-        logger.error(`Error in handleGameCreated: ${error.message}`);
+  // Define the event handler outside of the route handler to avoid adding multiple event handlers
+  const handleGameCreated = (game, creator) => {
+    console.log("GameCreated event received");
+    console.log("game", game);
+    console.log("creator", creator);
+    db.updateGameContractAddress(dbGame.game_id, game);
+    db.updateGameState(dbGame.game_id, 2);
+    db.updateGameCreatorAddress(dbGame.game_id, creator);
+    // Broadcasting the message to all connected WebSocket clients
+    const message = JSON.stringify({
+      type: "CONTRACT_READY",
+      gameId: dbGame.game_id,
+    });
+
+    const { player1_id, player2_id } = dbGame;
+    console.log("player1_id", player1_id);
+    console.log("player2_id", player2_id);
+    console.log("client ids", Object.keys(clients));
+    console.log("first client", clients[0]);
+    Object.values(clients).forEach((ws) => {
+      if (ws.readyState === WebSocket.OPEN) {
+        // send the message to the player 1 and player 2
+        if (
+          parseInt(ws.userId) === player1_id ||
+          parseInt(ws.userId) === player2_id
+        ) {
+          ws.send(message);
+        }
       }
-    };
+    });
 
-    factoryContract.on("GameCreated", handleGameCreated);
+    // Instantiate the contract
+    const gameContract = new ethers.Contract(
+      game,
+      chessContractAbi.abi,
+      signer,
+    );
 
-    await contractFactoryFunctions.createGame(dbGame.game_id, wagerSize);
-    logger.info(`Game creation initiated for game_id: ${dbGame.game_id}`);
+    // Subscribe to GameJoined event
+    console.log("subscribing to GameJoined event");
+    // there will be two GameJoined events, one for each player
+    gameContract.on("GameJoined", async (player, entryFee) => {
+      console.log("GameJoined event received");
+      console.log("player", player);
+      console.log("entryFee", entryFee);
+      console.log("dbGame.game_id", dbGame.game_id);
+      // update the reward pool in the database, add the entry fee to the reward pool
 
-    sendWebSocketMessage(clients, dbGame, "START_GAME");
-  } catch (error) {
-    logger.error(`Error in startGame: ${error.message}`);
-    sendErrorMessage(clients, dbGame, "Failed to start the game. Please try again.");
-  }
-}
+      // get the user data from the database for dbGame.player1_id and dbGame.player2_id
+      // get the wallet address of the player
+      // get the player id from the dbGame
 
-async function updateGameDetails(gameId, contractAddress, creator) {
-  await db.updateGameContractAddress(gameId, contractAddress);
-  await db.updateGameState(gameId, 2);
-  await db.updateGameCreatorAddress(gameId, creator);
-  logger.info(`Game details updated for game_id: ${gameId}`);
-}
+      const player1_details = await db.getUserById(dbGame.player1_id);
+      const player2_details = await db.getUserById(dbGame.player2_id);
 
-function setupGameEventListeners(gameContract, dbGame, clients) {
-  gameContract.on("GameJoined", async (player, entryFee) => {
-    try {
-      logger.info(`GameJoined event received for player: ${player}, entryFee: ${entryFee}`);
-      await handleGameJoined(dbGame, player, entryFee, clients);
-    } catch (error) {
-      logger.error(`Error handling GameJoined event: ${error.message}`);
-    }
-  });
+      console.log("player1_details", player1_details);
+      console.log("player2_details", player2_details);
 
-  gameContract.once("GamePrimed", async (white, black, entryFee) => {
-    try {
-      logger.info(`GamePrimed event received for white: ${white}, black: ${black}, entryFee: ${entryFee}`);
-      await handleGamePrimed(dbGame, clients);
-    } catch (error) {
-      logger.error(`Error handling GamePrimed event: ${error.message}`);
-    }
-  });
-}
+      const player_id =
+        player === player1_details.wallet_address
+          ? dbGame.player1_id
+          : dbGame.player2_id;
+      console.log("player_id", player_id);
 
-async function handleGameJoined(dbGame, player, entryFee, clients) {
-  const [player1_details, player2_details] = await Promise.all([
-    db.getUserById(dbGame.player1_id),
-    db.getUserById(dbGame.player2_id)
-  ]);
+      // send db.setPlayerReady(dbGame.game_id, player_id);
+      await db.setPlayerReady(dbGame.game_id, player_id);
 
-  const player_id = player === player1_details.wallet_address ? dbGame.player1_id : dbGame.player2_id;
-  await db.setPlayerReady(dbGame.game_id, player_id);
+      /// get the current reward pool
+      const currentRewardPool = await db.getRewardPool(dbGame.game_id);
+      console.log("currentRewardPool", currentRewardPool);
+      const newRewardPool = Number(currentRewardPool) + Number(entryFee);
+      console.log("newRewardPool", newRewardPool);
+      await db.updateRewardPool(dbGame.game_id, newRewardPool);
+      await db.updateGameState(dbGame.game_id, 3);
 
-  const currentRewardPool = await db.getRewardPool(dbGame.game_id);
-  const newRewardPool = Number(currentRewardPool) + Number(entryFee);
-  await db.updateRewardPool(dbGame.game_id, newRewardPool);
-  await db.updateGameState(dbGame.game_id, 3);
+      let message = JSON.stringify({
+        type: "GAME_JOINED",
+        gameId: dbGame.game_id,
+        player,
+      });
 
-  sendWebSocketMessage(clients, dbGame, "GAME_JOINED", { player });
-}
+      // Broadcasting the message to all connected WebSocket clients
+      Object.values(clients).forEach((ws) => {
+        if (ws.readyState === WebSocket.OPEN) {
+          if (
+            parseInt(ws.userId) === dbGame.player1_id ||
+            parseInt(ws.userId) === dbGame.player2_id
+          ) {
+            ws.send(message);
+          }
+        }
+      });
+    });
 
-async function handleGamePrimed(dbGame, clients) {
-  await db.setBothPlayersReady(dbGame.game_id);
+    // Subscribe to GamePrimed event
+    console.log("subscribing to GamePrimed event");
+    gameContract.once("GamePrimed", async (white, black, entryFee) => {
+      console.log("GamePrimed event received");
+      console.log("white", white);
+      console.log("black", black);
+      console.log("entryFee", entryFee);
+      console.log("dbGame.game_id", dbGame.game_id);
+      console.log("dbCreator", dbGame.creator);
+      console.log("dbGame.time_control", dbGame.time_control);
 
-  const [player1, player2] = await Promise.all([
-    db.getUserById(dbGame.player1_id),
-    db.getUserById(dbGame.player2_id)
-  ]);
+      // create a challenge on lichess
+      // get the lichess handles of the players
+      // the dbGame has the player ids, get the lichess handles of the players
+      // from the db using the player ids
+      const player1 = await db.getUserById(dbGame.player1_id);
+      const player2 = await db.getUserById(dbGame.player2_id);
+      console.log("player1", player1);
+      console.log("player2", player2);
 
-  const challengeData = await createChallenge(player1.username, player2.username, dbGame.time_control);
-  if (!challengeData || !challengeData.challenge || !challengeData.challenge.id) {
-    throw new Error("Failed to create Lichess challenge");
-  }
+      await db.setBothPlayersReady(dbGame.game_id);
 
-  await db.updateLichessId(dbGame.game_id, challengeData.challenge.id);
-  await db.updateGameState(dbGame.game_id, 4);
+      const username1 = player1.username;
+      const username2 = player2.username;
+      console.log("username1", username1);
+      console.log("username2", username2);
 
-  sendWebSocketMessage(clients, dbGame, "GAME_PRIMED", { creator: dbGame.game_creator_address });
-}
+      const challengeData = await createChallenge(
+        username1,
+        username2,
+        dbGame.time_control,
+      );
+      console.log("challengeData", challengeData);
+      console.log("challengeData.challenge.id", challengeData.challenge.id);
 
-function sendWebSocketMessage(clients, dbGame, type, additionalData = {}) {
+      // update the lichess_id in the database
+      await db.updateLichessId(dbGame.game_id, challengeData.challenge.id);
+
+      await db.updateGameState(dbGame.game_id, 4);
+
+      const message = JSON.stringify({
+        type: "GAME_PRIMED",
+        gameId: dbGame.game_id,
+        creator: dbGame.game_creator_address,
+      });
+
+      // Broadcasting the message to all connected WebSocket clients
+      Object.values(clients).forEach((ws) => {
+        if (ws.readyState === WebSocket.OPEN) {
+          if (
+            parseInt(ws.userId) === dbGame.player1_id ||
+            parseInt(ws.userId) === dbGame.player2_id
+          ) {
+            ws.send(message);
+          }
+        }
+      });
+    });
+
+    factoryContract.off("GameCreated", handleGameCreated);
+  };
+
+  console.log("factoryContract", factoryContract);
+
+  // Add the event handler
+  factoryContract.on("GameCreated", handleGameCreated);
+
+  console.log("handle game creation completed by factory");
+
+  // Call the function to create a new game
+  contractFactoryFunctions.createGame(dbGame.game_id, wagerSize);
+
+  console.log("handle game creation factory funcs completed");
+  // get the player ids
+  const { player1_id, player2_id } = dbGame;
+
   const message = JSON.stringify({
-    type,
+    type: "START_GAME",
     gameId: dbGame.game_id,
-    ...additionalData
   });
-
+  // Broadcasting the message to all connected WebSocket clients
   Object.values(clients).forEach((ws) => {
-    if (ws.readyState === WebSocket.OPEN &&
-        (parseInt(ws.userId) === dbGame.player1_id || parseInt(ws.userId) === dbGame.player2_id)) {
-      ws.send(message);
+    if (ws.readyState === WebSocket.OPEN) {
+      // send the message to the player 1 and player 2
+      if (
+        parseInt(ws.userId) === player1_id ||
+        parseInt(ws.userId) === player2_id
+      ) {
+        ws.send(message);
+      }
     }
   });
-}
-
-function sendErrorMessage(clients, dbGame, errorMessage) {
-  sendWebSocketMessage(clients, dbGame, "GAME_START_ERROR", { error: errorMessage });
 }
 
 module.exports = startGame;
