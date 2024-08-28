@@ -15,6 +15,9 @@ const server = http.createServer(app);
 app.use(express.json());
 app.use(expressLogger); // Use Pino middleware for logging
 
+console.log("CORS_ORIGIN");
+console.log(process.env.CORS_ORIGIN);
+
 const corsOptions = {
   origin: process.env.CORS_ORIGIN,
   optionsSuccessStatus: 200,
