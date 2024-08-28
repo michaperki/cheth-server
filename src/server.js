@@ -16,8 +16,11 @@ app.use(express.json());
 app.use(expressLogger); // Use Pino middleware for logging
 
 const corsOptions = {
-  origin: process.env.CORS_ORIGIN,
-  optionsSuccessStatus: 200,
+  origin: ['https://cheth-client.vercel.app', 'http://localhost:3000'], // Add your frontend URL and localhost for development
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+  optionsSuccessStatus: 200
 };
 
 app.use(cors(corsOptions));
