@@ -96,6 +96,8 @@ async function handleGamePrimed(dbGame, clients) {
   ]);
 
   const challengeData = await createChallenge(player1.username, player2.username, dbGame.time_control);
+  console.log("after creating challenge in Lichess");
+  console.log(challengeData);
   if (!challengeData || !challengeData.challenge || !challengeData.challenge.id) {
     throw new Error("Failed to create Lichess challenge");
   }
