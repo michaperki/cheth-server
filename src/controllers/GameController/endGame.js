@@ -70,6 +70,7 @@ async function reportGameOver(req, res, next) {
 
     const winnerHandle = determineWinner(gameInfo);
     const winningPlayer = await db.getUserByLichessHandle(winnerHandle);
+    await db.updateWinner(gameId, winningPlayer.user_id);
 
     const gameContract = new ethers.Contract(
       game.contract_address,

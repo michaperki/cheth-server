@@ -74,7 +74,7 @@ async function resolveGame(req, res) {
 
     await unlockGame(contractAddress);
     await distributeFunds(contractAddress, winnerWalletAddress);
-    await updateWinner(gameId, winner);
+    await updateWinner(gameId, winnerUser.user_id);
     await updateGameState(gameId, 5);
 
     res.status(200).json({

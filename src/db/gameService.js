@@ -173,11 +173,16 @@ const updateRewardPool = async (gameId, rewardPool) => {
 };
 
 const updateWinner = async (gameId, winnerId) => {
-  const { rows } = await client.query(
-    "UPDATE games SET winner = $1 WHERE game_id = $2 RETURNING *",
-    [winnerId, gameId],
-  );
-  return rows;
+  try {
+    const { rows } = await client.query(
+      "UPDATE games SET winner = $1, state = 5 WHERE game_id = $2 RETURNING *",
+      [winnerId, gameId]
+    );
+    return rows[0];
+  } catch (error) {
+    console.error("Error updating winner:", error);
+    throw error;
+  }
 };
 
 const getGames = async (timeControl, wagerSize) => {
