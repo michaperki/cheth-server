@@ -52,7 +52,7 @@ async function cancelGame(req, res, next) {
     });
 
     await chessContract.cancelGame(game.contract_address);
-    await db.updateGameState(gameId, -1);
+    await db.updateGameState(gameId, "-1");
 
     res.json({ message: "Game cancelled successfully" });
   } catch (error) {
