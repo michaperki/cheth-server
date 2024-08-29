@@ -16,6 +16,14 @@ function websocket(server) {
     ws.on("close", () => {
       logger.info("Client disconnected");
       onlineUsers--;
+      if (ws.userId) {
+        // Broadcast that this player has disconnected
+        broadcastToAll(JSON.stringify({
+          type: "PLAYER_DISCONNECTED",
+          userId: ws.userId
+        }));
+        delete clients[ws.userId];
+      }
       removeClient(ws);
       broadcastOnlineUsers();
     });
@@ -25,16 +33,16 @@ function websocket(server) {
       console.log("Received message:", data);
       switch (data.type) {
         case "CONNECT":
-          // Set the user ID for the client
           logger.info("CONNECT message received");
-          // why is the data not available here?
-          // answer: the data is available here, but the logger is not printing it
-          // you can use console.log to print the data
           console.log("Data:", data);
           ws.userId = data.userId; // Store the user ID in the WebSocket client object
           clients[data.userId] = ws;
-          // log the user IDs of all connected clients
           console.log("Connected clients:", Object.keys(clients));
+          // Broadcast that this player has connected
+          broadcastToAll(JSON.stringify({
+            type: "PLAYER_CONNECTED",
+            userId: data.userId
+          }));
           break;
         case "CANCEL_SEARCH":
           console.log("CANCEL_SEARCH message received");
@@ -60,6 +68,14 @@ function websocket(server) {
         client.send(
           JSON.stringify({ type: "ONLINE_USERS_COUNT", count: onlineUsers }),
         );
+      }
+    });
+  }
+  
+  function broadcastToAll(message) {
+    wss.clients.forEach((client) => {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(message);
       }
     });
   }
