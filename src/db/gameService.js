@@ -81,11 +81,13 @@ const setBothPlayersReady = async (gameId) => {
 };
 
 const cancelGame = async (gameId) => {
-  const { rows } = await client.query(
-    "DELETE FROM games WHERE game_id = $1 RETURNING *",
-    [gameId],
-  );
-  return rows;
+    try {
+        await client.query("DELETE FROM games WHERE game_id = $1", [gameId]);
+        console.log(`Game ${gameId} cancelled and removed from database`);
+    } catch (error) {
+        console.error("Error cancelling game:", error);
+        throw error;
+    }
 };
 
 const cancelGameSearch = async (userId) => {
