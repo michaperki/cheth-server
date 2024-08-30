@@ -24,7 +24,6 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-jj
 
 // Middleware to inject WebSocket instance into request object
 app.use((req, res, next) => {
