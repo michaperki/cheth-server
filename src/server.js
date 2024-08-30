@@ -25,9 +25,13 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
+// Initialize WebSocket and get the instance
+const { wss, clients } = websocket(server);
+
 // Middleware to inject WebSocket instance into request object
 app.use((req, res, next) => {
-  req.broadcastToGame = websocket.broadcastToGame;
+  req.wss = wss;
+  req.clients = clients;
   next();
 });
 
@@ -61,14 +65,6 @@ app.use("/allIcons", (req, res) => {
 });
 
 app.use(router);
-
-// Initialize WebSocket and get the instance
-try {
-  websocket.initialize(server);
-  logger.info("WebSocket initialized successfully");
-} catch (error) {
-  logger.error("Failed to initialize WebSocket:", error);
-}
 
 const PORT = process.env.PORT || 5000;
 

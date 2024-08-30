@@ -2,123 +2,91 @@ const WebSocket = require("ws");
 const { logger } = require("./../dist/utils/LoggerUtils");
 const db = require("./db");
 
-class WebSocketManager {
-  constructor() {
-    this.wss = null;
-    this.clients = new Map(); // Map of userId to WebSocket client
-    this.games = new Map(); // Map of gameId to Set of connected userIds
-  }
+let onlineUsers = 0;
+let clients = {}; // Object to store WebSocket clients and their associated user IDs
 
-  initialize(server) {
-    this.wss = new WebSocket.Server({ server });
+function websocket(server) {
+  const wss = new WebSocket.Server({ server });
 
-    this.wss.on("connection", (ws) => {
-      logger.info("Client connected");
+  wss.on("connection", async (ws) => {
+    logger.info("Client connected");
+    onlineUsers++;
+    broadcastOnlineUsers();
 
-      ws.on("message", async (message) => {
-        const data = JSON.parse(message);
-        await this.handleMessage(ws, data);
-      });
-
-      ws.on("close", () => {
-        this.handleDisconnect(ws);
-      });
-    });
-  }
-
-  async handleMessage(ws, data) {
-    logger.info("Received message:", data);
-
-    switch (data.type) {
-      case "CONNECT":
-        await this.handleConnect(ws, data.userId, data.gameId);
-        break;
-      case "CANCEL_SEARCH":
-        await this.handleCancelSearch(data.userId);
-        break;
-      case "PING":
-        ws.send(JSON.stringify({ type: "PONG" }));
-        break;
-      default:
-        logger.info("Received unknown message type:", data.type);
-    }
-  }
-
-  async handleConnect(ws, userId, gameId) {
-    logger.info(`User ${userId} connected to game ${gameId}`);
-    ws.userId = userId;
-    ws.gameId = gameId;
-    this.clients.set(userId, ws);
-
-    if (gameId) {
-      if (!this.games.has(gameId)) {
-        this.games.set(gameId, new Set());
+    ws.on("close", () => {
+      logger.info("Client disconnected");
+      onlineUsers--;
+      if (ws.userId) {
+        // Broadcast that this player has disconnected
+        broadcastToAll(JSON.stringify({
+          type: "PLAYER_DISCONNECTED",
+          userId: ws.userId
+        }));
+        delete clients[ws.userId];
       }
-      this.games.get(gameId).add(userId);
-      await this.broadcastGameStatus(gameId);
-    }
-
-    this.broadcastOnlineUsers();
-  }
-
-  async handleDisconnect(ws) {
-    logger.info(`Client disconnected: ${ws.userId}`);
-    if (ws.userId) {
-      this.clients.delete(ws.userId);
-      if (ws.gameId && this.games.has(ws.gameId)) {
-        this.games.get(ws.gameId).delete(ws.userId);
-        await this.broadcastGameStatus(ws.gameId);
-      }
-    }
-    this.broadcastOnlineUsers();
-  }
-
-  async handleCancelSearch(userId) {
-    logger.info(`Cancelling game search for user ${userId}`);
-    await db.cancelGameSearch(userId);
-  }
-
-  async broadcastGameStatus(gameId) {
-    const connectedPlayers = Array.from(this.games.get(gameId) || []);
-    const message = JSON.stringify({
-      type: "GAME_STATUS_UPDATE",
-      gameId,
-      connectedPlayers,
+      removeClient(ws);
+      broadcastOnlineUsers();
     });
 
-    for (const userId of connectedPlayers) {
-      const client = this.clients.get(userId);
-      if (client && client.readyState === WebSocket.OPEN) {
-        client.send(message);
+    ws.on("message", async (message) => {
+      const data = JSON.parse(message);
+      console.log("Received message:", data);
+      switch (data.type) {
+        case "CONNECT":
+          logger.info("CONNECT message received");
+          console.log("Data:", data);
+          ws.userId = data.userId; // Store the user ID in the WebSocket client object
+          clients[data.userId] = ws;
+          console.log("Connected clients:", Object.keys(clients));
+          // Broadcast that this player has connected
+          broadcastToAll(JSON.stringify({
+            type: "PLAYER_CONNECTED",
+            userId: data.userId
+          }));
+          break;
+        case "CANCEL_SEARCH":
+          console.log("CANCEL_SEARCH message received");
+          // Implement logic to cancel the search
+          userId = data.userId;
+          db.cancelGameSearch(userId);
+
+          break;
+        case "PING":
+          logger.info("Received PING message");
+          ws.send(JSON.stringify({ type: "PONG" }));
+          break;
+        default:
+          logger.info("Received unknown message type:", data.type);
+          break;
       }
-    }
+    });
+  });
+
+  function broadcastOnlineUsers() {
+    wss.clients.forEach((client) => {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(
+          JSON.stringify({ type: "ONLINE_USERS_COUNT", count: onlineUsers }),
+        );
+      }
+    });
   }
-
-  broadcastOnlineUsers() {
-    const count = this.clients.size;
-    const message = JSON.stringify({ type: "ONLINE_USERS_COUNT", count });
-
-    for (const client of this.clients.values()) {
+  
+  function broadcastToAll(message) {
+    wss.clients.forEach((client) => {
       if (client.readyState === WebSocket.OPEN) {
         client.send(message);
       }
-    }
+    });
   }
 
-  broadcastToGame(gameId, message) {
-    const players = this.games.get(gameId) || new Set();
-    for (const userId of players) {
-      const client = this.clients.get(userId);
-      if (client && client.readyState === WebSocket.OPEN) {
-        client.send(JSON.stringify(message));
-      }
-    }
+  function removeClient(ws) {
+    // Remove the WebSocket client from the clients object
+    const userId = Object.keys(clients).find((key) => clients[key] === ws);
+    delete clients[userId];
   }
+
+  return { wss, clients }; // Return WebSocket Server instance and clients dictionary
 }
 
-const webSocketManager = new WebSocketManager();
-
-module.exports = {
-  initialize: (server) => webSocketManager.initialize(server),
-  broadcastToGame: (gameId, message) => webSocketManager.broadcastToGame(gameId, message),
-};
+module.exports = websocket;
