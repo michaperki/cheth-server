@@ -1,5 +1,6 @@
 const { client } = require("./db");
 const { getUserById } = require("./userService");
+const redis = require("../utils/cache");
 
 const createGame = async (whiteUserId, timeControl, wagerSize) => {
   try {
@@ -229,19 +230,19 @@ AND ABS(player1_rating - $4) <= 100
 };
 
 const getGameById = async (gameId) => {
-  try {
-    const { rows } = await client.query(
-      "SELECT * FROM games WHERE game_id = $1",
-      [gameId],
-    );
-    if (rows.length === 0) {
-      throw new Error(`Game not found for ID: ${gameId}`);
+    const cacheKey = `game:${gameId}`;
+    let gameData = await redis.get(cacheKey);
+    
+    if (gameData) {
+        return JSON.parse(gameData);
     }
-    return rows[0];
-  } catch (error) {
-    console.error(`Error fetching game by ID: ${gameId}`, error);
-    throw error;
-  }
+
+    const { rows } = await client.query('SELECT * FROM games WHERE game_id = $1', [gameId]);
+    if (rows.length > 0) {
+        await redis.set(cacheKey, JSON.stringify(rows[0]), 'EX', 300); // Cache for 5 minutes
+        return rows[0];
+    }
+    throw new Error(`Game not found for ID: ${gameId}`);
 };
 
 const getRewardPool = async (gameId) => {
@@ -345,6 +346,10 @@ const lockGameInDb = async (gameId) => {
   }
 };
 
+const invalidateGameCache = async (gameId) => {
+    await redis.del(`game:${gameId}`);
+};
+
 module.exports = {
   createGame,
   playGame,
@@ -376,4 +381,5 @@ module.exports = {
   getGameCount,
   getTotalWagered,
   lockGameInDb,
+  invalidateGameCache
 };

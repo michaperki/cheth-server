@@ -1,4 +1,5 @@
 const { client } = require('./db');
+const redis = require('../utils/cache');
 
 const addUser = async (
     username, 
@@ -28,8 +29,17 @@ const getUsers = async () => {
 }
 
 const getUserById = async (userId) => {
+    const cacheKey = `user:${userId}`;
+    let userData = await redis.get(cacheKey);
+    if (userData) {
+        return JSON.parse(userData);
+    }
     const { rows } = await client.query('SELECT * FROM users WHERE user_id = $1', [userId]);
-    return rows.length > 0 ? rows[0] : null;
+    if (rows.length > 0) {
+        await redis.set(cacheKey, JSON.stringify(rows[0]), 'EX', 3600); // Cache for 1 hour
+        return rows[0];
+    }
+    return null;
 }
 
 const getUserByLichessHandle = async (lichessHandle) => {
@@ -38,10 +48,21 @@ const getUserByLichessHandle = async (lichessHandle) => {
 }
 
 const getUserByWalletAddress = async (walletAddress) => {
+    const cacheKey = `user:wallet:${walletAddress.toLowerCase()}`;
+    let userData = await redis.get(cacheKey);
+    
+    if (userData) {
+        return JSON.parse(userData);
+    }
+
     walletAddress = walletAddress.toLowerCase();
     const { rows } = await client.query('SELECT * FROM users WHERE wallet_address = $1', [walletAddress]);
-    return rows.length > 0 ? rows[0] : null;
-}
+    if (rows.length > 0) {
+        await redis.set(cacheKey, JSON.stringify(rows[0]), 'EX', 3600); // Cache for 1 hour
+        return rows[0];
+    }
+    return null;
+};
 
 const toggleDarkMode = async (userId) => {
     const { rows } = await client.query('UPDATE users SET dark_mode = NOT dark_mode WHERE user_id = $1 RETURNING *', [userId]);
@@ -53,6 +74,11 @@ const setAvatar = async (userId, avatar) => {
     return rows;
 }
 
+const invalidateUserCache = async (userId, walletAddress) => {
+    await redis.del(`user:${userId}`);
+    await redis.del(`user:wallet:${walletAddress.toLowerCase()}`);
+};
+
 module.exports = {
     addUser,
     getUsers,
@@ -60,6 +86,7 @@ module.exports = {
     getUserByLichessHandle,
     getUserByWalletAddress,
     toggleDarkMode,
-    setAvatar
+    setAvatar,
+    invalidateUserCache
 };
 
