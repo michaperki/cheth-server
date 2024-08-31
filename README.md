@@ -1,4 +1,5 @@
 # cheth backend server
+A backend server for the [cheth](www.cheth-client.vercel.app) game.
 
 ## Setup
 
