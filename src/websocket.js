@@ -1,7 +1,6 @@
 const WebSocket = require("ws");
 const { logger } = require("./../dist/utils/LoggerUtils");
 const db = require("./db");
-const redis = require("./utils/cache");
 
 let onlineUsers = 0;
 let clients = {}; // Object to store WebSocket clients and their associated user IDs
@@ -45,9 +44,6 @@ function websocket(server) {
             userId: data.userId
           }));
           break;
-        case "GAME_STATE_UPDATE":
-          await handleGameStateUpdate(data.gameId, data.state);
-          break;
         case "CANCEL_SEARCH":
           console.log("CANCEL_SEARCH message received");
           // Implement logic to cancel the search
@@ -82,22 +78,6 @@ function websocket(server) {
         client.send(message);
       }
     });
-  }
-
-  async function handleGameStateUpdate(gameId, newState) {
-      await db.updateGameState(gameId, newState);
-      await db.invalidateGameCache(gameId);
-      
-      const message = JSON.stringify({ type: "GAME_STATE_UPDATE", gameId, state: newState });
-      broadcastToGamePlayers(gameId, message);
-  }
-
-  function broadcastToGamePlayers(gameId, message) {
-      wss.clients.forEach((client) => {
-          if (client.gameId === gameId && client.readyState === WebSocket.OPEN) {
-              client.send(message);
-          }
-      });
   }
 
   function removeClient(ws) {

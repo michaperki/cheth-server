@@ -1,5 +1,4 @@
 const db = require("../../db");
-const redis = require('../../utils/cache');
 const WebSocket = require("ws");
 const ethers = require("ethers");
 const chessContractAbi = require("../../abis/Chess.json");
@@ -48,7 +47,6 @@ async function updateGameDetails(gameId, contractAddress, creator) {
   await db.updateGameContractAddress(gameId, contractAddress);
   await db.updateGameState(gameId, 2);
   await db.updateGameCreatorAddress(gameId, creator);
-  await db.invalidateGameCache(gameId);
   logger.info(`Game details updated for game_id: ${gameId}`);
 }
 
@@ -78,6 +76,11 @@ async function handleGameJoined(dbGame, player, entryFee, clients) {
     db.getUserById(dbGame.player2_id)
   ]);
   
+  console.log("player1_details.wallet_address:", player1_details.wallet_address.toLowerCase());
+  console.log("player2_details.wallet_address:", player2_details.wallet_address.toLowerCase());
+  console.log("player:", player.toLowerCase());
+
+  // Convert all addresses to lowercase for comparison
   const player1Address = player1_details.wallet_address.toLowerCase();
   const player2Address = player2_details.wallet_address.toLowerCase();
   const joinedPlayerAddress = player.toLowerCase();
@@ -85,21 +88,22 @@ async function handleGameJoined(dbGame, player, entryFee, clients) {
   let player_id;
   if (joinedPlayerAddress === player1Address) {
     player_id = dbGame.player1_id;
+    console.log("Player 1 joined");
   } else if (joinedPlayerAddress === player2Address) {
     player_id = dbGame.player2_id;
+    console.log("Player 2 joined");
   } else {
-    logger.error("Joined player address doesn't match either player");
+    console.error("Joined player address doesn't match either player");
     return;
   }
 
   await db.setPlayerReady(dbGame.game_id, player_id);
-  logger.info(`Player ${player_id} set as ready`);
+  console.log(`Player ${player_id} set as ready`);
 
   const currentRewardPool = await db.getRewardPool(dbGame.game_id);
   const newRewardPool = Number(currentRewardPool) + Number(entryFee);
   await db.updateRewardPool(dbGame.game_id, newRewardPool);
   await db.updateGameState(dbGame.game_id, 3);
-  await db.invalidateGameCache(dbGame.game_id);
 
   sendWebSocketMessage(clients, dbGame, "GAME_JOINED", { player });
 }
@@ -113,13 +117,16 @@ async function handleGamePrimed(dbGame, clients) {
   ]);
 
   const challengeData = await createChallenge(player1.username, player2.username, dbGame.time_control);
+  console.log("after creating challenge in Lichess");
+  console.log(challengeData);
+  console.log("challengeData ID");
+  console.log(challengeData.id);
   if (!challengeData || !challengeData.id) {
     throw new Error("Failed to create Lichess challenge");
   }
 
   await db.updateLichessId(dbGame.game_id, challengeData.id);
   await db.updateGameState(dbGame.game_id, 4);
-  await db.invalidateGameCache(dbGame.game_id);
 
   sendWebSocketMessage(clients, dbGame, "GAME_PRIMED", { creator: dbGame.game_creator_address });
 }
