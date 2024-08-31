@@ -2,8 +2,7 @@ const WebSocket = require("ws");
 const { logger } = require("./../dist/utils/LoggerUtils");
 const db = require("./db");
 
-// Global set to store connected player IDs
-const connectedPlayers = new Set();
+let onlineUsers = 0;
 let clients = {}; // Object to store WebSocket clients and their associated user IDs
 
 function websocket(server) {
@@ -11,15 +10,22 @@ function websocket(server) {
 
   wss.on("connection", async (ws) => {
     logger.info("Client connected");
+    onlineUsers++;
+    broadcastOnlineUsers();
 
     ws.on("close", () => {
       logger.info("Client disconnected");
+      onlineUsers--;
       if (ws.userId) {
-        connectedPlayers.delete(ws.userId);
+        // Broadcast that this player has disconnected
+        broadcastToAll(JSON.stringify({
+          type: "PLAYER_DISCONNECTED",
+          userId: ws.userId
+        }));
         delete clients[ws.userId];
-        broadcastPlayerStatus(wss);
       }
-      broadcastOnlineUsers(wss);
+      removeClient(ws);
+      broadcastOnlineUsers();
     });
 
     ws.on("message", async (message) => {
@@ -29,16 +35,21 @@ function websocket(server) {
         case "CONNECT":
           logger.info("CONNECT message received");
           console.log("Data:", data);
-          ws.userId = data.userId;
+          ws.userId = data.userId; // Store the user ID in the WebSocket client object
           clients[data.userId] = ws;
-          connectedPlayers.add(data.userId);
           console.log("Connected clients:", Object.keys(clients));
-          sendConnectedPlayers(ws);
-          broadcastPlayerStatus(wss);
+          // Broadcast that this player has connected
+          broadcastToAll(JSON.stringify({
+            type: "PLAYER_CONNECTED",
+            userId: data.userId
+          }));
           break;
         case "CANCEL_SEARCH":
           console.log("CANCEL_SEARCH message received");
-          await db.cancelGameSearch(data.userId);
+          // Implement logic to cancel the search
+          userId = data.userId;
+          db.cancelGameSearch(userId);
+
           break;
         case "PING":
           logger.info("Received PING message");
@@ -49,38 +60,33 @@ function websocket(server) {
           break;
       }
     });
-
-    broadcastOnlineUsers(wss);
   });
 
-  return { wss, clients };
-}
+  function broadcastOnlineUsers() {
+    wss.clients.forEach((client) => {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(
+          JSON.stringify({ type: "ONLINE_USERS_COUNT", count: onlineUsers }),
+        );
+      }
+    });
+  }
+  
+  function broadcastToAll(message) {
+    wss.clients.forEach((client) => {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(message);
+      }
+    });
+  }
 
-function broadcastOnlineUsers(wss) {
-  const count = wss.clients.size;
-  broadcastToAll(wss, JSON.stringify({ type: "ONLINE_USERS_COUNT", count }));
-}
+  function removeClient(ws) {
+    // Remove the WebSocket client from the clients object
+    const userId = Object.keys(clients).find((key) => clients[key] === ws);
+    delete clients[userId];
+  }
 
-function broadcastPlayerStatus(wss) {
-  broadcastToAll(wss, JSON.stringify({
-    type: "PLAYER_STATUS_UPDATE",
-    players: Array.from(connectedPlayers)
-  }));
-}
-
-function sendConnectedPlayers(ws) {
-  ws.send(JSON.stringify({
-    type: "CONNECTED_PLAYERS",
-    players: Array.from(connectedPlayers)
-  }));
-}
-
-function broadcastToAll(wss, message) {
-  wss.clients.forEach((client) => {
-    if (client.readyState === WebSocket.OPEN) {
-      client.send(message);
-    }
-  });
+  return { wss, clients }; // Return WebSocket Server instance and clients dictionary
 }
 
 module.exports = websocket;
