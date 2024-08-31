@@ -1,5 +1,7 @@
 const { client } = require("./db");
 const { getUserById } = require("./userService");
+const NodeCache = require('node-cache');
+const cache = new NodeCache({ stdTTL: 300 });
 
 const createGame = async (whiteUserId, timeControl, wagerSize) => {
   try {
@@ -131,6 +133,9 @@ const updateGameState = async (gameId, state) => {
     "UPDATE games SET state = $1 WHERE game_id = $2 RETURNING *",
     [state, gameId],
   );
+
+  cache.del(`/game/${gameId}`);
+
   return rows;
 };
 

@@ -2,6 +2,7 @@
 const express = require("express");
 const router = express.Router();
 const GameController = require("../controllers/GameController");
+const cacheMiddleware = require("../middleware/cacheMiddleware");
 
 router.post("/findOpponent", GameController.findOpponent);
 router.get("/getGames", GameController.getGames);
@@ -17,7 +18,7 @@ router.post("/declineRematch", GameController.declineRematch);
 router.post("/cancelRematch", GameController.cancelRematch);
 router.get("/getGameCount", GameController.getGameCount);
 router.get("/getTotalWagered", GameController.getTotalWagered);
-router.get("/:gameId", GameController.getGame);
+router.get("/:gameId", cacheMiddleware.cache(60), GameController.getGame);
 router.post("/reportIssue", GameController.reportIssue);
 router.post("/resolveGame", GameController.resolveGame);
 
