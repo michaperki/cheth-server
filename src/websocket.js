@@ -9,11 +9,9 @@ function websocket(server) {
     const wss = new WebSocket.Server({ server });
 
     wss.on("connection", async (ws) => {
-        logger.debug("New WebSocket connection");
-
         ws.on("close", () => {
             if (ws.userId) {
-                logger.info({ event: "user_connection", userId: ws.userId, status: "disconnected" }, "User connection status changed");
+                logger.info(`User ${ws.userId} disconnected`);
                 connectedPlayers.delete(ws.userId);
                 delete clients[ws.userId];
                 broadcastPlayerStatus(wss);
@@ -24,16 +22,16 @@ function websocket(server) {
         ws.on("message", async (message) => {
             try {
                 const data = JSON.parse(message);
-                logger.debug({ messageType: data.type }, "Received WebSocket message");
-
                 switch (data.type) {
                     case "CONNECT":
                         handleConnect(ws, data, wss);
                         break;
                     // ... other cases ...
+                    default:
+                        logger.debug(`Received unknown message type: ${data.type}`);
                 }
             } catch (error) {
-                logger.error({ err: error }, "Error processing WebSocket message");
+                logger.error(`Error processing WebSocket message: ${error.message}`);
             }
         });
 
@@ -44,11 +42,10 @@ function websocket(server) {
 }
 
 function handleConnect(ws, data, wss) {
-    logger.info({ event: "user_connection", userId: data.userId, status: "connected" }, "User connection status changed");
+    logger.info(`User ${data.userId} connected`);
     ws.userId = data.userId;
     clients[data.userId] = ws;
     connectedPlayers.add(data.userId);
-    logger.debug({ connectedClients: Object.keys(clients) }, "Connected clients");
     sendConnectedPlayers(ws);
     broadcastPlayerStatus(wss);
 }

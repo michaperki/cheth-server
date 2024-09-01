@@ -11,21 +11,24 @@ const logger = pino({
             colorize: true,
             translateTime: 'SYS:standard',
             ignore: 'pid,hostname',
+            messageFormat: '{msg} {req.method} {req.url} {res.statusCode} {responseTime}ms'
         }
     },
 });
 
 const expressLogger = expressPino({
     logger,
-    autoLogging: false,
-    customSuccessMessage: function (req, res) {
-        if (res.statusCode >= 400) {
-            return `${req.method} ${req.url} ${res.statusCode}`;
-        }
-        return null;  // Don't log successful requests
+    autoLogging: {
+        ignore: (req) => req.url === '/crypto/ethToUsd' // Ignore ethToUsd requests
     },
-    customErrorMessage: function (error, req, res) {
-        return `${req.method} ${req.url} ${res.statusCode} - Error: ${error.message}`;
+    customSuccessMessage: (req, res) => {
+        if (res.statusCode >= 400) {
+            return 'request errored';
+        }
+        return false; // Don't log successful requests
+    },
+    customErrorMessage: (error, req, res) => {
+        return 'request errored';
     },
     serializers: {
         req: (req) => ({
