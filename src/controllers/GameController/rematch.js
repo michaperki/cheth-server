@@ -63,12 +63,17 @@ async function acceptRematch(req, res, next) {
         const opponentId = game.player1_id === userId ? game.player2_id : game.player1_id;
         const { wager, time_control: timeControl } = game;
         console.log('Opponent ID:', opponentId, 'Wager Size:', wager, 'Time Control:', timeControl);
-
-        // Notify players about the rematch acceptance
-        sendRematchAcceptedMessage(clientList, gameId, userId, opponentId, wager, timeControl);
-
+        
         // Start a new game
         const newGame = await initiateNewGame(userId, opponentId, timeControl, wager, req.clients);
+        console.log('New game created:', newGame);
+
+        // Get the new game ID
+        const newGameId = newGame[0].game_id;
+        console.log('New game ID:', newGameId);
+
+        // Notify players about the rematch acceptance
+        sendRematchAcceptedMessage(clientList, newGameId, userId, opponentId, wager, timeControl);
 
         res.json(newGame);
     } catch (error) {
