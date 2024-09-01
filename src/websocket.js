@@ -2,51 +2,47 @@ const WebSocket = require("ws");
 const { logger } = require("./../dist/utils/LoggerUtils");
 const db = require("./db");
 
-// Global set to store connected player IDs
 const connectedPlayers = new Set();
-let clients = {}; // Object to store WebSocket clients and their associated user IDs
+let clients = {};
 
 function websocket(server) {
   const wss = new WebSocket.Server({ server });
 
   wss.on("connection", async (ws) => {
-    logger.info("Client connected");
+    logger.info("New WebSocket connection established");
 
     ws.on("close", () => {
-      logger.info("Client disconnected");
+      logger.info("WebSocket connection closed");
       if (ws.userId) {
         connectedPlayers.delete(ws.userId);
         delete clients[ws.userId];
         broadcastPlayerStatus(wss);
+        logger.info({ userId: ws.userId }, "User disconnected");
       }
       broadcastOnlineUsers(wss);
     });
 
     ws.on("message", async (message) => {
-      const data = JSON.parse(message);
-      console.log("Received message:", data);
-      switch (data.type) {
-        case "CONNECT":
-          logger.info("CONNECT message received");
-          console.log("Data:", data);
-          ws.userId = data.userId;
-          clients[data.userId] = ws;
-          connectedPlayers.add(data.userId);
-          console.log("Connected clients:", Object.keys(clients));
-          sendConnectedPlayers(ws);
-          broadcastPlayerStatus(wss);
-          break;
-        case "CANCEL_SEARCH":
-          console.log("CANCEL_SEARCH message received");
-          await db.cancelGameSearch(data.userId);
-          break;
-        case "PING":
-          logger.info("Received PING message");
-          ws.send(JSON.stringify({ type: "PONG" }));
-          break;
-        default:
-          logger.info("Received unknown message type:", data.type);
-          break;
+      let data;
+      try {
+        data = JSON.parse(message);
+        logger.debug({ messageType: data.type }, "Received WebSocket message");
+
+        switch (data.type) {
+          case "CONNECT":
+            handleConnect(ws, data, wss);
+            break;
+          case "CANCEL_SEARCH":
+            await handleCancelSearch(data);
+            break;
+          case "PING":
+            handlePing(ws);
+            break;
+          default:
+            logger.warn({ messageType: data.type }, "Received unknown message type");
+        }
+      } catch (error) {
+        logger.error({ err: error, message }, "Error processing WebSocket message");
       }
     });
 
@@ -56,12 +52,34 @@ function websocket(server) {
   return { wss, clients };
 }
 
+function handleConnect(ws, data, wss) {
+  logger.info({ userId: data.userId }, "User connected");
+  ws.userId = data.userId;
+  clients[data.userId] = ws;
+  connectedPlayers.add(data.userId);
+  logger.debug({ connectedClients: Object.keys(clients) }, "Connected clients");
+  sendConnectedPlayers(ws);
+  broadcastPlayerStatus(wss);
+}
+
+async function handleCancelSearch(data) {
+  logger.info({ userId: data.userId }, "Cancelling game search");
+  await db.cancelGameSearch(data.userId);
+}
+
+function handlePing(ws) {
+  logger.debug("Received PING, sending PONG");
+  ws.send(JSON.stringify({ type: "PONG" }));
+}
+
 function broadcastOnlineUsers(wss) {
   const count = wss.clients.size;
+  logger.debug({ onlineUsers: count }, "Broadcasting online user count");
   broadcastToAll(wss, JSON.stringify({ type: "ONLINE_USERS_COUNT", count }));
 }
 
 function broadcastPlayerStatus(wss) {
+  logger.debug({ connectedPlayers: Array.from(connectedPlayers) }, "Broadcasting player status");
   broadcastToAll(wss, JSON.stringify({
     type: "PLAYER_STATUS_UPDATE",
     players: Array.from(connectedPlayers)
@@ -69,6 +87,7 @@ function broadcastPlayerStatus(wss) {
 }
 
 function sendConnectedPlayers(ws) {
+  logger.debug({ connectedPlayers: Array.from(connectedPlayers) }, "Sending connected players to client");
   ws.send(JSON.stringify({
     type: "CONNECTED_PLAYERS",
     players: Array.from(connectedPlayers)
