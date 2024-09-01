@@ -18,30 +18,33 @@ async function startGame(dbGame, clients, wagerSize) {
   try {
     logger.info(`Starting game for game_id: ${dbGame.game_id}`);
 
-    const handleGameCreated = async (game, creator) => {
-      try {
-        logger.info(`GameCreated event received for game: ${game}, creator: ${creator}`);
-        
-        // Only process the event if it's for the current game
-        if (game.toLowerCase() === dbGame.contract_address.toLowerCase()) {
+    let gameCreatedPromise = new Promise((resolve) => {
+      const handleGameCreated = async (game, creator) => {
+        try {
+          logger.info(`GameCreated event received for game: ${game}, creator: ${creator}`);
           await updateGameDetails(dbGame.game_id, game, creator);
           sendWebSocketMessage(clients, dbGame, "CONTRACT_READY");
           
           const gameContract = new ethers.Contract(game, chessContractAbi.abi, signer);
           setupGameEventListeners(gameContract, dbGame, clients);
+          
+          resolve();
+        } catch (error) {
+          logger.error(`Error in handleGameCreated: ${error.message}`);
         }
-      } catch (error) {
-        logger.error(`Error in handleGameCreated: ${error.message}`);
-      }
-    };
+      };
 
-    // Use 'once' instead of 'on' to ensure the listener is removed after triggering
-    factoryContract.once("GameCreated", handleGameCreated);
+      factoryContract.once("GameCreated", handleGameCreated);
+    });
 
     await contractFactoryFunctions.createGame(dbGame.game_id, wagerSize);
     logger.info(`Game creation initiated for game_id: ${dbGame.game_id}`);
 
     sendWebSocketMessage(clients, dbGame, "START_GAME");
+
+    // Wait for the GameCreated event to be processed
+    await gameCreatedPromise;
+
   } catch (error) {
     logger.error(`Error in startGame: ${error.message}`);
     sendErrorMessage(clients, dbGame, "Failed to start the game. Please try again.");
