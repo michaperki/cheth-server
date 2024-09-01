@@ -4,7 +4,7 @@ const cache = new NodeCache({ stdTTL: 60 }); // Cache for 60 seconds
 
 const db = require("../../db");
 const { GameNotFoundError } = require("../../utils/errors");
-const { logger } = require("../../utils/logger");
+const { loggerUtils } = require("../../utils/logger");
 
 async function refreshContractBalance(req, res, next) {
   logger.debug("Refreshing contract balance");
