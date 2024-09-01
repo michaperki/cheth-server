@@ -1,5 +1,5 @@
 const WebSocket = require("ws");
-const { logger } = require("./../dist/utils/LoggerUtils");
+const { logger } = require("./utils/LoggerUtils");
 const db = require("./db");
 
 const connectedPlayers = new Set();
