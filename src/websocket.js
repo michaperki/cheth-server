@@ -6,60 +6,51 @@ const connectedPlayers = new Set();
 let clients = {};
 
 function websocket(server) {
-  const wss = new WebSocket.Server({ server });
+    const wss = new WebSocket.Server({ server });
 
-  wss.on("connection", async (ws) => {
-    logger.info("New WebSocket connection established");
+    wss.on("connection", async (ws) => {
+        logger.debug("New WebSocket connection");
 
-    ws.on("close", () => {
-      logger.info("WebSocket connection closed");
-      if (ws.userId) {
-        connectedPlayers.delete(ws.userId);
-        delete clients[ws.userId];
-        broadcastPlayerStatus(wss);
-        logger.info({ userId: ws.userId }, "User disconnected");
-      }
-      broadcastOnlineUsers(wss);
+        ws.on("close", () => {
+            if (ws.userId) {
+                logger.info({ event: "user_connection", userId: ws.userId, status: "disconnected" }, "User connection status changed");
+                connectedPlayers.delete(ws.userId);
+                delete clients[ws.userId];
+                broadcastPlayerStatus(wss);
+            }
+            broadcastOnlineUsers(wss);
+        });
+
+        ws.on("message", async (message) => {
+            try {
+                const data = JSON.parse(message);
+                logger.debug({ messageType: data.type }, "Received WebSocket message");
+
+                switch (data.type) {
+                    case "CONNECT":
+                        handleConnect(ws, data, wss);
+                        break;
+                    // ... other cases ...
+                }
+            } catch (error) {
+                logger.error({ err: error }, "Error processing WebSocket message");
+            }
+        });
+
+        broadcastOnlineUsers(wss);
     });
 
-    ws.on("message", async (message) => {
-      let data;
-      try {
-        data = JSON.parse(message);
-        logger.debug({ messageType: data.type }, "Received WebSocket message");
-
-        switch (data.type) {
-          case "CONNECT":
-            handleConnect(ws, data, wss);
-            break;
-          case "CANCEL_SEARCH":
-            await handleCancelSearch(data);
-            break;
-          case "PING":
-            handlePing(ws);
-            break;
-          default:
-            logger.warn({ messageType: data.type }, "Received unknown message type");
-        }
-      } catch (error) {
-        logger.error({ err: error, message }, "Error processing WebSocket message");
-      }
-    });
-
-    broadcastOnlineUsers(wss);
-  });
-
-  return { wss, clients };
+    return { wss, clients };
 }
 
 function handleConnect(ws, data, wss) {
-  logger.info({ userId: data.userId }, "User connected");
-  ws.userId = data.userId;
-  clients[data.userId] = ws;
-  connectedPlayers.add(data.userId);
-  logger.debug({ connectedClients: Object.keys(clients) }, "Connected clients");
-  sendConnectedPlayers(ws);
-  broadcastPlayerStatus(wss);
+    logger.info({ event: "user_connection", userId: data.userId, status: "connected" }, "User connection status changed");
+    ws.userId = data.userId;
+    clients[data.userId] = ws;
+    connectedPlayers.add(data.userId);
+    logger.debug({ connectedClients: Object.keys(clients) }, "Connected clients");
+    sendConnectedPlayers(ws);
+    broadcastPlayerStatus(wss);
 }
 
 async function handleCancelSearch(data) {
