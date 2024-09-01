@@ -1,9 +1,10 @@
 const pino = require('pino');
 const expressPino = require('pino-http');
+const LOG_LEVEL = process.env.LOG_LEVEL || 'error';
 
 // Create a Pino logger instance
 const logger = pino({
-    level: 'info', // Set log level to 'info' (default is 'info')
+    level: LOG_LEVEL,
     transport: {
         target: 'pino-pretty'
     },
