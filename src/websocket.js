@@ -8,12 +8,7 @@ let clients = {};
 function websocket(server) {
     const wss = new WebSocket.Server({ server });
 
-    wss.on("connection", async (ws, req) => {
-        const userId = new URL(req.url, 'http://localhost').searchParams.get('userId');
-        if (userId) {
-            handleConnect(ws, { userId }, wss);
-        }
-
+    wss.on("connection", async (ws) => {
         ws.on("close", () => {
             if (ws.userId) {
                 logger.info(`User ${ws.userId} disconnected`);
@@ -31,12 +26,7 @@ function websocket(server) {
                     case "CONNECT":
                         handleConnect(ws, data, wss);
                         break;
-                    case "PING":
-                        handlePing(ws);
-                        break;
-                    case "CANCEL_SEARCH":
-                        await handleCancelSearch(data);
-                        break;
+                    // ... other cases ...
                     default:
                         logger.debug(`Received unknown message type: ${data.type}`);
                 }
@@ -61,43 +51,43 @@ function handleConnect(ws, data, wss) {
 }
 
 async function handleCancelSearch(data) {
-    logger.info({ userId: data.userId }, "Cancelling game search");
-    await db.cancelGameSearch(data.userId);
+  logger.info({ userId: data.userId }, "Cancelling game search");
+  await db.cancelGameSearch(data.userId);
 }
 
 function handlePing(ws) {
-    logger.debug("Received PING, sending PONG");
-    ws.send(JSON.stringify({ type: "PONG" }));
+  logger.debug("Received PING, sending PONG");
+  ws.send(JSON.stringify({ type: "PONG" }));
 }
 
 function broadcastOnlineUsers(wss) {
-    const count = wss.clients.size;
-    logger.debug({ onlineUsers: count }, "Broadcasting online user count");
-    broadcastToAll(wss, JSON.stringify({ type: "ONLINE_USERS_COUNT", count }));
+  const count = wss.clients.size;
+  logger.debug({ onlineUsers: count }, "Broadcasting online user count");
+  broadcastToAll(wss, JSON.stringify({ type: "ONLINE_USERS_COUNT", count }));
 }
 
 function broadcastPlayerStatus(wss) {
-    logger.debug({ connectedPlayers: Array.from(connectedPlayers) }, "Broadcasting player status");
-    broadcastToAll(wss, JSON.stringify({
-        type: "PLAYER_STATUS_UPDATE",
-        players: Array.from(connectedPlayers)
-    }));
+  logger.debug({ connectedPlayers: Array.from(connectedPlayers) }, "Broadcasting player status");
+  broadcastToAll(wss, JSON.stringify({
+    type: "PLAYER_STATUS_UPDATE",
+    players: Array.from(connectedPlayers)
+  }));
 }
 
 function sendConnectedPlayers(ws) {
-    logger.debug({ connectedPlayers: Array.from(connectedPlayers) }, "Sending connected players to client");
-    ws.send(JSON.stringify({
-        type: "CONNECTED_PLAYERS",
-        players: Array.from(connectedPlayers)
-    }));
+  logger.debug({ connectedPlayers: Array.from(connectedPlayers) }, "Sending connected players to client");
+  ws.send(JSON.stringify({
+    type: "CONNECTED_PLAYERS",
+    players: Array.from(connectedPlayers)
+  }));
 }
 
 function broadcastToAll(wss, message) {
-    wss.clients.forEach((client) => {
-        if (client.readyState === WebSocket.OPEN) {
-            client.send(message);
-        }
-    });
+  wss.clients.forEach((client) => {
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(message);
+    }
+  });
 }
 
 module.exports = websocket;
