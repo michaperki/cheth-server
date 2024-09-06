@@ -45,18 +45,30 @@ const createGame = async (gameId, entryFeeInUsd) => {
         const receipt = await tx.wait();
         console.log("Transaction was mined!");
 
-        // Log the gas used
-        const gasUsed = receipt.gasUsed.toString();
-        console.log("Gas used:", gasUsed);
-                // Calculate gas fees
-        const gasPrice = receipt.effectiveGasPrice;
-        const gasFeeWei = BigInt(gasUsed) * BigInt(gasPrice); // Convert to BigInt before multiplication
+        console.log("Receipt:", JSON.stringify(receipt, null, 2));
+
+        if (!receipt.gasUsed) {
+            throw new Error("gasUsed is undefined in the receipt");
+        }
+        console.log("Gas used:", receipt.gasUsed.toString());
+
+        if (!receipt.effectiveGasPrice) {
+            throw new Error("effectiveGasPrice is undefined in the receipt");
+        }
+        console.log("Effective gas price:", receipt.effectiveGasPrice.toString());
+
+        const gasUsed = BigInt(receipt.gasUsed);
+        const gasPrice = BigInt(receipt.effectiveGasPrice);
+        
+        console.log("Gas used (BigInt):", gasUsed.toString());
+        console.log("Gas price (BigInt):", gasPrice.toString());
+
+        const gasFeeWei = gasUsed * gasPrice;
+        console.log("Gas fee (Wei):", gasFeeWei.toString());
+
         const gasFeeEth = ethers.formatEther(gasFeeWei);
+        console.log("Gas fee (ETH):", gasFeeEth);
 
-        console.log("Gas Price:", ethers.formatUnits(gasPrice, "gwei"), "gwei");
-        console.log("Total Gas Fee:", gasFeeEth, "ETH");
-
-        // Store gas fee information in the database
         await db.storeGasFee({
             gameId,
             operationType: 'createGame',
