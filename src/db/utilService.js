@@ -1,3 +1,5 @@
+const { client } = require('./db');
+
 const logRequest = async (sessionId, method, url) => {
   try {
     await client.query(
