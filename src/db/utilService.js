@@ -1,10 +1,14 @@
 const { client } = require('./db');
+const { v4: uuidv4 } = require('uuid');
 
 const logRequest = async (sessionId, method, url) => {
   try {
+    // If sessionId is 'anonymous', generate a new UUID
+    const actualSessionId = sessionId === 'anonymous' ? uuidv4() : sessionId;
+    
     await client.query(
       'INSERT INTO request_logs (session_id, method, url) VALUES ($1, $2, $3)',
-      [sessionId, method, url]
+      [actualSessionId, method, url]
     );
   } catch (error) {
     console.error('Error logging request to database:', error);
@@ -33,5 +37,5 @@ const getRequestStats = async () => {
 
 module.exports = {
   logRequest,
-  getRequestStats
+  getRequestStats,
 };
