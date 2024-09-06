@@ -52,13 +52,13 @@ const createGame = async (gameId, entryFeeInUsd) => {
         }
         console.log("Gas used:", receipt.gasUsed.toString());
 
-        if (!receipt.effectiveGasPrice) {
-            throw new Error("effectiveGasPrice is undefined in the receipt");
+        if (!receipt.gasPrice) {
+            throw new Error("gasPrice is undefined in the receipt");
         }
-        console.log("Effective gas price:", receipt.effectiveGasPrice.toString());
+        console.log("Gas price:", receipt.gasPrice.toString());
 
         const gasUsed = BigInt(receipt.gasUsed);
-        const gasPrice = BigInt(receipt.effectiveGasPrice);
+        const gasPrice = BigInt(receipt.gasPrice);
         
         console.log("Gas used (BigInt):", gasUsed.toString());
         console.log("Gas price (BigInt):", gasPrice.toString());
@@ -82,9 +82,12 @@ const createGame = async (gameId, entryFeeInUsd) => {
         return "Game created successfully!";
     } catch (error) {
         console.error("Error creating game:", error);
+        if (error.receipt) {
+            console.error("Transaction receipt:", JSON.stringify(error.receipt, null, 2));
+        }
         throw error;
     }
-}
+};
 
 module.exports = {
     createGame,
