@@ -54,7 +54,6 @@ const createGame = async (gameId, entryFeeInUsd) => {
         console.log("Gas Used:", gasUsed.toString());
         console.log("Gas Price:", ethers.formatUnits(gasPrice, "gwei"), "gwei");
         console.log("Total Gas Fee:", gasFeeEth, "ETH");
-
         
         return "Game created successfully!";
     } catch (error) {
