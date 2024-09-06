@@ -8,6 +8,7 @@ const { logger, expressLogger } = require("./utils/LoggerUtils");
 const db = require("./db");
 const websocket = require("./websocket");
 const router = require("./routes");
+const requestTrackingMiddleware = require('./middleware/requestTrackingMiddleware');
 
 const app = express();
 const server = http.createServer(app);
@@ -15,6 +16,7 @@ const server = http.createServer(app);
 // Middleware
 app.use(express.json());
 app.use(expressLogger);
+app.use(requestTrackingMiddleware);  // Add this line to use the new middleware
 
 // CORS configuration
 const corsOptions = {
@@ -44,6 +46,17 @@ app.use("/allIcons", async (req, res) => {
   } catch (err) {
     logger.error("Error reading icons directory:", err);
     res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+// New route for request statistics
+app.get('/api/request-stats', async (req, res) => {
+  try {
+    const stats = await db.getRequestStats();
+    res.json(stats);
+  } catch (error) {
+    logger.error('Error retrieving request stats:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
