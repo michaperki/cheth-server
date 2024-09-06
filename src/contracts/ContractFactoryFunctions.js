@@ -72,7 +72,7 @@ const createGame = async (gameId, entryFeeInUsd) => {
         await db.storeGasFee({
             gameId,
             operationType: 'createGame',
-            transactionHash: receipt.transactionHash,
+            transactionHash: receipt.hash,
             gasUsed: gasUsed.toString(),
             gasPrice: gasPrice.toString(),
             gasFeeWei: gasFeeWei.toString(),
