@@ -350,6 +350,15 @@ const lockGameInDb = async (gameId) => {
   }
 };
 
+const storeGasFee = async ({ gameId, operationType, transactionHash, gasUsed, gasPrice, gasFeeWei, gasFeeEth }) => {
+  const query = `
+    INSERT INTO gas_fees (game_id, operation_type, transaction_hash, gas_used, gas_price, gas_fee_wei, gas_fee_eth, timestamp)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())
+  `;
+  
+  await client.query(query, [gameId, operationType, transactionHash, gasUsed, gasPrice, gasFeeWei, gasFeeEth]);
+};
+
 module.exports = {
   createGame,
   playGame,
@@ -381,4 +390,5 @@ module.exports = {
   getGameCount,
   getTotalWagered,
   lockGameInDb,
+  storeGasFee,
 };

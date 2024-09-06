@@ -48,7 +48,17 @@ const createGame = async (gameId, entryFeeInUsd) => {
         // Log the gas used
         const gasUsed = receipt.gasUsed.toString();
         console.log("Gas used:", gasUsed);
-        
+                // Store gas fee information in the database
+        await db.storeGasFee({
+            gameId,
+            operationType: 'createGame',
+            transactionHash: receipt.transactionHash,
+            gasUsed: gasUsed.toString(),
+            gasPrice: gasPrice.toString(),
+            gasFeeWei: gasFeeWei.toString(),
+            gasFeeEth
+        });
+
         return "Game created successfully!";
     } catch (error) {
         console.error("Error creating game:", error);
