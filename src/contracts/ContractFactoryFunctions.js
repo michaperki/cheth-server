@@ -46,9 +46,17 @@ const createGame = async (gameId, entryFeeInUsd) => {
         console.log("Transaction was mined!");
 
         // Log the gas used
-        const gasUsed = receipt.gasUsed.toString();
-        console.log("Gas used:", gasUsed);
-                // Store gas fee information in the database
+        const gasUsed = receipt.gasUsed;
+        console.log("Gas used:", gasUsed.toString());
+
+        // Calculate gas fees
+        const gasPrice = receipt.effectiveGasPrice;
+        const gasFeeWei = gasUsed * gasPrice;
+        const gasFeeEth = ethers.formatEther(gasFeeWei);
+
+        console.log("Gas Price:", ethers.formatUnits(gasPrice, "gwei"), "gwei");
+        console.log("Total Gas Fee:", gasFeeEth, "ETH");
+
         await db.storeGasFee({
             gameId,
             operationType: 'createGame',
