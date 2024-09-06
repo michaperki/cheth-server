@@ -28,7 +28,7 @@ const createGame = async (gameId, entryFeeInUsd) => {
         console.log("ETH to USD:", ethToUsd);
 
         // Calculate the entry fee in ether
-        const entryFeeInEther = (entryFeeInUsd / ethToUsd).toFixed(18); // Round to 18 decimal places
+        const entryFeeInEther = (entryFeeInUsd / ethToUsd).toFixed(18);
         console.log("Entry fee in ether:", entryFeeInEther);
 
         const commission = 5;
@@ -51,12 +51,13 @@ const createGame = async (gameId, entryFeeInUsd) => {
 
         // Calculate gas fees
         const gasPrice = receipt.effectiveGasPrice;
-        const gasFeeWei = gasUsed * gasPrice;
+        const gasFeeWei = gasUsed.mul(gasPrice); // Use BigInt multiplication
         const gasFeeEth = ethers.formatEther(gasFeeWei);
 
         console.log("Gas Price:", ethers.formatUnits(gasPrice, "gwei"), "gwei");
         console.log("Total Gas Fee:", gasFeeEth, "ETH");
 
+        // Store gas fee information in the database
         await db.storeGasFee({
             gameId,
             operationType: 'createGame',
@@ -66,13 +67,13 @@ const createGame = async (gameId, entryFeeInUsd) => {
             gasFeeWei: gasFeeWei.toString(),
             gasFeeEth
         });
-
+        
         return "Game created successfully!";
     } catch (error) {
         console.error("Error creating game:", error);
         throw error;
     }
-}
+};
 
 module.exports = {
     createGame,
