@@ -1,5 +1,6 @@
 require("dotenv").config();
 const express = require("express");
+const cookieParser = require('cookie-parser');
 const cors = require("cors");
 const http = require("http");
 const path = require("path");
@@ -16,6 +17,7 @@ const server = http.createServer(app);
 // Middleware
 app.use(express.json());
 app.use(expressLogger);
+app.use(cookieParser());
 app.use(requestTrackingMiddleware);  // Add this line to use the new middleware
 
 // CORS configuration
