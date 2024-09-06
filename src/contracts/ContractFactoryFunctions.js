@@ -46,7 +46,7 @@ const createGame = async (gameId, entryFeeInUsd) => {
         console.log("Transaction was mined!");
 
         // Log the gas used
-        const gasUsed = receipt.gasUsed.toNumber();
+        const gasUsed = receipt.gasUsed.toString();
         console.log("Gas used:", gasUsed);
         
         return "Game created successfully!";
