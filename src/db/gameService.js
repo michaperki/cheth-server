@@ -258,10 +258,31 @@ const getRewardPool = async (gameId) => {
 };
 
 const getUserGames = async (userId) => {
-  const { rows } = await client.query(
-    "SELECT * FROM games WHERE player1_id = $1 OR player2_id = $1",
-    [userId],
-  );
+  const query = `
+    SELECT 
+      g.game_id, 
+      g.player1_id, 
+      g.player2_id, 
+      g.time_control, 
+      g.state, 
+      g.winner, 
+      g.wager, 
+      g.reward_pool, 
+      g.created_at,
+      u1.username as player1_username,
+      u2.username as player2_username
+    FROM 
+      games g
+    LEFT JOIN 
+      users u1 ON g.player1_id = u1.user_id
+    LEFT JOIN 
+      users u2 ON g.player2_id = u2.user_id
+    WHERE 
+      g.player1_id = $1 OR g.player2_id = $1
+    ORDER BY 
+      g.created_at DESC
+  `;
+  const { rows } = await client.query(query, [userId]);
   return rows;
 };
 
