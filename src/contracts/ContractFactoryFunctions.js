@@ -27,8 +27,7 @@ const createGame = async (gameId, entryFeeInUsd) => {
         const ethToUsd = await getEthToUsd();
         console.log("ETH to USD:", ethToUsd);
 
-        // Calculate the entry fee in ether
-        const entryFeeInEther = (entryFeeInUsd / ethToUsd).toFixed(18); // Round to 18 decimal places
+        const entryFeeInEther = (entryFeeInUsd / ethToUsd).toFixed(18);
         console.log("Entry fee in ether:", entryFeeInEther);
 
         const commission = 5;
@@ -43,15 +42,26 @@ const createGame = async (gameId, entryFeeInUsd) => {
         // Wait for the transaction to be mined
         console.log("Waiting for the transaction to be mined...");
         const receipt = await tx.wait();
-        console.log(receipt);
         console.log("Transaction was mined!");
+
+        // Calculate gas fees
+        const gasUsed = receipt.gasUsed;
+        const gasPrice = receipt.effectiveGasPrice;
+        const gasFeeWei = gasUsed * gasPrice;
+        const gasFeeEth = ethers.formatEther(gasFeeWei);
+
+        // Log gas fee information
+        console.log("Gas Used:", gasUsed.toString());
+        console.log("Gas Price:", ethers.formatUnits(gasPrice, "gwei"), "gwei");
+        console.log("Total Gas Fee:", gasFeeEth, "ETH");
+
         
         return "Game created successfully!";
     } catch (error) {
         console.error("Error creating game:", error);
         throw error;
     }
-}
+};
 
 module.exports = {
     createGame,
