@@ -32,7 +32,7 @@ const expressLogger = expressPino({
     },
     customSuccessMessage: (req, res) => {
         const method = colorMethod(req.method);
-        const url = colorize(req.url, 36); // Cyan
+        const url = colorize(req.originalUrl || req.url, 36); // Use originalUrl to get the full path
         const status = colorStatus(res.statusCode);
         const time = colorize(`${res.responseTime || 0}ms`, 33); // Yellow
         return `${method} ${url} ${status} ${time}`;
