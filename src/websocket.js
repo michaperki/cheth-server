@@ -1,5 +1,5 @@
 const WebSocket = require("ws");
-const { logger } = require("./utils/LoggerUtils");
+const { logger, logUserConnection } = require("./utils/LoggerUtils");
 const db = require("./db");
 
 const connectedPlayers = new Set();
@@ -11,6 +11,7 @@ function websocket(server) {
     wss.on("connection", async (ws) => {
         ws.on("close", () => {
             if (ws.userId) {
+                logUserConnection(ws.userId, 'disconnected');
                 logger.info(`User ${ws.userId} disconnected`);
                 connectedPlayers.delete(ws.userId);
                 delete clients[ws.userId];
@@ -42,6 +43,7 @@ function websocket(server) {
 }
 
 function handleConnect(ws, data, wss) {
+    logUserConnection(data.userId, 'connected');
     logger.info(`User ${data.userId} connected`);
     ws.userId = data.userId;
     clients[data.userId] = ws;

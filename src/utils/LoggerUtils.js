@@ -22,10 +22,15 @@ const expressLogger = expressPino({
     autoLogging: {
         ignore: (req) => req.method === 'OPTIONS' || req.url === '/crypto/ethToUsd'
     },
-    customSuccessMessage: (req, res) => {
-        if (res.statusCode >= 400) {
-            return 'request errored';
+    customLogLevel: (req, res, err) => {
+        if (res.statusCode >= 400 && res.statusCode < 500) {
+            return 'warn';
+        } else if (res.statusCode >= 500 || err) {
+            return 'error';
         }
+        return 'info';
+    },
+    customSuccessMessage: (req, res) => {
         const method = colorMethod(req.method);
         const url = colorize(req.url, 36); // Cyan
         const status = colorStatus(res.statusCode);
@@ -38,16 +43,6 @@ const expressLogger = expressPino({
         const status = colorStatus(res.statusCode);
         return `${method} ${url} ${status} Error: ${error.message}`;
     },
-    serializers: {
-        req: (req) => ({
-            method: req.method,
-            url: req.url,
-        }),
-        res: (res) => ({
-            statusCode: res.statusCode
-        }),
-        err: pino.stdSerializers.err,
-    }
 });
 
 function colorize(str, colorCode) {
@@ -72,4 +67,10 @@ function colorStatus(status) {
     return colorize(status, 31); // Red
 }
 
-module.exports = { logger, expressLogger };
+// Custom logger for user connections
+const logUserConnection = (userId, action) => {
+    const userAction = colorize(`User ${userId} ${action}`, 35); // Magenta
+    logger.info(userAction);
+};
+
+module.exports = { logger, expressLogger, logUserConnection };
