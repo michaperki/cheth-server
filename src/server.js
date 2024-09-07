@@ -1,5 +1,6 @@
 require("dotenv").config();
 const express = require("express");
+const session = require('express-session');
 const cookieParser = require('cookie-parser');
 const cors = require("cors");
 const http = require("http");
@@ -18,6 +19,13 @@ const server = http.createServer(app);
 app.use(express.json());
 app.use(expressLogger);
 app.use(cookieParser());
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'your_session_secret',
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: process.env.NODE_ENV === 'production' }
+}));
+
 app.use(requestTrackingMiddleware);  // Add this line to use the new middleware
 
 // CORS configuration

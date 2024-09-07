@@ -1,19 +1,26 @@
 const { logRequest } = require('../db/utilService');
 const { v4: uuidv4 } = require('uuid');
 
-const SESSION_COOKIE_NAME = 'sessionId';
-const SESSION_DURATION = 30 * 24 * 60 * 60 * 1000; // 30 days in milliseconds
+const ANONYMOUS_COOKIE_NAME = 'anonymousId';
+const COOKIE_DURATION = 365 * 24 * 60 * 60 * 1000; // 1 year in milliseconds
 
 const requestTrackingMiddleware = async (req, res, next) => {
-  let sessionId = req.cookies[SESSION_COOKIE_NAME];
+  let sessionId;
 
-  if (!sessionId) {
-    sessionId = uuidv4();
-    res.cookie(SESSION_COOKIE_NAME, sessionId, { 
-      maxAge: SESSION_DURATION, 
-      httpOnly: true, 
-      secure: process.env.NODE_ENV === 'production'
-    });
+  // If user is logged in, use their user ID
+  if (req.session && req.session.userId) {
+    sessionId = req.session.userId.toString();
+  } else {
+    // For anonymous users, use the anonymousId cookie
+    sessionId = req.cookies[ANONYMOUS_COOKIE_NAME];
+    if (!sessionId) {
+      sessionId = uuidv4();
+      res.cookie(ANONYMOUS_COOKIE_NAME, sessionId, { 
+        maxAge: COOKIE_DURATION, 
+        httpOnly: true, 
+        secure: process.env.NODE_ENV === 'production'
+      });
+    }
   }
 
   const { method, originalUrl } = req;
