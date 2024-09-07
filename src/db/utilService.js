@@ -17,7 +17,9 @@ const getRequestStats = async () => {
       SELECT 
         COUNT(*) as total_requests, 
         COUNT(DISTINCT session_id) as unique_sessions,
-        AVG(requests_per_session) as avg_requests_per_session
+        AVG(requests_per_session) as avg_requests_per_session,
+        COUNT(DISTINCT CASE WHEN session_id LIKE 'user_%' THEN session_id END) as logged_in_users,
+        COUNT(DISTINCT CASE WHEN session_id LIKE 'anon_%' THEN session_id END) as anonymous_users
       FROM (
         SELECT session_id, COUNT(*) as requests_per_session 
         FROM request_logs 
