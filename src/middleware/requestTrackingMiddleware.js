@@ -6,15 +6,17 @@ const COOKIE_DURATION = 30 * 24 * 60 * 60 * 1000; // 30 days in milliseconds
 
 const requestTrackingMiddleware = async (req, res, next) => {
   let sessionId;
+  let isLoggedIn = false;
 
   // If user is logged in, use their user ID
   if (req.session && req.session.userId) {
-    sessionId = `user_${req.session.userId}`;
+    sessionId = req.session.userId.toString();
+    isLoggedIn = true;
   } else {
     // For anonymous users, use the anonymousId cookie
     sessionId = req.cookies[ANONYMOUS_COOKIE_NAME];
     if (!sessionId) {
-      sessionId = `anon_${uuidv4()}`;
+      sessionId = uuidv4();
       res.cookie(ANONYMOUS_COOKIE_NAME, sessionId, { 
         maxAge: COOKIE_DURATION, 
         httpOnly: true, 
@@ -26,7 +28,7 @@ const requestTrackingMiddleware = async (req, res, next) => {
   const { method, originalUrl } = req;
 
   try {
-    await logRequest(sessionId, method, originalUrl);
+    await logRequest(sessionId, method, originalUrl, isLoggedIn);
   } catch (error) {
     console.error('Error logging request:', error);
   }
