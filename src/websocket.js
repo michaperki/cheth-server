@@ -12,7 +12,6 @@ function websocket(server) {
         ws.on("close", () => {
             if (ws.userId) {
                 logUserConnection(ws.userId, 'disconnected');
-                logger.info(`User ${ws.userId} disconnected`);
                 connectedPlayers.delete(ws.userId);
                 delete clients[ws.userId];
                 broadcastPlayerStatus(wss);
@@ -44,7 +43,6 @@ function websocket(server) {
 
 function handleConnect(ws, data, wss) {
     logUserConnection(data.userId, 'connected');
-    logger.info(`User ${data.userId} connected`);
     ws.userId = data.userId;
     clients[data.userId] = ws;
     connectedPlayers.add(data.userId);
