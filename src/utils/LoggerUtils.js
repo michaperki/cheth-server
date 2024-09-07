@@ -34,7 +34,7 @@ const expressLogger = expressPino({
         const method = colorMethod(req.method);
         const url = colorize(req.url, 36); // Cyan
         const status = colorStatus(res.statusCode);
-        const time = colorize(`${res.responseTime}ms`, 33); // Yellow
+        const time = colorize(`${res.responseTime || 0}ms`, 33); // Yellow
         return `${method} ${url} ${status} ${time}`;
     },
     customErrorMessage: (error, req, res) => {
@@ -43,6 +43,10 @@ const expressLogger = expressPino({
         const status = colorStatus(res.statusCode);
         return `${method} ${url} ${status} Error: ${error.message}`;
     },
+    serializers: {
+        req: () => undefined,
+        res: () => undefined
+    }
 });
 
 function colorize(str, colorCode) {
