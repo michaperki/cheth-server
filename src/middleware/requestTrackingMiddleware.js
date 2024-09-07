@@ -5,6 +5,9 @@ const ANONYMOUS_COOKIE_NAME = 'anonymousId';
 const COOKIE_DURATION = 30 * 24 * 60 * 60 * 1000; // 30 days in milliseconds
 
 const requestTrackingMiddleware = async (req, res, next) => {
+  console.log('Request tracking middleware');
+  console.log(req);
+  
   let sessionId;
   let isLoggedIn = false;
 
