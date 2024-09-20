@@ -10,7 +10,8 @@ const userCache = new NodeCache({ stdTTL: 600 }); // Set TTL to 10 minutes
 const UserController = {
   async checkEligibility(req, res, next) {
     try {
-      const lichessHandle = req.body.lichessHandle;
+      console.log('👄 ~ checkEligibility ~ req.body', req.body);
+      const { lichessHandle } = req.body;
 
       // Check if the user already exists in the database
       const existingUser = await db.getUserByLichessHandle(lichessHandle);
@@ -48,21 +49,21 @@ const UserController = {
 
   async addUser(req, res, next) {
       try {
-          const { lichessHandle, walletAddress } = req.body;
+          console.log('󰠰  ~ addUser ~ req.body', req.body);
+          const { username, wallet_address } = req.body;
           const authToken = req.headers.authorization;
           const rollupId = process.env.VIRTUAL_LABS_ROLLUP_ID; // We'll store this in .env
 
-          logger.info(`💥 ~ userController.addUser ~ 💥 ~ walletAddress: ${walletAddress} ~ lichessHandle: ${lichessHandle}`);
-          logger.info(`💥 ~ userController.addUser ~ 💥 ~ authToken: ${authToken} ~ rollupId: ${rollupId}`);
-
           // Fetch user info from Lichess (we'll still use this for our local database)
-          const userInfo = await fetchLichessUserInfo(lichessHandle);
+          const userInfo = await fetchLichessUserInfo(username);
           const bullet_rating = userInfo.perfs.bullet.rating;
           const bullet_games = userInfo.perfs.bullet.games;
           const blitz_rating = userInfo.perfs.blitz.rating;
           const blitz_games = userInfo.perfs.blitz.games;
           const rapid_rating = userInfo.perfs.rapid.rating;
           const rapid_games = userInfo.perfs.rapid.games;
+
+          console.log('👄 ~ addUser ~ userInfo bullet_rating', bullet_rating);
 
           // Create player in the virtual rollup system
           const createPlayerResponse = await fetch(`${process.env.VIRTUAL_LABS_API_URL}/player/cheth/createPlayer`, {
@@ -72,7 +73,7 @@ const UserController = {
                   'Content-Type': 'application/json'
               },
               body: JSON.stringify({
-                  address: walletAddress,
+                  address: wallet_address,
                   rollupId: rollupId
               })
           });
@@ -85,8 +86,8 @@ const UserController = {
 
           // Save player in local database
           const user = await db.addUser(
-              lichessHandle,
-              walletAddress,
+              username,
+              wallet_address,
               bullet_rating,
               blitz_rating,
               rapid_rating,
