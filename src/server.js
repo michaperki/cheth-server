@@ -18,7 +18,7 @@ app.use(expressLogger);
 
 // CORS configuration
 const corsOptions = {
-  origin: process.env.CORS_ORIGIN,
+  origin: process.env.CORS_ORIGIN.split(","),
   optionsSuccessStatus: 200,
 };
 app.use(cors(corsOptions));

@@ -6,6 +6,7 @@ const {
 } = require("../../dist/utils/lichessUtils");
 
 async function getLichessUserInfo(req, res, next) {
+  console.log("🐉 ~ lichessController ~ getLichessUserInfo ~ req.params", req.params);
   const lichessHandle = req.params.lichessHandle; // Assuming the handle is passed as a route parameter
   try {
     const userInfo = await fetchLichessUserInfo(lichessHandle);

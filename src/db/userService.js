@@ -8,18 +8,19 @@ const addUser = async (
     rapidRating, 
     bulletGames, 
     blitzGames, 
-    rapidGames
+    rapidGames,
+    rollupPlayerId
 ) => {
     const queryText = `
         INSERT INTO users 
-            (username, wallet_address, bullet_rating, blitz_rating, rapid_rating, bullet_games, blitz_games, rapid_games) 
+            (username, wallet_address, bullet_rating, blitz_rating, rapid_rating, bullet_games, blitz_games, rapid_games, rollup_player_id) 
         VALUES 
-            ($1, $2, $3, $4, $5, $6, $7, $8) 
+            ($1, $2, $3, $4, $5, $6, $7, $8, $9) 
         RETURNING *;
     `;
-    const values = [username, walletAddress, bulletRating, blitzRating, rapidRating, bulletGames, blitzGames, rapidGames];
+    const values = [username, walletAddress, bulletRating, blitzRating, rapidRating, bulletGames, blitzGames, rapidGames, rollupPlayerId];
     const { rows } = await client.query(queryText, values);
-    return rows;
+    return rows[0];
 };
 
 const getUsers = async () => {
