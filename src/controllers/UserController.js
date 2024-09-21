@@ -1,9 +1,10 @@
 // controllers/UserController.js (Controller for user-related operations)
 const NodeCache = require("node-cache");
+const fetch = require("node-fetch");
 const db = require("../db");
 const { fetchLichessUserInfo } = require("../utils/lichessUtils");
-const { logger } = require("../utils/LoggerUtils"); // Import the logger instance and expressLogger middleware
-const fetch = require("node-fetch");
+const { logger } = require("../utils/LoggerUtils");
+const { createSession } = require("../services/virtualLabsService");
 
 const userCache = new NodeCache({ stdTTL: 600 }); // Set TTL to 10 minutes
 
@@ -47,63 +48,81 @@ const UserController = {
     }
   },
 
-  async addUser(req, res, next) {
-      try {
-          console.log('󰠰  ~ addUser ~ req.body', req.body);
-          const { username, wallet_address } = req.body;
-          const authToken = req.headers.authorization;
-          const rollupId = process.env.VIRTUAL_LABS_ROLLUP_ID; // We'll store this in .env
-          const sessionId = req.body.sessionId;
+  async createUser(req, res, next) {
+    try {
+      const { lichessHandle, address } = req.body;
+      const authToken = req.headers.authorization;
+      const rollupId = process.env.VIRTUAL_LABS_ROLLUP_ID;
 
-          // Fetch user info from Lichess (we'll still use this for our local database)
-          const userInfo = await fetchLichessUserInfo(username);
-          const bullet_rating = userInfo.perfs.bullet.rating;
-          const bullet_games = userInfo.perfs.bullet.games;
-          const blitz_rating = userInfo.perfs.blitz.rating;
-          const blitz_games = userInfo.perfs.blitz.games;
-          const rapid_rating = userInfo.perfs.rapid.rating;
-          const rapid_games = userInfo.perfs.rapid.games;
+      logger.info(`Creating user with lichessHandle: ${lichessHandle} and address: ${address}`);
 
-          console.log('👄 ~ addUser ~ userInfo bullet_rating', bullet_rating);
+      // Fetch Lichess user info
+      const userInfo = await fetchLichessUserInfo(lichessHandle);
+      
+      // Set ratings from Lichess data
+      const bulletRating = userInfo.perfs?.bullet?.rating || 1500;
+      const blitzRating = userInfo.perfs?.blitz?.rating || 1500;
+      const rapidRating = userInfo.perfs?.rapid?.rating || 1500;
+      const bulletGames = userInfo.perfs?.bullet?.games || 0;
+      const blitzGames = userInfo.perfs?.blitz?.games || 0;
+      const rapidGames = userInfo.perfs?.rapid?.games || 0;
 
-          // Create player in the virtual rollup system
-          const createPlayerResponse = await fetch(`${process.env.VIRTUAL_LABS_API_URL}/player/cheth/createPlayer`, {
-              method: 'POST',
-              headers: {
-                  'Authorization': authToken,
-                  'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({
-                  address: wallet_address,
-                  rollupId: rollupId
-              })
-          });
-
-          if (!createPlayerResponse.ok) {
-              throw new Error(`Failed to create player in rollup: ${createPlayerResponse.statusText}`);
-          }
-
-          const rollupPlayer = await createPlayerResponse.json();
-
-          // Save player in local database
-          const user = await db.addUser(
-              username,
-              wallet_address,
-              bullet_rating,
-              blitz_rating,
-              rapid_rating,
-              bullet_games,
-              blitz_games,
-              rapid_games,
-              rollupPlayer.playerId,
-          );
-
-          logger.info(`User created: ${JSON.stringify(user)}`);
-          res.json(user);
-      } catch (error) {
-          logger.error(`Error adding user: ${error.message}`);
-          next(error);
+      // Create player in VirtualLabs
+      const createPlayerResponse = await fetch(`${process.env.VIRTUAL_LABS_API_URL}/player/cheth/createPlayer`, {
+        method: 'POST',
+        headers: {
+          'Authorization': authToken,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          address: address,
+          rollupId: rollupId
+        })
+      });
+      
+      if (!createPlayerResponse.ok) {
+        throw new Error(`Failed to create player in rollup: ${createPlayerResponse.statusText}`);
       }
+      
+      const rollupPlayer = await createPlayerResponse.json();
+      logger.info(`Rollup player created: ${JSON.stringify(rollupPlayer)}`);
+
+      // Create or get session in VirtualLabs
+      let virtualLabsSession = await createSession(address, authToken, rollupId);
+
+      // Save or update user in local database
+      const user = await db.upsertUser(
+        lichessHandle,
+        address,
+        bulletRating,
+        blitzRating,
+        rapidRating,
+        bulletGames,
+        blitzGames,
+        rapidGames,
+        rollupPlayer.playerId
+      );
+      logger.info(`User upserted`);
+
+      try {
+        const newSession = await db.createUserSession(user.user_id, virtualLabsSession.session._id);
+        logger.info(`New session created: ${JSON.stringify(newSession)}`);
+      } catch (error) {
+        logger.error(`Error creating session: ${error.message}`);
+        // Don't throw here, we want to return the user even if session creation fails
+      }
+
+      logger.info(`User creation process completed`);
+
+      res.status(201).json({ 
+        user: user,
+        sessionId: virtualLabsSession.session._id
+      });
+
+    } catch (error) {
+      logger.error(`Error creating user: ${error.message}`);
+      next(error);
+    }
   },
 
   async checkUser(req, res, next) {

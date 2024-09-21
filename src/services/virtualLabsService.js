@@ -3,6 +3,13 @@
 const fetch = require('node-fetch');
 
 const createSession = async (walletAddress, authToken) => {
+  console.log('💰 SERVER ~ CREATE SESSION');
+  console.log(' ENV VARS');
+  console.log(process.env.VIRTUAL_LABS_API_URL);
+  console.log(process.env.VIRTUAL_LABS_ROLLUP_ID);
+  console.log(process.env.VIRTUAL_LABS_TOKEN_ADDRESS);
+  console.log(process.env.VIRTUAL_LABS_DEPOSIT_AMOUNT);
+
   const response = await fetch(`${process.env.VIRTUAL_LABS_API_URL}/session/createSession`, {
     method: 'POST',
     headers: {
