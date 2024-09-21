@@ -3,8 +3,7 @@ const express = require('express');
 const router = express.Router();
 const UserController = require('../controllers/UserController');
 const { validateVirtualLabsToken } = require('../middleware/virtualLabsAuth');
-const PlayerChethController = require('../controllers/PlayerChethController');
-router.post('/player/cheth/createPlayer', validateVirtualLabsToken, PlayerChethController.createPlayer);
+
 // Update other routes as needed
 router.post('/checkEligibility', UserController.checkEligibility);
 router.post('/addUser', UserController.addUser);

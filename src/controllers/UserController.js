@@ -53,6 +53,7 @@ const UserController = {
           const { username, wallet_address } = req.body;
           const authToken = req.headers.authorization;
           const rollupId = process.env.VIRTUAL_LABS_ROLLUP_ID; // We'll store this in .env
+          const sessionId = req.body.sessionId;
 
           // Fetch user info from Lichess (we'll still use this for our local database)
           const userInfo = await fetchLichessUserInfo(username);
@@ -94,7 +95,7 @@ const UserController = {
               bullet_games,
               blitz_games,
               rapid_games,
-              rollupPlayer.playerId // This is the ID returned by Virtual Labs
+              rollupPlayer.playerId,
           );
 
           logger.info(`User created: ${JSON.stringify(user)}`);
@@ -205,6 +206,56 @@ const UserController = {
       const userId = req.body.userId;
       const games = await db.getUserGames(userId);
       res.json(games);
+    } catch (error) {
+      next(error); // Pass error to error handling middleware
+    }
+  },
+
+  async registerUser(req, res, next) {
+    try {
+      const { lichessHandle, walletAddress } = req.body;
+      const authToken = req.headers.authorization;
+      const rollupId = process.env.VIRTUAL_LABS_ROLLUP_ID;
+
+      // First, create the player using PlayerChethController
+      const playerResponse = await fetch(`${process.env.REACT_APP_SERVER_BASE_URL}/player/createPlayer`, {
+        method: 'POST',
+        headers: {
+          'Authorization': authToken,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ lichessHandle, walletAddress })
+      });
+
+      if (!playerResponse.ok) {
+        throw new Error(`Failed to create player: ${playerResponse.statusText}`);
+      }
+
+      const player = await playerResponse.json();
+
+      // Now create a session for the user in Virtual Labs
+      // const virtualLabsSession = await createSession(walletAddress, authToken);
+      //
+      // // Save the session ID to your local database
+      // await db.createUserSession(player.user_id, virtualLabsSession.sessionId);
+
+      res.status(201).json({ 
+        user: player, 
+        // sessionId: virtualLabsSession.sessionId 
+      });
+    } catch (error) {
+      logger.error(`Error registering user: ${error.message}`);
+      next(error);
+    }
+  },
+
+  async getUserSession(req, res, next) {
+    try {
+      const userId = req.body.userId;
+      const sessionId = req.body.sessionId;
+
+      const userSession = await db.getUserSession(userId, sessionId);
+      res.json(userSession);
     } catch (error) {
       next(error); // Pass error to error handling middleware
     }

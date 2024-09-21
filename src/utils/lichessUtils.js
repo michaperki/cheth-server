@@ -6,7 +6,7 @@ async function fetchLichessUserInfo(lichessHandle) {
         const headers = {
             Authorization: 'Bearer ' + process.env.LICHESS_TOKEN,
         };
-        console.log('♟️ ~ fetchLichessUserInfo ~ lichessHandle', lichessHandle);
+        console.log('♟️ utils/lichessUtils.js ~ fetchLichessUserInfo ~ lichessHandle', lichessHandle);
         const response = await fetch(`https://lichess.org/api/user/${lichessHandle}`, { headers });
 
         if (!response.ok) {
@@ -14,7 +14,9 @@ async function fetchLichessUserInfo(lichessHandle) {
         }
 
         const userInformation = await response.json();
-        console.log('♟️ ~ fetchLichessUserInfo ~ userInformation', userInformation);
+        console.log('♟️ ~ fetchLichessUserInfo ~ userInformation (play time)', userInformation.playTime);
+        console.log('♟️ ~ fetchLichessUserInfo ~ userInformation (username)', userInformation.username);
+        console.log('♟️ ~ fetchLichessUserInfo ~ userInformation (perfs.bullet.rating)', userInformation.perfs.bullet.rating);
         return userInformation;
     } catch (error) {
         console.error('Error fetching Lichess user information:', error);

@@ -13,8 +13,7 @@ const pool = new Pool({
 
 // Define your SQL query
 const sqlQuery = `
-    ALTER TABLE users
-    ADD COLUMN rollup_player_id VARCHAR(255) UNIQUE;
+    ALTER TABLE users ADD CONSTRAINT unique_wallet_address UNIQUE (wallet_address);
 `;
 
 // Execute the SQL query
@@ -26,3 +25,4 @@ pool.query(sqlQuery, (err, res) => {
     }
     pool.end();
 });
+
