@@ -68,7 +68,7 @@ const UserController = {
       const rapidGames = userInfo.perfs?.rapid?.games || 0;
 
       // Create player in VirtualLabs
-      const createPlayerResponse = await fetch(`${process.env.VIRTUAL_LABS_API_URL}/player/cheth/createPlayer`, {
+      const createPlayerResponse = await fetch(`${process.env.VIRTUAL_LABS_API_URL}/v1/player/cheth/createPlayer`, {
         method: 'POST',
         headers: {
           'Authorization': authToken,
