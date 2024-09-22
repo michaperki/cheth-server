@@ -26,12 +26,11 @@ const createPlayer = async (walletAddress, authToken) => {
   return response.json();
 };
 
-const testAuthToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ3YWxsZXQiOiIweDBGNDI3MjViMkVGMTE3QUU2Y0ExNGRCMjMxMWU5ZTg3MzQ1OTgyZjgiLCJpYXQiOjE3MjY3NzY1OTMsImV4cCI6MTcyNzM4MTM5M30.Axsxp_0cUskBhzwpW9FRjRjEtr_4EompasDFuomRZno'
-
 const getPlayerByAddress = async (walletAddress, authToken) => {
   console.log('💰 SERVER ~ GET PLAYER BY ADDRESS');
   console.log(`🔍 Wallet address: ${walletAddress}`);
   console.log(`🔍 Rollup ID: ${ROLLUP_ID}`);
+  console.log(`🔍 Auth token: ${authToken}`);
   const response = await fetch(`${VIRTUAL_LABS_API_URL}/v1/player/cheth/getPlayerByAddress/${ROLLUP_ID}`, {
     method: 'GET',
     headers: {
@@ -44,16 +43,21 @@ const getPlayerByAddress = async (walletAddress, authToken) => {
   return response.json();
 };
 
-const getSessionBalance = async (walletAddress, authToken) => {
-  console.log('💰 SERVER ~ GET SESSION BALANCE');
-  const response = await fetch(`${VIRTUAL_LABS_API_URL}/v1/session/getBalance/${walletAddress}`, {
+const getSessionBalance = async (sessionId, authToken) => {
+  const session = await getSessionById(sessionId, authToken);
+  console.log('💰 SERVER ~ SESSION', session);
+  return session.sessionBalance;
+};
+
+const getSessionById = async (sessionId, authToken) => {
+  const response = await fetch(`${VIRTUAL_LABS_API_URL}/v1/participant/getParticipant/${sessionId}`, {
     method: 'GET',
     headers: {
       'Authorization': authToken
     }
   });
   if (!response.ok) {
-    throw new Error(`Failed to get session balance from Virtual Labs: ${response.statusText}`);
+    throw new Error(`Failed to get session from Virtual Labs: ${response.statusText}`);
   }
   return response.json();
 };
@@ -137,7 +141,7 @@ const createParticipant = async (sessionId, amount, walletAddress, authToken) =>
     body: JSON.stringify({
       _playerId: player._id,
       _sessionId: sessionId,
-      sessionBalance: 1000000000000000000,
+      sessionBalance: amount,
       active: true
     })
   });

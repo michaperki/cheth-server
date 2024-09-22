@@ -5,7 +5,11 @@ const userService = require('../db/userService');
 
 exports.getSessionBalance = async (req, res) => {
     try {
-        const balance = await virtualLabsService.getSessionBalance(req.user.wallet);
+        const walletAddress = req.query.walletAddress || req.user.wallet;
+        // get the session ID from the database
+        const session = await sessionService.getSessionByWalletAddress(walletAddress);
+        const balance = await virtualLabsService.getSessionBalance(session.virtual_labs_session_id, req.headers.authorization);
+        console.log('💰 SERVER ~ SESSION BALANCE', balance);
         res.json({ balance });
     } catch (error) {
         res.status(500).json({ message: 'Error fetching session balance', error: error.message });
