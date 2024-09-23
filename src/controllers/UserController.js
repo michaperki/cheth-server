@@ -4,7 +4,7 @@ const fetch = require("node-fetch");
 const db = require("../db");
 const { fetchLichessUserInfo } = require("../utils/lichessUtils");
 const { logger } = require("../utils/LoggerUtils");
-const { createSession } = require("../services/virtualLabsService");
+const { createSession } = require("../services/virtualLabs");
 
 const userCache = new NodeCache({ stdTTL: 600 }); // Set TTL to 10 minutes
 

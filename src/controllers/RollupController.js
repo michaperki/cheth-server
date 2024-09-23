@@ -1,4 +1,4 @@
-const virtualLabsService = require('../services/virtualLabsService');
+const virtualLabsService = require('../services/virtualLabs');
 const userService = require('../db/userService');
 
 exports.getRollupBalance = async (req, res) => {

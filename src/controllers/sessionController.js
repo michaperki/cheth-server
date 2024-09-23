@@ -1,5 +1,5 @@
 
-const virtualLabsService = require('../services/virtualLabsService');
+const virtualLabsService = require('../services/virtualLabs');
 const sessionService = require('../db/sessionService');
 const userService = require('../db/userService');
 
